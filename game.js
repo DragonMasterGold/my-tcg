@@ -1034,177 +1034,112 @@ function spawnToken(owner) {
 // if (k === '[') { card.counters.atk -= 100; refreshCard(card); }
 // if (k === ']') { card.counters.atk += 100; refreshCard(card); }
 
-// === MULTIPLAYER CONFIG ===
-const SERVER_URL = 'http://91.98.79.30:3000'; // Your IP
+// === MULTIPLAYER SYSTEM ===
 let socket = null;
-let roomCode = null;
 let isMultiplayer = false;
-let myRole = null; // 'host' or 'guest'
+let myRole = null; 
+let roomCode = null;
 
-// Initialize Connection
+// Determine if we are running locally or on the Hetzner server
+const SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000' 
+    : 'http://mytcg.teamdragonmaster.com:3000'; // Note the :3000
+
 function connectToServer() {
-    if (socket) return;
+    if (socket && socket.connected) return; // Already connected
+    
+    console.log("Attempting to connect to:", SERVER_URL);
     socket = io(SERVER_URL);
 
+    // Add a connection check
+    socket.on('connect', () => {
+        console.log("Connected to server successfully!");
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error("Connection failed. Is server.js running?", err.message);
+        alert("Cannot connect to multiplayer server. Make sure server.js is running!");
+    });
+
+    // ... (rest of your socket.on functions: room_created, game_action, etc.)
+}
+
+function openMultiplayerMenu() {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('multiplayer-menu').classList.remove('hidden');
+    connectToServer();
+}
+
+function closeMultiplayerMenu() {
+    document.getElementById('multiplayer-menu').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+}
+
+function connectToServer() {
+    if (socket) return; // Already connected
+    
+    // Connect to your Hetzner server
+    socket = io(SERVER_URL);
+
+    // Event: Room successfully created
     socket.on('room_created', (data) => {
         roomCode = data.roomCode;
-        myRole = data.role; // Host is usually Player 1 logic
+        myRole = 'host';
         isMultiplayer = true;
-        alert(`Room Created! Code: ${roomCode}`);
-        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('room-status').innerText = `Room Code: ${roomCode}\nWaiting for opponent...`;
+        console.log("Room created:", roomCode);
     });
 
+    // Event: Joined an existing room
     socket.on('room_joined', (data) => {
         roomCode = data.roomCode;
-        myRole = data.role;
+        myRole = 'guest';
         isMultiplayer = true;
-        alert(`Joined Room: ${roomCode}`);
-        document.getElementById('main-menu').classList.add('hidden');
-        startGame(); // Start game immediately for guest
+        document.getElementById('room-status').innerText = `Joined Room: ${roomCode}`;
+        setTimeout(() => {
+            closeMultiplayerMenu();
+            startGame();
+        }, 1000);
     });
 
+    // Event: Opponent entered your room
     socket.on('opponent_joined', () => {
-        alert("Opponent Joined!");
-        startGame(); // Start game for host
+        document.getElementById('room-status').innerText = "Opponent joined! Starting...";
+        setTimeout(() => {
+            closeMultiplayerMenu();
+            startGame();
+        }, 1000);
     });
 
-    // RECEIVE ACTION FROM SERVER
+    // Event: Receive action from opponent
     socket.on('game_action', (data) => {
-        // data.type is the function name (e.g., 'moveCard')
-        // data.payload is the arguments (e.g., {cardId: 1, zone: 'deck'})
-        
-        // We set a flag 'isRemote' to true so we don't send this action back to the server (infinite loop)
+        // This is the Action Relay! 
+        // It triggers the same function locally but marked as 'isRemote'
         executeAction(data.type, data.payload, true);
+    });
+
+    socket.on('opponent_disconnected', () => {
+        alert("Opponent disconnected.");
+        resetGame();
+    });
+
+    socket.on('error', (data) => {
+        alert(data.message);
     });
 }
 
-/**
- * The Central Nervous System of Multiplayer
- * @param {string} type - The name of the action (e.g., 'draw', 'move', 'flip')
- * @param {object} payload - Data needed to do the action (card ID, target zone, etc.)
- * @param {boolean} isRemote - TRUE if this came from the server (opponent did it). FALSE if I did it.
- */
-function executeAction(type, payload, isRemote = false) {
-    
-    // 1. Sync with Server (if we are the one doing it)
-    if (!isRemote && isMultiplayer && socket) {
-        socket.emit('game_action', {
-            roomCode: roomCode,
-            type: type,
-            payload: payload
-        });
-    }
+// Button Action: Create Room
+function createRoom() {
+    if (!socket) connectToServer();
+    socket.emit('create_room');
+}
 
-    // 2. Setup Variables
-    const actor = isRemote ? 'opponent' : 'player'; 
-    console.log(`Executing ${type}`, payload);
-
-    switch (type) {
-        case 'draw_phase':
-            draw(1, 'player');
-            draw(1, 'opponent');
-            break;
-
-        case 'draw':
-            drawCard(actor, payload.deckType || 'deck');
-            break;
-
-        case 'move_card':
-            let targetId = payload.targetId;
-            
-            // Swap IDs if this action came from the opponent
-            if (isRemote) {
-                targetId = flipZoneId(targetId);
-            }
-            
-            const card = findCard(payload.cardId);
-            const targetZone = document.getElementById(targetId);
-            
-            if (card && targetZone) {
-                // 1. Remove from old location
-                removeCard(card);
-                
-                // 2. Identify the new Owner
-                // FIX: Field zones don't have data-owner, so check ID string (e.g. 'player-monster-1')
-                let newOwner = targetZone.dataset.owner;
-                if (!newOwner) {
-                    newOwner = targetId.startsWith('opponent') ? 'opponent' : 'player';
-                }
-
-                // 3. Identify Zone Type
-                const zoneType = targetZone.dataset.type; // deck, sideDeck, etc.
-                const isHand = targetZone.classList.contains('hand-area');
-
-                // 4. Update Card Data
-                card.owner = newOwner;
-
-                // 5. Update State & Visuals
-                if (isHand) {
-                    card.loc = 'hand';
-                    state[newOwner].hand.push(card);
-                    renderHand(newOwner);
-                } 
-                else if (zoneType) {
-                    // Pile or Deck
-                    state[newOwner][zoneType].push(card);
-                    updateCounts(newOwner);
-                } 
-                else {
-                    // The Field
-                    card.loc = 'field';
-                    state[newOwner].field.push(card);
-                    targetZone.appendChild(createCardEl(card));
-                }
-            }
-            break;
-            
-        case 'play_card':
-            // Logic for Context Menu Play/Set
-            const pc = findCard(payload.cardId);
-            if(pc) {
-                playCardToField(pc, payload.zone, !payload.set, payload.defense); 
-            }
-            break;
-            
-        case 'flip_card':
-            const cFlip = findCard(payload.cardId);
-            if (cFlip) { cFlip.faceUp = !cFlip.faceUp; refreshCard(cFlip); }
-            break;
-
-        case 'rotate_card':
-            const cRot = findCard(payload.cardId);
-            if (cRot) { cRot.rotated = !cRot.rotated; refreshCard(cRot); }
-            break;
-            
-        case 'clone_card':
-            cloneCard(findCard(payload.cardId)); 
-            break;
-
-        case 'add_counter':
-            const cAdd = findCard(payload.cardId);
-            if (cAdd) { cAdd.counter = (cAdd.counter || 0) + 1; refreshCard(cAdd); }
-            break;
-
-        case 'remove_counter':
-            const cRem = findCard(payload.cardId);
-            if (cRem) { cRem.counter = Math.max(0, (cRem.counter || 0) - 1); refreshCard(cRem); }
-            break;
-            
-        case 'adjust_lp':
-            // Logic: Update State -> Update UI
-            let target = payload.target;
-            
-            // Fix for Multiplayer: 
-            // If the other player says "I modified 'player' (myself)", 
-            // I need to update 'opponent' on my screen.
-            if (isRemote) {
-                target = target === 'player' ? 'opponent' : 'player';
-            }
-            
-            state[target].lp += payload.amount;
-            updateStats();
-            break;
-    }
+// Button Action: Join Room
+function joinRoom() {
+    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+    if (!code) return alert("Enter a code first!");
+    if (!socket) connectToServer();
+    socket.emit('join_room', code);
 }
 
 // Helper to swap IDs for remote actions
@@ -1315,4 +1250,18 @@ function flipZoneId(id) {
     if (id.startsWith('player-')) return id.replace('player-', 'opponent-');
     if (id.startsWith('opponent-')) return id.replace('opponent-', 'player-');
     return id;
+}
+
+function openMultiplayerMenu() {
+    // Show the menu, hide the main menu
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('multiplayer-menu').classList.remove('hidden');
+    
+    // Connect to the server immediately when opening this menu
+    connectToServer(); 
+}
+
+function closeMultiplayerMenu() {
+    document.getElementById('multiplayer-menu').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
 }
