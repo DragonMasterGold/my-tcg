@@ -1030,9 +1030,7 @@ function spawnToken(owner) {
     targetZone.appendChild(createCardEl(token));
 }
 
-// Optional Hotkeys: Add to handleKeys(e)
-// if (k === '[') { card.counters.atk -= 100; refreshCard(card); }
-// if (k === ']') { card.counters.atk += 100; refreshCard(card); }
+
 
 // === MULTIPLAYER SYSTEM ===
 let socket = null;
@@ -1043,7 +1041,7 @@ let roomCode = null;
 // Determine if we are running locally or on the Hetzner server
 const SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000' 
-    : 'http://mytcg.teamdragonmaster.com:3000'; // Note the :3000
+    : 'https://mytcg.teamdragonmaster.com'; 
 
 function connectToServer() {
     if (socket && socket.connected) return; // Already connected
@@ -1180,16 +1178,15 @@ function executeAction(type, payload, isRemote = false) {
             break;
 
         case 'move_card':
-            let targetId = payload.targetId;
-            
-            if (isRemote) {
-                targetId = flipZoneId(targetId);
-            }
-            
-            const card = findCard(payload.cardId);
-            const targetZone = document.getElementById(targetId);
-            
-            if (card && targetZone) {
+			let targetId = payload.targetId;
+			if (isRemote) targetId = flipZoneId(targetId); // Swaps 'player' to 'opponent' for you
+				
+			const card = findCard(payload.cardId);
+			const targetZone = document.getElementById(targetId);
+				
+			if (card && targetZone) {
+				removeCard(card);
+	
                 // 1. Remove from old location
                 removeCard(card);
                 
