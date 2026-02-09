@@ -152,9 +152,7 @@ function setupListeners() {
 
 function handleKeys(e) {
     const k = e.key.toLowerCase();
-	
-
-
+    
     if (k === 'i') { openViewer('player', 'deck', true); return; }	
 
     if (hoveredId) {
@@ -162,23 +160,22 @@ function handleKeys(e) {
         if (!card) return;
         const el = document.getElementById(card.id);
 
-        if (k === 'f') { card.faceUp = !card.faceUp; refreshCard(card); }
-        if (k === 'r') { card.rotated = !card.rotated; refreshCard(card); }
-        if (k === 'd') moveCardTo(card, 'afterlife');
-        if (k === 's') moveCardTo(card, 'shadow');
-        if (k === 'a') moveCardTo(card, 'oblivion');
+        if (k === 'f') executeAction('flip_card', { cardId: card.id });
+        if (k === 'r') executeAction('rotate_card', { cardId: card.id });
+        if (k === 'd') executeAction('move_card', { cardId: card.id, targetType: 'afterlife', owner: card.owner });
+        if (k === 's') executeAction('move_card', { cardId: card.id, targetType: 'shadow', owner: card.owner });
+        if (k === 'a') executeAction('move_card', { cardId: card.id, targetType: 'oblivion', owner: card.owner });
+        if (k === 'h') executeAction('move_card', { cardId: card.id, targetType: 'hand', owner: card.owner });
         
-        // NEW HOTKEYS
-        if (k === 'h') moveCardTo(card, 'hand');
-        if (k === 'c') cloneCard(card);
+        if (k === 'c') executeAction('clone_card', { cardId: card.id });
         if (k === 'e') toggleHighlight(el);
         if (e.key === 'Delete') removeCard(card);
         
         if (k === 'w') {
-            if (card.type === 'Phantom') playCardToField(card, 'Phantom', true, false);
-            else if (card.type === 'Spirit') playCardToField(card, 'Spirit', true, false);
-            else if (card.type === 'Counter') playCardToField(card, 'Counter', false, false);
-            else if (card.type === 'Environment') playCardToField(card, 'Environment', true, false);
+            const set = false; 
+            const def = false;
+            // Simplified "Play" hotkey logic sending action
+            executeAction('play_card', { cardId: card.id, set, defense: def });
         }
         return;
     } else if (hoveredZone) {
@@ -189,14 +186,6 @@ function handleKeys(e) {
             if (k === 'r' && type.toLowerCase().includes('deck')) {
                 shuffle(list); alert(`${type} Shuffled!`);
             }
-            if (['d', 's', 'a'].includes(k)) {
-                const card = list.pop();
-                if (card) {
-                    const dest = k === 'd' ? 'afterlife' : (k === 's' ? 'shadow' : 'oblivion');
-                    state[owner][dest].push(card);
-                    updateCounts(owner);
-                }
-            }
         }
     }
 }
@@ -205,6 +194,7 @@ function closeAllModals() {
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('deck-viewer').classList.add('hidden');
 	document.getElementById('card-info-panel').classList.add('hidden');
+    document.getElementById('multiplayer-menu').classList.add('hidden');
 }
 
 function startGame() {
@@ -266,7 +256,7 @@ function makeCard(owner, loc, forcedType) {
         cardData = { name: 'Test Card', type: 'Phantom', level: 1, attack: 0, health: 0 };
     }
     return {
-        id: `c-${idCounter}`,
+        id: `c-${idCounter}-${Date.now()}`, // Added timestamp to ensure uniqueness in MP
         owner,
         name: cardData.name,
         type: cardData.type || 'Phantom',
@@ -300,7 +290,7 @@ function createCardEl(data) {
     el.draggable = true;
     
     const isOppHand = data.loc === 'hand' && data.owner === 'opponent';
-        // Opponent sees it if global handVisible is on OR the individual card is revealed
+    // Opponent sees it if global handVisible is on OR the individual card is revealed
     if (isOppHand && !state.opponent.handVisible && !data.revealed) {
         el.innerText = '';
         el.classList.add('face-down');
@@ -357,7 +347,6 @@ function toggleHighlight(el) {
                 refreshCard(card);
             }, 5000);
         } else {
-            // General highlight (opponent cards or field cards)
             setTimeout(() => { 
                 const currentEl = document.getElementById(card.id);
                 if (currentEl) currentEl.classList.remove('highlighted'); 
@@ -376,15 +365,12 @@ function handleDrop(e) {
     e.preventDefault();
     if (!draggedId) return;
 
-    // 1. Check if valid card
     const card = findCard(draggedId);
     if (!card) return;
     
-    // 2. Check if valid target
     let target = e.target.closest('.zone, .hand-area');
     if (!target) return;
 
-    // 3. Send Signal (Do not move logic here)
     executeAction('move_card', {
         cardId: draggedId,
         targetId: target.id
@@ -392,6 +378,9 @@ function handleDrop(e) {
 }
 
 function moveCardTo(card, destType) {
+    // This is the local helper, but usually we want executeAction to handle state changes
+    // But for deck viewer actions (viewer only), we might call this.
+    // However, for consistency, we will try to use state modification directly only here.
     removeCard(card);
     card.faceUp = true; card.rotated = false;
     
@@ -407,23 +396,6 @@ function moveCardTo(card, destType) {
     
     updateCounts(card.owner);
     if(destType === 'hand') renderHand(card.owner);
-}
-
-function playCardToField(card, type) {
-    removeCard(card);
-    card.loc = 'field';
-    state[card.owner].field.push(card);
-    
-    const prefix = card.owner;
-    const zoneType = type === 'monster' ? 'monster' : 'spell';
-    for(let i=1; i<=3; i++) {
-        const zone = document.getElementById(`${prefix}-${zoneType}-${i}`);
-        if(zone && zone.children.length === 0) {
-            zone.appendChild(createCardEl(card));
-            return;
-        }
-    }
-    document.getElementById(`${prefix}-${zoneType}-1`).appendChild(createCardEl(card));
 }
 
 function removeCard(card) {
@@ -479,18 +451,14 @@ function draw(amt, owner, deckType = 'deck') {
     updateCounts(owner); renderHand(owner);
 }
 
-function drawCard(owner, deckType = 'deck') { draw(1, owner, deckType); }
+function drawCard(owner, deckType = 'deck') { 
+    executeAction('draw_card', { owner, deckType });
+}
 
 function drawPhase() {
     const btn = document.querySelector('.phase-btn');
     btn.classList.add('pulsing-purple');
-    
-    // Remove class after animation finishes
-    setTimeout(() => {
-        btn.classList.remove('pulsing-purple');
-    }, 1000);
-
-    // Trigger the phase action
+    setTimeout(() => { btn.classList.remove('pulsing-purple'); }, 1000);
     executeAction('draw_phase', {});
 }
 
@@ -499,7 +467,7 @@ function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Mat
 function updateStats() {
     ['player', 'opponent'].forEach(p => {
         const el = document.getElementById(`${p}-lp`);
-        if (el) el.value = state[p].lp; // Updates the input box
+        if (el) el.value = state[p].lp; 
         
         const spEl = document.getElementById(`${p}-sp-val`);
         if (spEl) spEl.innerText = state[p].sp;
@@ -521,7 +489,6 @@ function adjustLP(p, dir) {
     if (val !== null && val.trim() !== "") { 
         const amount = parseInt(val);
         if (!isNaN(amount)) {
-            // Hijack: Send to Action Engine instead of doing math here
             executeAction('adjust_lp', { target: p, amount: amount * dir });
         }
     }
@@ -543,7 +510,7 @@ function refreshCard(card) {
 
 function cloneCard(card) {
     idCounter++;
-    const newCard = { ...card, id: `c-${idCounter}` };
+    const newCard = { ...card, id: `c-${idCounter}-${Date.now()}` };
     
     if (card.loc === 'field') {
         const el = document.getElementById(card.id);
@@ -641,40 +608,36 @@ function cardAction(act) {
     if (!ctxTarget) return;
     const card = ctxTarget;
 
-    // Play/Set Actions
-    if (act === 'play-atk') executeAction('play_card', { cardId: card.id, zone: 'monster', attack: true, defense: false });
-    else if (act === 'play-def') executeAction('play_card', { cardId: card.id, zone: 'monster', attack: false, defense: true });
-    else if (act === 'set-atk')  executeAction('play_card', { cardId: card.id, zone: 'monster', attack: false, defense: false, set: true });
-    else if (act === 'set-def')  executeAction('play_card', { cardId: card.id, zone: 'monster', attack: false, defense: true, set: true });
-    else if (act === 'play-spirit') executeAction('play_card', { cardId: card.id, zone: 'spell' });
-    else if (act === 'set-spirit')  executeAction('play_card', { cardId: card.id, zone: 'spell', set: true });
-    else if (act === 'play-env') executeAction('play_card', { cardId: card.id, zone: 'environment' });
-    else if (act === 'set-env')  executeAction('play_card', { cardId: card.id, zone: 'environment', set: true });
-    
-    // State Actions
+    if (act === 'play-atk') executeAction('play_card', { cardId: card.id, set: false, defense: false });
+    else if (act === 'play-def') executeAction('play_card', { cardId: card.id, set: false, defense: true });
+    else if (act === 'set-atk')  executeAction('play_card', { cardId: card.id, set: true, defense: false });
+    else if (act === 'set-def')  executeAction('play_card', { cardId: card.id, set: true, defense: true });
+    else if (act === 'play-spirit') executeAction('play_card', { cardId: card.id, set: false, defense: false });
+    else if (act === 'set-spirit')  executeAction('play_card', { cardId: card.id, set: true, defense: false });
+    else if (act === 'play-env') executeAction('play_card', { cardId: card.id, set: false, defense: false });
+    else if (act === 'set-env')  executeAction('play_card', { cardId: card.id, set: true, defense: false });
+
     else if (act === 'flip') executeAction('flip_card', { cardId: card.id });
     else if (act === 'rotate') executeAction('rotate_card', { cardId: card.id });
-    else if (act === 'highlight') toggleHighlight(document.getElementById(card.id)); // Local
+    else if (act === 'highlight') toggleHighlight(document.getElementById(card.id));
     else if (act === 'clone') executeAction('clone_card', { cardId: card.id });
     
-    // Movement Actions
-    else if (act === 'hand') executeAction('move_card', { cardId: card.id, targetId: 'player-hand' });
-    else if (act === 'topdeck') executeAction('move_card', { cardId: card.id, targetId: 'player-deck' });
-    else if (act === 'bottomdeck') executeAction('move_card', { cardId: card.id, targetId: 'player-deck', toBottom: true });
-    else if (act === 'randomdeck') executeAction('move_card', { cardId: card.id, targetId: 'player-deck', random: true });
-    else if (act === 'afterlife') executeAction('move_card', { cardId: card.id, targetId: 'player-afterlife' });
-    else if (act === 'shadow') executeAction('move_card', { cardId: card.id, targetId: 'player-shadow' });
-    else if (act === 'oblivion') executeAction('move_card', { cardId: card.id, targetId: 'player-oblivion' });
+    // Movement actions via context menu
+    else if (act === 'hand') executeAction('move_card', { cardId: card.id, targetType: 'hand', owner: card.owner });
+    else if (act === 'topdeck') moveCardTo(card, 'topdeck'); // Deck manipulations usually local or strict, keeping local for now
+    else if (act === 'bottomdeck') moveCardTo(card, 'bottomdeck');
+    else if (act === 'randomdeck') moveCardTo(card, 'randomdeck');
     
-    // Counter Actions
-    else if (act === 'add-counter') executeAction('add_counter', { cardId: card.id });
-    else if (act === 'remove-counter') executeAction('remove_counter', { cardId: card.id });
-    
-    // Reveal (Toggle)
-    else if (act === 'toggle-reveal') { card.revealed = !card.revealed; refreshCard(card); }
+    else if (['afterlife', 'shadow', 'oblivion'].includes(act)) {
+        executeAction('move_card', { cardId: card.id, targetType: act, owner: card.owner });
+    }
+	
+	if (act === 'add-counter') executeAction('add_counter', { cardId: card.id });
+    if (act === 'remove-counter') executeAction('remove_counter', { cardId: card.id });
 }
 
 function playCardToField(card, typeName, faceUp, rotated) {
+    // This is the implementation called by executeAction
     removeCard(card);
     card.loc = 'field';
     card.faceUp = faceUp;
@@ -684,14 +647,12 @@ function playCardToField(card, typeName, faceUp, rotated) {
     const prefix = card.owner;
     let targetZone = null;
 
-    // Map internal names (Phantom/Spirit) to HTML ID names (monster/spell)
     let htmlType = 'monster';
     if (typeName === 'Spirit' || typeName === 'Counter') htmlType = 'spell';
 
     if (typeName === 'Environment') {
         targetZone = document.getElementById(`${prefix}-env`);
     } else {
-        // Priority: Middle(2) -> Left(1) -> Right(3) -> Balance 1 -> Balance 2
         const priorityIds = [
             `${prefix}-${htmlType}-2`,
             `${prefix}-${htmlType}-1`,
@@ -707,8 +668,6 @@ function playCardToField(card, typeName, faceUp, rotated) {
                 break;
             }
         }
-        
-        // Fallback: if all prioritized zones are full, default to center slot
         if (!targetZone) targetZone = document.getElementById(`${prefix}-${htmlType}-2`);
     }
 
@@ -721,35 +680,18 @@ function openDeckCtx(e, owner, type) { viewerTarget = { owner, type }; showMenu(
 
 function showMenu(id, x, y) { 
     const m = document.getElementById(id); 
-    
-    // 1. Show the menu instantly so we can measure its width/height
     m.classList.remove('hidden');
-    
     const menuWidth = m.offsetWidth;
     const menuHeight = m.offsetHeight;
-    const padding = 10; // Small buffer from the edge
-
-    // 2. Flip horizontal if it goes off the right edge
-    if (x + menuWidth > window.innerWidth) {
-        x = x - menuWidth;
-    }
-
-    // 3. Flip vertical if it goes off the bottom edge
-    if (y + menuHeight > window.innerHeight) {
-        y = y - menuHeight;
-    }
-
-    // 4. Safety: ensure it doesn't flip off the top or left edges
+    const padding = 10;
+    if (x + menuWidth > window.innerWidth) x = x - menuWidth;
+    if (y + menuHeight > window.innerHeight) y = y - menuHeight;
     x = Math.max(padding, x);
     y = Math.max(padding, y);
-
-    m.style.left = x + 'px'; 
-    m.style.top = y + 'px'; 
+    m.style.left = x + 'px'; m.style.top = y + 'px'; 
 }
 
 function hideCtx() { document.querySelectorAll('.ctx-menu').forEach(e => e.classList.add('hidden')); }
-
-
 function viewPile(owner, type) { openViewer(owner, type); }
 
 function deckAction(act) {
@@ -764,17 +706,16 @@ function deckAction(act) {
     else if (act === 'shuffle') { shuffle(list); alert('Shuffled'); }
     else if (act === 'mill') { const c = list.pop(); if (c) { state[owner].afterlife.push(c); updateCounts(owner); } }
     
-    // NEW DECK OPTIONS
     else if (act === 'draw-bottom') {
         if (list.length > 0) {
-            const c = list.shift(); // Take from index 0
+            const c = list.shift();
             state[owner].hand.push(c);
             renderHand(owner);
             updateCounts(owner);
         }
     }
     else if (act.startsWith('draw-first-')) {
-        const targetType = act.replace('draw-first-', ''); // e.id. 'Phantom'
+        const targetType = act.replace('draw-first-', '');
         const idx = list.findIndex(c => c.type === targetType);
         if (idx > -1) {
             const c = list.splice(idx, 1)[0];
@@ -788,7 +729,7 @@ function deckAction(act) {
 function openViewer(owner, type, shouldSort) {
     viewerTarget = { owner, type, shouldSort }; 
     const viewer = document.getElementById('deck-viewer');
-    if (!viewer) return; // Safety check
+    if (!viewer) return;
 
     viewer.classList.remove('hidden');
     document.getElementById('viewer-title').innerText = `${owner} ${type} (${shouldSort ? 'Sorted' : 'Top-to-Bottom'})`;
@@ -797,15 +738,13 @@ function openViewer(owner, type, shouldSort) {
 
 function renderViewer() {
     const grid = document.getElementById('viewer-grid');
-    if (!grid) return; // Safety check
+    if (!grid) return;
     grid.innerHTML = '';
     
-    // Get a copy of the list so we don't accidentally mutate the real deck while viewing
     let list = [...state[viewerTarget.owner][viewerTarget.type]];
     const term = document.getElementById('viewer-search').value.toLowerCase();
 
     if (viewerTarget.shouldSort) {
-        // SORTING LOGIC: Phantom (Monster) -> Spirit (Spell) -> Counter (Trap) -> Environment
         const typeOrder = { 'monster': 1, 'phantom': 1, 'spell': 2, 'spirit': 2, 'trap': 3, 'counter': 3, 'environment': 4 };
         list.sort((a, b) => {
             if (typeOrder[a.type] !== typeOrder[b.type]) {
@@ -814,7 +753,6 @@ function renderViewer() {
             return a.name.localeCompare(b.name);
         });
     } else {
-        // VIEW LOGIC: Show top of deck (end of array) first
         list.reverse();
     }
 
@@ -822,12 +760,11 @@ function renderViewer() {
         if (term && !c.name.toLowerCase().includes(term)) return;
         
         const el = createCardEl(c); 
-        el.classList.remove('face-down'); // Always show cards face-up in viewer
+        el.classList.remove('face-down');
         el.draggable = false;
         
         el.onclick = () => {
             const originalList = state[viewerTarget.owner][viewerTarget.type];
-            // Find the specific card by ID in the actual deck
             const idx = originalList.findIndex(card => card.id === c.id);
             if (idx > -1) {
                 const movedCard = originalList.splice(idx, 1)[0];
@@ -865,7 +802,6 @@ function showCardInfo(card) {
     const statsDiv = document.getElementById('card-info-stats');
     statsDiv.innerHTML = '<div class="info-divider"></div>';
     
-    // Line 1: Form & Level (Left Aligned)
     const line1 = document.createElement('div');
     line1.className = 'info-line';
     let line1HTML = `Form: ${card.type || '???'}`;
@@ -875,7 +811,6 @@ function showCardInfo(card) {
     line1.innerHTML = line1HTML;
     statsDiv.appendChild(line1);
 
-    // Line 2: Archetypes (Left Aligned, Regular Dash)
     const archs = [];
     if (card.archetype) archs.push(card.archetype);
     if (card.archetypes && card.archetypes[1]) archs.push(card.archetypes[1]);
@@ -886,7 +821,6 @@ function showCardInfo(card) {
     archDiv.innerText = `Archetypes: ${archs.length > 0 ? archs.join(' - ') : 'None'}`;
     statsDiv.appendChild(archDiv);
 
-    // Line 3: Attack & Health (Now AFTER Archetypes)
     if (card.type === 'Phantom') {
         const line3 = document.createElement('div');
         line3.className = 'info-line';
@@ -895,15 +829,13 @@ function showCardInfo(card) {
         statsDiv.appendChild(line3);
     }
     
-    // Ability Text Section (Centered)
     const textDiv = document.getElementById('card-info-text');
     if (card.description) {
         const charCount = card.description.length;
-        let fontSize = 22; // Adjusted max size to be smaller than before
+        let fontSize = 22;
         if (charCount > 120) fontSize = 18;
         if (charCount > 300) fontSize = 15;
         
-        // Wrap header and divider in a container for centering
         const container = document.createElement('div');
         container.className = 'card-info-text-container';
 		container.innerHTML = `
@@ -913,7 +845,6 @@ function showCardInfo(card) {
         `;
         statsDiv.appendChild(container);
     }
-    
     panel.classList.remove('hidden');
 }
 
@@ -943,8 +874,6 @@ function loadDeckFile() {
         reader.onload = evt => {
             try {
                 const deckData = JSON.parse(evt.target.result);
-                
-                // Convert to full card objects
                 state.player.deck = (deckData.main || []).map(c => ({
                     ...c,
                     id: `c-${++idCounter}`,
@@ -953,7 +882,6 @@ function loadDeckFile() {
                     faceUp: true,
                     rotated: false
                 }));
-                
                 state.player.sideDeck = (deckData.side || []).map(c => ({
                     ...c,
                     id: `c-${++idCounter}`,
@@ -962,7 +890,6 @@ function loadDeckFile() {
                     faceUp: true,
                     rotated: false
                 }));
-                
                 state.player.extraDeck = (deckData.extra || []).map(c => ({
                     ...c,
                     id: `c-${++idCounter}`,
@@ -971,13 +898,11 @@ function loadDeckFile() {
                     faceUp: true,
                     rotated: false
                 }));
-                
                 shuffle(state.player.deck);
                 updateCounts('player');
-                alert('Deck loaded! Click "Resume Game" to play.');
+                alert('Deck loaded!');
             } catch (err) {
                 alert('Invalid deck file!');
-                console.error(err);
             }
         };
         reader.readAsText(file);
@@ -992,13 +917,13 @@ function spawnToken(owner) {
         owner: owner,
         name: 'Token',
         type: 'Phantom',
-        level: 0, // Level 0
+        level: 0,
         attack: 0,
         health: 0,
         description: 'Generated Token.',
         image: null,
         faceUp: true,
-        rotated: true, // Defense Position
+        rotated: true, 
         loc: 'field',
         counter: 0,
         isToken: true
@@ -1006,8 +931,6 @@ function spawnToken(owner) {
     
     state[owner].field.push(token);
     const prefix = owner;
-
-    // Priority List: Center(2), Left(1), Right(3), Bal1, Bal2
     const priority = [
         `${prefix}-monster-2`, 
         `${prefix}-monster-1`, 
@@ -1015,7 +938,6 @@ function spawnToken(owner) {
         `${prefix}-balance-1`, 
         `${prefix}-balance-2`
     ];
-
     let targetZone = null;
     for (let id of priority) {
         const zone = document.getElementById(id);
@@ -1024,215 +946,216 @@ function spawnToken(owner) {
             break;
         }
     }
-
-    // Fallback if all zones full: Center
     if (!targetZone) targetZone = document.getElementById(`${prefix}-monster-2`);
-
     targetZone.appendChild(createCardEl(token));
 }
 
 
 
-// === SIMPLE ACTION-BASED MULTIPLAYER ===
+// === ROBUST MULTIPLAYER & ACTION ENGINE ===
 let socket = null;
 let isMultiplayer = false;
-let myRole = null;
+let myRole = null; 
 let roomCode = null;
-const SERVER_URL = 'http://tcg.teamdragonmaster.com:3000'; // Use your domain
 
-function connectToServer() {
-    if (socket) return;
+const SERVER_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000' 
+    : 'https://mytcg.teamdragonmaster.com';
+
+function initSocket(callback) {
+    if (socket && socket.connected) {
+        if(callback) callback();
+        return;
+    }
+    
+    // Connect to Server
     socket = io(SERVER_URL);
     
+    socket.on('connect', () => {
+        console.log("Connected to server:", socket.id);
+        if(callback) callback();
+    });
+
+    socket.on('connect_error', (err) => {
+        console.error("Connection failed", err);
+        alert("Cannot connect to server.");
+    });
+    
+    // Set up listeners once
+    socket.off('room_created');
+    socket.off('room_joined');
+    socket.off('opponent_joined');
+    socket.off('game_action');
+
     socket.on('room_created', (data) => {
         roomCode = data.roomCode;
         myRole = 'host';
         isMultiplayer = true;
-        document.getElementById('room-status').innerText = `Room: ${roomCode}\nWaiting...`;
-        document.getElementById('room-status').style.userSelect = 'text';
-        document.getElementById('room-status').style.cursor = 'text';
+        document.getElementById('room-status').innerText = `Room: ${roomCode} (Waiting...)`;
     });
     
     socket.on('room_joined', (data) => {
         roomCode = data.roomCode;
         myRole = 'guest';
         isMultiplayer = true;
-        document.getElementById('room-status').innerText = `Joined: ${roomCode}`;
-        setTimeout(() => closeMultiplayerMenu(), 1000);
+        closeMultiplayerMenu();
+        executeAction('start_game_sync', {});
     });
     
     socket.on('opponent_joined', () => {
-        document.getElementById('room-status').innerText = `Opponent joined!`;
-        setTimeout(() => closeMultiplayerMenu(), 1000);
+        closeMultiplayerMenu();
+        executeAction('start_game_sync', {});
     });
     
     socket.on('game_action', (data) => {
-        applyOpponentAction(data);
-    });
-    
-    socket.on('opponent_disconnected', () => {
-        alert('Opponent disconnected!');
-        isMultiplayer = false;
+        // Execute Remote Action
+        executeAction(data.type, data.payload, true);
     });
 }
 
+function createRoom() {
+    initSocket(() => socket.emit('create_room'));
+}
+
+function joinRoom() {
+    const code = document.getElementById('room-code-input').value.toUpperCase();
+    if(!code) return alert("Enter code");
+    initSocket(() => socket.emit('join_room', code));
+}
+
 function openMultiplayerMenu() {
-    connectToServer();
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('multiplayer-menu').classList.remove('hidden');
 }
 
 function closeMultiplayerMenu() {
     document.getElementById('multiplayer-menu').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
 }
 
-function createRoom() {
-    if (!socket) connectToServer();
-    socket.emit('create_room');
+// === THE MIRROR LOGIC ===
+function flipZoneId(id) {
+    if (!id) return id;
+    if (id.includes('player')) return id.replace('player', 'opponent');
+    if (id.includes('opponent')) return id.replace('opponent', 'player');
+    return id;
 }
 
-function joinRoom() {
-    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-    if (!code) return alert('Enter room code');
-    if (!socket) connectToServer();
-    socket.emit('join_room', code);
-}
+// === THE CENTRAL ACTION HANDLER ===
+function executeAction(type, payload, isRemote = false) {
+    // 1. Broadcast if local and multiplayer
+    if (!isRemote && isMultiplayer && socket) {
+        socket.emit('game_action', { roomCode, type, payload });
+    }
 
-function sendAction(action) {
-    if (!isMultiplayer || !socket || !roomCode) return;
-    socket.emit('game_action', { roomCode, ...action });
-}
+    console.log(`Action: ${type} (Remote: ${isRemote})`, payload);
 
-function applyOpponentAction(data) {
-    const { type, payload } = data;
-    
-    switch(type) {
-        case 'move':
+    // 2. Handle Action
+    switch (type) {
+        case 'start_game_sync':
+            startGame();
+            break;
+            
+        case 'draw_card':
+            let drawTarget = payload.owner;
+            // If remote said "player", it means the opponent drew
+            if (isRemote) drawTarget = (drawTarget === 'player') ? 'opponent' : 'player';
+            draw(1, drawTarget, payload.deckType || 'deck');
+            break;
+            
+        case 'draw_phase':
+            // Both players draw 1 locally
+            draw(1, 'player');
+            draw(1, 'opponent');
+            break;
+
+        case 'flip_card':
+            const cFlip = findCard(payload.cardId);
+            if(cFlip) { cFlip.faceUp = !cFlip.faceUp; refreshCard(cFlip); }
+            break;
+
+        case 'rotate_card':
+            const cRot = findCard(payload.cardId);
+            if(cRot) { cRot.rotated = !cRot.rotated; refreshCard(cRot); }
+            break;
+            
+        case 'add_counter':
+            const cAdd = findCard(payload.cardId);
+            if(cAdd) { cAdd.counter = (cAdd.counter || 0) + 1; refreshCard(cAdd); }
+            break;
+            
+        case 'remove_counter':
+            const cRem = findCard(payload.cardId);
+            if(cRem) { cRem.counter = Math.max(0, (cRem.counter || 0) - 1); refreshCard(cRem); }
+            break;
+            
+        case 'clone_card':
+            const cClone = findCard(payload.cardId);
+            if (cClone) cloneCard(cClone);
+            break;
+            
+        case 'play_card':
+            const pc = findCard(payload.cardId);
+            if (pc) playCardToField(pc, pc.type, !payload.set, payload.defense || false);
+            break;
+
+        case 'adjust_lp':
+            let lpTarget = payload.target;
+            if (isRemote) lpTarget = (lpTarget === 'player') ? 'opponent' : 'player';
+            state[lpTarget].lp += payload.amount;
+            updateStats();
+            break;
+
+        case 'move_card':
+            // Handle ID Flipping for remote actions
+            let targetId = payload.targetId;
+            let targetType = payload.targetType; // 'hand', 'afterlife' used by hotkeys
+            let ownerRef = payload.owner; 
+
+            if (isRemote) {
+                if (targetId) targetId = flipZoneId(targetId);
+                // If it was a hotkey move (no targetId, just targetType), flip the owner
+                if (ownerRef) ownerRef = (ownerRef === 'player') ? 'opponent' : 'player';
+            }
+
             const card = findCard(payload.cardId);
-            if (!card) break;
-            removeCard(card);
-            
-            const zone = document.getElementById(payload.toZone);
-            if (!zone) break;
-            
-            if (zone.classList.contains('hand-area')) {
-                card.owner = payload.owner;
-                state[payload.owner].hand.push(card);
-                renderHand(payload.owner);
-            } else if (zone.dataset.type) {
-                card.owner = payload.owner;
-                state[payload.owner][zone.dataset.type].push(card);
-                updateCounts(payload.owner);
-            } else {
-                card.loc = 'field';
-                state[payload.owner].field.push(card);
-                zone.appendChild(createCardEl(card));
+            if (!card) return;
+
+            // Determine Destination
+            if (targetId) {
+                // Drop on Zone
+                const zone = document.getElementById(targetId);
+                if (zone) {
+                    removeCard(card);
+                    
+                    let newOwner = targetId.includes('opponent') ? 'opponent' : 'player';
+                    
+                    if (targetId.includes('hand')) {
+                        state[newOwner].hand.push(card);
+                        card.owner = newOwner;
+                        renderHand(newOwner);
+                    } else if (zone.dataset.type) {
+                        // Pile/Deck drop
+                        const t = zone.dataset.type;
+                        state[newOwner][t].push(card);
+                        card.owner = newOwner;
+                        updateCounts(newOwner);
+                    } else {
+                        // Field drop
+                        state[newOwner].field.push(card);
+                        card.owner = newOwner;
+                        card.loc = 'field';
+                        zone.appendChild(createCardEl(card));
+                    }
+                }
+            } else if (targetType && ownerRef) {
+                // Hotkey move (e.g. 'd' to Afterlife)
+                removeCard(card);
+                state[ownerRef][targetType].push(card);
+                card.owner = ownerRef;
+                updateCounts(ownerRef);
+                if(targetType === 'hand') renderHand(ownerRef);
             }
-            break;
-            
-        case 'lp':
-            state[payload.player].lp = payload.value;
-            updateStats();
-            break;
-            
-        case 'sp':
-            state[payload.player].sp = payload.value;
-            updateStats();
-            break;
-            
-        case 'flip':
-            const flipCard = findCard(payload.cardId);
-            if (flipCard) {
-                flipCard.faceUp = payload.faceUp;
-                refreshCard(flipCard);
-            }
-            break;
-            
-        case 'rotate':
-            const rotCard = findCard(payload.cardId);
-            if (rotCard) {
-                rotCard.rotated = payload.rotated;
-                refreshCard(rotCard);
-            }
-            break;
-            
-        case 'die':
-            document.getElementById('die-result').innerText = payload.value;
-            break;
-            
-        case 'coin':
-            document.getElementById('coin-result').innerText = payload.value;
-            break;
-            
-        case 'draw':
-            draw(payload.amount, payload.player, payload.deckType);
             break;
     }
 }
-
-// Wrap game functions
-const __origHandleDrop = handleDrop;
-window.handleDrop = function(e) {
-    __origHandleDrop(e);
-    
-    if (!isMultiplayer || !draggedId) return;
-    const card = findCard(draggedId);
-    const target = e.target.closest('.zone, .hand-area');
-    if (!card || !target) return;
-    
-    sendAction({
-        type: 'move',
-        payload: {
-            cardId: card.id,
-            toZone: target.id,
-            owner: card.owner
-        }
-    });
-};
-
-const __origAdjustLP = adjustLP;
-window.adjustLP = function(p, dir) {
-    __origAdjustLP(p, dir);
-    if (!isMultiplayer) return;
-    sendAction({ type: 'lp', payload: { player: p, value: state[p].lp } });
-};
-
-const __origAdjustSP = adjustSP;
-window.adjustSP = function(p, dir) {
-    __origAdjustSP(p, dir);
-    if (!isMultiplayer) return;
-    sendAction({ type: 'sp', payload: { player: p, value: state[p].sp } });
-};
-
-const __origCardAction = cardAction;
-window.cardAction = function(act) {
-    __origCardAction(act);
-    if (!isMultiplayer || !ctxTarget) return;
-    
-    if (act === 'flip') {
-        sendAction({ type: 'flip', payload: { cardId: ctxTarget.id, faceUp: ctxTarget.faceUp } });
-    } else if (act === 'rotate') {
-        sendAction({ type: 'rotate', payload: { cardId: ctxTarget.id, rotated: ctxTarget.rotated } });
-    }
-};
-
-const __origRollDie = rollDie;
-window.rollDie = function() {
-    __origRollDie();
-    if (!isMultiplayer) return;
-    sendAction({ type: 'die', payload: { value: document.getElementById('die-result').innerText } });
-};
-
-const __origFlipCoin = flipCoin;
-window.flipCoin = function() {
-    __origFlipCoin();
-    if (!isMultiplayer) return;
-    sendAction({ type: 'coin', payload: { value: document.getElementById('coin-result').innerText } });
-};
-
-const __origDraw = draw;
-window.draw = function(amt, owner, deckType = 'deck') {
-    __origDraw(amt, owner, deckType);
-    if (!isMultiplayer) return;
-    sendAction({ type: 'draw', payload: { amount: amt, player: owner, deckType } });
-};
