@@ -1033,52 +1033,40 @@ function spawnToken(owner) {
 
 
 
-// === MULTIPLAYER SYSTEM ===
+// === SIMPLE ACTION-BASED MULTIPLAYER ===
 let socket = null;
 let isMultiplayer = false;
 let myRole = null; 
 let roomCode = null;
 
+// The one true local port is 3000
 const SERVER_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000' 
     : 'https://mytcg.teamdragonmaster.com';
 
-// 1. Unified Connection Logic
-function initSocket(callback) {
+function connectToServer(callback) {
     if (socket && socket.connected) {
         if (callback) callback();
         return;
     }
-
-    // Use the CDN version of socket.io defined in HTML
+    
+    console.log("Connecting to:", SERVER_URL);
     socket = io(SERVER_URL);
 
     socket.on('connect', () => {
-        console.log("Connected to server:", socket.id);
-        setupSocketListeners();
+        console.log("Socket connected!");
         if (callback) callback();
     });
 
     socket.on('connect_error', (err) => {
-        console.error("Connection error:", err);
-        alert("Could not connect to multiplayer server.");
+        console.warn("Socket connection error (local server failure):", err.message);
     });
-}
-
-function setupSocketListeners() {
-    // Only set these up once
-    socket.off('room_created');
-    socket.off('room_joined');
-    socket.off('opponent_joined');
-    socket.off('game_action');
-    socket.off('error_msg');
 
     socket.on('room_created', (data) => {
         roomCode = data.roomCode;
         myRole = 'host';
         isMultiplayer = true;
-        const statusEl = document.getElementById('room-status');
-        if (statusEl) statusEl.innerText = `Room Code: ${roomCode}\nWaiting for opponent...`;
+        document.getElementById('room-status').innerText = `Room Code: ${roomCode}\nWaiting for opponent...`;
     });
 
     socket.on('room_joined', (data) => {
@@ -1090,41 +1078,19 @@ function setupSocketListeners() {
     });
 
     socket.on('opponent_joined', () => {
-        console.log("Opponent joined!");
         closeMultiplayerMenu();
         startGame();
     });
 
     socket.on('game_action', (data) => {
-        console.log("Received remote action:", data.type);
         executeAction(data.type, data.payload, true);
-    });
-
-    socket.on('error_msg', (data) => {
-        alert(data.message);
-    });
-}
-
-// 2. Fixed Button Actions
-function createRoom() {
-    initSocket(() => {
-        socket.emit('create_room');
-    });
-}
-
-function joinRoom() {
-    const codeInput = document.getElementById('room-code-input');
-    const code = codeInput.value.trim().toUpperCase();
-    if (!code) return alert("Enter a Room Code!");
-    
-    initSocket(() => {
-        socket.emit('join_room', code);
     });
 }
 
 function openMultiplayerMenu() {
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('multiplayer-menu').classList.remove('hidden');
+    connectToServer(); 
 }
 
 function closeMultiplayerMenu() {
@@ -1132,125 +1098,163 @@ function closeMultiplayerMenu() {
     document.getElementById('main-menu').classList.remove('hidden');
 }
 
-// Helper to swap IDs for remote actions
-function flipZoneId(id) {
-    if (!id) return id;
-    if (id.includes('player')) return id.replace('player', 'opponent');
-    if (id.includes('opponent')) return id.replace('opponent', 'player');
-    return id;
+// Function to handle connecting and waiting for the socket to be ready
+function initSocket(callback) {
+    if (!socket) connectToServer();
+    
+    if (socket.connected) {
+        if (callback) callback();
+    } else {
+        // Wait for connection to be ready before calling the callback
+        socket.once('connect', callback); 
+    }
 }
 
-/**
- * The Central Action Handler
- */
-function executeAction(type, payload, isRemote = false) {
-    // If we performed the action locally, send it to the other player
-    if (!isRemote && isMultiplayer && socket) {
-        socket.emit('game_action', { roomCode: roomCode, type: type, payload: payload });
-    }
+function createRoom() {
+    initSocket(() => {
+        socket.emit('create_room');
+    });
+}
 
-    switch (type) {
-        case 'draw_phase':
-            // In draw phase, normally both draw? or current turn player draws?
-            // This implementation draws for both
-            draw(1, 'player');
-            draw(1, 'opponent');
-            break;
+function joinRoom() {
+    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+    if (!code) return alert('Enter code!');
+    initSocket(() => {
+        socket.emit('join_room', code);
+    });
+}
 
-        case 'adjust_lp':
-            let lpTarget = payload.target;
-            // If remote sent "player", it means it's hitting the opponent from MY perspective
-            if (isRemote) lpTarget = (lpTarget === 'player') ? 'opponent' : 'player';
-            state[lpTarget].lp += payload.amount;
-            updateStats();
-            break;
 
-        
-		
-		case 'move_card':
-            let targetId = payload.targetId;
-            let cardId = payload.cardId;
+function applyOpponentAction(data) {
+    const { type, payload } = data;
+    
+    switch(type) {
+        case 'move':
+            const card = findCard(payload.cardId);
+            if (!card) break;
+            removeCard(card);
             
-            // Mirror the target zone ID for the opponent
-            if (isRemote) targetId = flipZoneId(targetId);
+            const zone = document.getElementById(payload.toZone);
+            if (!zone) break;
             
-            const card = findCard(cardId);
-            const targetZone = document.getElementById(targetId);
-            
-            if (card && targetZone) {
-                removeCard(card);
-                let newOwner = targetId.includes('opponent') ? 'opponent' : 'player';
-                const isHand = targetZone.classList.contains('hand-area');
-                const zoneType = targetZone.dataset.type;
-                
-                card.owner = newOwner;
-                
-                if (isHand) {
-                    card.loc = 'hand';
-                    state[newOwner].hand.push(card);
-                    renderHand(newOwner);
-                } else if (zoneType) {
-                    card.faceUp = true; card.rotated = false;
-                    state[newOwner][zoneType].push(card);
-                    updateCounts(newOwner);
-                } else {
-                    card.loc = 'field';
-                    state[newOwner].field.push(card);
-                    targetZone.appendChild(createCardEl(card));
-                }
+            if (zone.classList.contains('hand-area')) {
+                card.owner = payload.owner;
+                state[payload.owner].hand.push(card);
+                renderHand(payload.owner);
+            } else if (zone.dataset.type) {
+                card.owner = payload.owner;
+                state[payload.owner][zone.dataset.type].push(card);
+                updateCounts(payload.owner);
+            } else {
+                card.loc = 'field';
+                state[payload.owner].field.push(card);
+                zone.appendChild(createCardEl(card));
             }
             break;
-			
-			// Add or replace these cases inside executeAction's switch statement:
-	switch (type) {
-		// ... (Keep existing cases: adjust_lp, move_card, draw_phase, etc.) ...
-
-		case 'draw_single':
-			const dOwner = payload.owner;
-			const dList = state[dOwner][payload.type];
-			let card = null;
-
-			if (payload.from === 'bottom') {
-				card = dList.shift();
-			} else if (payload.firstType) {
-				const idx = dList.findIndex(c => c.type === payload.firstType);
-				card = (idx > -1) ? dList.splice(idx, 1)[0] : null;
-			} else {
-				card = dList.pop(); // Default draw
-			}
-			
-			if (card) {
-				state[dOwner].hand.push(card);
-				renderHand(dOwner);
-				updateCounts(dOwner);
-			}
-			break;
-
-		case 'shuffle_deck':
-			const sOwner = payload.owner;
-			shuffle(state[sOwner][payload.type]);
-			// Update both screens: show alert on opponent's screen too
-			alert(`${payload.type} shuffled for ${sOwner}`);
-			break;
-			
-		case 'mill_top':
-			const mOwner = payload.owner;
-			const mCard = state[mOwner][payload.type].pop();
-			if (mCard) {
-				state[mOwner][payload.dest].push(mCard);
-				updateCounts(mOwner);
-			}
-			break;
-			
-		// ... (Rest of executeAction) ...
-	}
-			
-			
-			
-		
-			
-			
             
-        // Add more cases here as needed (flip_card, rotate_card, etc.)
+        case 'lp':
+            state[payload.player].lp = payload.value;
+            updateStats();
+            break;
+            
+        case 'sp':
+            state[payload.player].sp = payload.value;
+            updateStats();
+            break;
+            
+        case 'flip':
+            const flipCard = findCard(payload.cardId);
+            if (flipCard) {
+                flipCard.faceUp = payload.faceUp;
+                refreshCard(flipCard);
+            }
+            break;
+            
+        case 'rotate':
+            const rotCard = findCard(payload.cardId);
+            if (rotCard) {
+                rotCard.rotated = payload.rotated;
+                refreshCard(rotCard);
+            }
+            break;
+            
+        case 'die':
+            document.getElementById('die-result').innerText = payload.value;
+            break;
+            
+        case 'coin':
+            document.getElementById('coin-result').innerText = payload.value;
+            break;
+            
+        case 'draw':
+            draw(payload.amount, payload.player, payload.deckType);
+            break;
     }
 }
+
+// Wrap game functions
+const __origHandleDrop = handleDrop;
+window.handleDrop = function(e) {
+    __origHandleDrop(e);
+    
+    if (!isMultiplayer || !draggedId) return;
+    const card = findCard(draggedId);
+    const target = e.target.closest('.zone, .hand-area');
+    if (!card || !target) return;
+    
+    sendAction({
+        type: 'move',
+        payload: {
+            cardId: card.id,
+            toZone: target.id,
+            owner: card.owner
+        }
+    });
+};
+
+const __origAdjustLP = adjustLP;
+window.adjustLP = function(p, dir) {
+    __origAdjustLP(p, dir);
+    if (!isMultiplayer) return;
+    sendAction({ type: 'lp', payload: { player: p, value: state[p].lp } });
+};
+
+const __origAdjustSP = adjustSP;
+window.adjustSP = function(p, dir) {
+    __origAdjustSP(p, dir);
+    if (!isMultiplayer) return;
+    sendAction({ type: 'sp', payload: { player: p, value: state[p].sp } });
+};
+
+const __origCardAction = cardAction;
+window.cardAction = function(act) {
+    __origCardAction(act);
+    if (!isMultiplayer || !ctxTarget) return;
+    
+    if (act === 'flip') {
+        sendAction({ type: 'flip', payload: { cardId: ctxTarget.id, faceUp: ctxTarget.faceUp } });
+    } else if (act === 'rotate') {
+        sendAction({ type: 'rotate', payload: { cardId: ctxTarget.id, rotated: ctxTarget.rotated } });
+    }
+};
+
+const __origRollDie = rollDie;
+window.rollDie = function() {
+    __origRollDie();
+    if (!isMultiplayer) return;
+    sendAction({ type: 'die', payload: { value: document.getElementById('die-result').innerText } });
+};
+
+const __origFlipCoin = flipCoin;
+window.flipCoin = function() {
+    __origFlipCoin();
+    if (!isMultiplayer) return;
+    sendAction({ type: 'coin', payload: { value: document.getElementById('coin-result').innerText } });
+};
+
+const __origDraw = draw;
+window.draw = function(amt, owner, deckType = 'deck') {
+    __origDraw(amt, owner, deckType);
+    if (!isMultiplayer) return;
+    sendAction({ type: 'draw', payload: { amount: amt, player: owner, deckType } });
+};
