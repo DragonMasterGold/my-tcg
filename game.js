@@ -518,10 +518,12 @@ function updateStats() {
 
 function adjustLP(p, dir) { 
     let val = prompt("Amount?", "");
-    if(val) { 
-        state[p].lp = parseInt(state[p].lp) + (parseInt(val)*dir);
-        updateStats();
-        if (isMultiplayer) syncGameState();
+    if (val !== null && val.trim() !== "") { 
+        const amount = parseInt(val);
+        if (!isNaN(amount)) {
+            // Hijack: Send to Action Engine instead of doing math here
+            executeAction('adjust_lp', { target: p, amount: amount * dir });
+        }
     }
 }
 
@@ -1038,106 +1040,97 @@ let isMultiplayer = false;
 let myRole = null; 
 let roomCode = null;
 
-// Determine if we are running locally or on the Hetzner server
-const SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const SERVER_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000' 
-    : 'https://mytcg.teamdragonmaster.com'; 
+    : 'https://mytcg.teamdragonmaster.com';
 
-function connectToServer() {
-    if (socket && socket.connected) return; // Already connected
-    
-    console.log("Attempting to connect to:", SERVER_URL);
+// 1. Unified Connection Logic
+function initSocket(callback) {
+    if (socket && socket.connected) {
+        if (callback) callback();
+        return;
+    }
+
+    // Use the CDN version of socket.io defined in HTML
     socket = io(SERVER_URL);
 
-    // Add a connection check
     socket.on('connect', () => {
-        console.log("Connected to server successfully!");
+        console.log("Connected to server:", socket.id);
+        setupSocketListeners();
+        if (callback) callback();
     });
 
     socket.on('connect_error', (err) => {
-        console.error("Connection failed. Is server.js running?", err.message);
-        alert("Cannot connect to multiplayer server. Make sure server.js is running!");
+        console.error("Connection error:", err);
+        alert("Could not connect to multiplayer server.");
+    });
+}
+
+function setupSocketListeners() {
+    // Only set these up once
+    socket.off('room_created');
+    socket.off('room_joined');
+    socket.off('opponent_joined');
+    socket.off('game_action');
+    socket.off('error_msg');
+
+    socket.on('room_created', (data) => {
+        roomCode = data.roomCode;
+        myRole = 'host';
+        isMultiplayer = true;
+        const statusEl = document.getElementById('room-status');
+        if (statusEl) statusEl.innerText = `Room Code: ${roomCode}\nWaiting for opponent...`;
     });
 
-    // ... (rest of your socket.on functions: room_created, game_action, etc.)
+    socket.on('room_joined', (data) => {
+        roomCode = data.roomCode;
+        myRole = 'guest';
+        isMultiplayer = true;
+        closeMultiplayerMenu();
+        startGame();
+    });
+
+    socket.on('opponent_joined', () => {
+        console.log("Opponent joined!");
+        closeMultiplayerMenu();
+        startGame();
+    });
+
+    socket.on('game_action', (data) => {
+        console.log("Received remote action:", data.type);
+        executeAction(data.type, data.payload, true);
+    });
+
+    socket.on('error_msg', (data) => {
+        alert(data.message);
+    });
+}
+
+// 2. Fixed Button Actions
+function createRoom() {
+    initSocket(() => {
+        socket.emit('create_room');
+    });
+}
+
+function joinRoom() {
+    const codeInput = document.getElementById('room-code-input');
+    const code = codeInput.value.trim().toUpperCase();
+    if (!code) return alert("Enter a Room Code!");
+    
+    initSocket(() => {
+        socket.emit('join_room', code);
+    });
 }
 
 function openMultiplayerMenu() {
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('multiplayer-menu').classList.remove('hidden');
-    connectToServer();
 }
 
 function closeMultiplayerMenu() {
     document.getElementById('multiplayer-menu').classList.add('hidden');
     document.getElementById('main-menu').classList.remove('hidden');
-}
-
-function connectToServer() {
-    if (socket) return; // Already connected
-    
-    // Connect to your Hetzner server
-    socket = io(SERVER_URL);
-
-    // Event: Room successfully created
-    socket.on('room_created', (data) => {
-        roomCode = data.roomCode;
-        myRole = 'host';
-        isMultiplayer = true;
-        document.getElementById('room-status').innerText = `Room Code: ${roomCode}\nWaiting for opponent...`;
-        console.log("Room created:", roomCode);
-    });
-
-    // Event: Joined an existing room
-    socket.on('room_joined', (data) => {
-        roomCode = data.roomCode;
-        myRole = 'guest';
-        isMultiplayer = true;
-        document.getElementById('room-status').innerText = `Joined Room: ${roomCode}`;
-        setTimeout(() => {
-            closeMultiplayerMenu();
-            startGame();
-        }, 1000);
-    });
-
-    // Event: Opponent entered your room
-    socket.on('opponent_joined', () => {
-        document.getElementById('room-status').innerText = "Opponent joined! Starting...";
-        setTimeout(() => {
-            closeMultiplayerMenu();
-            startGame();
-        }, 1000);
-    });
-
-    // Event: Receive action from opponent
-    socket.on('game_action', (data) => {
-        // This is the Action Relay! 
-        // It triggers the same function locally but marked as 'isRemote'
-        executeAction(data.type, data.payload, true);
-    });
-
-    socket.on('opponent_disconnected', () => {
-        alert("Opponent disconnected.");
-        resetGame();
-    });
-
-    socket.on('error', (data) => {
-        alert(data.message);
-    });
-}
-
-// Button Action: Create Room
-function createRoom() {
-    if (!socket) connectToServer();
-    socket.emit('create_room');
-}
-
-// Button Action: Join Room
-function joinRoom() {
-    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-    if (!code) return alert("Enter a code first!");
-    if (!socket) connectToServer();
-    socket.emit('join_room', code);
 }
 
 // Helper to swap IDs for remote actions
@@ -1150,78 +1143,56 @@ function flipZoneId(id) {
 
 /**
  * The Central Action Handler
- * This replaces individual logic in handleDrop, drawCard, etc.
  */
 function executeAction(type, payload, isRemote = false) {
-    
-    // 1. Sync with Server (if we are the one doing it)
+    // If we performed the action locally, send it to the other player
     if (!isRemote && isMultiplayer && socket) {
-        socket.emit('game_action', {
-            roomCode: roomCode,
-            type: type,
-            payload: payload
-        });
+        socket.emit('game_action', { roomCode: roomCode, type: type, payload: payload });
     }
-
-    // 2. Setup Variables
-    const actor = isRemote ? 'opponent' : 'player'; 
-    console.log(`Executing ${type}`, payload);
 
     switch (type) {
         case 'draw_phase':
+            // In draw phase, normally both draw? or current turn player draws?
+            // This implementation draws for both
             draw(1, 'player');
             draw(1, 'opponent');
             break;
 
-        case 'draw':
-            drawCard(actor, payload.deckType || 'deck');
+        case 'adjust_lp':
+            let lpTarget = payload.target;
+            // If remote sent "player", it means it's hitting the opponent from MY perspective
+            if (isRemote) lpTarget = (lpTarget === 'player') ? 'opponent' : 'player';
+            state[lpTarget].lp += payload.amount;
+            updateStats();
             break;
 
         case 'move_card':
-			let targetId = payload.targetId;
-			if (isRemote) targetId = flipZoneId(targetId); // Swaps 'player' to 'opponent' for you
-				
-			const card = findCard(payload.cardId);
-			const targetZone = document.getElementById(targetId);
-				
-			if (card && targetZone) {
-				removeCard(card);
-	
-                // 1. Remove from old location
+            let targetId = payload.targetId;
+            let cardId = payload.cardId;
+            
+            // Mirror the target zone ID for the opponent
+            if (isRemote) targetId = flipZoneId(targetId);
+            
+            const card = findCard(cardId);
+            const targetZone = document.getElementById(targetId);
+            
+            if (card && targetZone) {
                 removeCard(card);
-                
-                // 2. Determine Owner
-                let newOwner = targetZone.dataset.owner;
-                if (!newOwner) {
-                    newOwner = targetId.includes('opponent') ? 'opponent' : 'player';
-                }
-
-                // 3. Determine Zone Type
-                const zoneType = targetZone.dataset.type;
+                let newOwner = targetId.includes('opponent') ? 'opponent' : 'player';
                 const isHand = targetZone.classList.contains('hand-area');
-
-                // 4. Update Card Data
+                const zoneType = targetZone.dataset.type;
+                
                 card.owner = newOwner;
-                // We REMOVED the lines that reset faceUp/rotated here.
-                // Now the card keeps its orientation when moved.
-
-                // 5. Update State & Visuals
+                
                 if (isHand) {
                     card.loc = 'hand';
                     state[newOwner].hand.push(card);
                     renderHand(newOwner);
-                } 
-                else if (zoneType) {
-                    // If moving TO a Deck/Pile, we usually DO want to reset state, 
-                    // otherwise drawing a sideways card later is weird.
-                    card.faceUp = true;
-                    card.rotated = false;
-                    
+                } else if (zoneType) {
+                    card.faceUp = true; card.rotated = false;
                     state[newOwner][zoneType].push(card);
                     updateCounts(newOwner);
-                } 
-                else {
-                    // Field
+                } else {
                     card.loc = 'field';
                     state[newOwner].field.push(card);
                     targetZone.appendChild(createCardEl(card));
@@ -1229,36 +1200,6 @@ function executeAction(type, payload, isRemote = false) {
             }
             break;
             
-        // ... other cases (play_card, flip, etc.)
+        // Add more cases here as needed (flip_card, rotate_card, etc.)
     }
-}
-
-// Helper to swap IDs for multiplayer sync
-function flipZoneId(id) {
-    if (!id) return id;
-    if (id.startsWith('player-')) return id.replace('player-', 'opponent-');
-    if (id.startsWith('opponent-')) return id.replace('opponent-', 'player-');
-    return id;
-}
-
-function flipZoneId(id) {
-    if (!id) return id;
-    // Swap 'player' and 'opponent' prefixes
-    if (id.startsWith('player-')) return id.replace('player-', 'opponent-');
-    if (id.startsWith('opponent-')) return id.replace('opponent-', 'player-');
-    return id;
-}
-
-function openMultiplayerMenu() {
-    // Show the menu, hide the main menu
-    document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('multiplayer-menu').classList.remove('hidden');
-    
-    // Connect to the server immediately when opening this menu
-    connectToServer(); 
-}
-
-function closeMultiplayerMenu() {
-    document.getElementById('multiplayer-menu').classList.add('hidden');
-    document.getElementById('main-menu').classList.remove('hidden');
 }

@@ -3,7 +3,7 @@ let hoveredCard = null;
 let allCards = [];
 let currentDeck = { main: [], extra: [], side: [] };
 let currentFilter = 'All';
-let currentDeckView = 'main';
+let currentDeckView = 'main'; // This is our active tab ('main', 'extra', or 'side')
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', loadCards);
@@ -16,30 +16,25 @@ async function loadCards() {
         console.error('Error loading cards:', error);
         createTestCards();
     }
-    // Initial Render
     filterCards();
     updateDeckDisplay();
     updateDeckStats();
+    showDefaultControls();
 }
 
 // === ROBUST FILTERING & RENDERING ===
-// This function handles Search AND Type filtering together
 function filterCards() {
     const term = document.getElementById('card-search').value.toLowerCase();
     const cardPool = document.getElementById('card-pool');
-    cardPool.innerHTML = ''; // Clear current pool
+    cardPool.innerHTML = ''; 
 
-    // Filter the actual data array
     const filtered = allCards.filter(card => {
-        // 1. Check Type
         if (currentFilter !== 'All' && card.type !== currentFilter) return false;
-        // 2. Check Search Term (Name or Description)
         const nameMatch = card.name.toLowerCase().includes(term);
         const descMatch = (card.description || "").toLowerCase().includes(term);
         return nameMatch || descMatch;
     });
 
-    // Render only the matching cards
     filtered.forEach(card => {
         cardPool.appendChild(createCardElement(card, true));
     });
@@ -47,79 +42,127 @@ function filterCards() {
 
 function filterByType(type) {
     currentFilter = type;
-    
-    // Update active button visual
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.textContent.includes(type) || (type === 'All' && btn.textContent === 'All')) {
             btn.classList.add('active');
         }
     });
-
-    filterCards(); // Re-render pool
+    filterCards();
 }
 
-// === CARD CREATION ===
+// === CARD CREATION (Unified) ===
 function createCardElement(card, isPool = false) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card-item';
     cardEl.dataset.type = card.type;
 
+    // Visual Content
     if (card.image) {
-        const img = document.createElement('img');
-        img.src = card.image;
-        img.className = 'card-image';
-        cardEl.appendChild(img);
+        // Use the same method as the main game for consistency
+        cardEl.style.backgroundImage = `url("${card.image}")`;
+        cardEl.style.backgroundSize = "cover";
+        cardEl.style.backgroundPosition = "center";
+        
+        // Add a fallback label so name is visible on the image
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'card-name-fallback';
+        nameLabel.style.background = 'rgba(0,0,0,0.6)';
+        nameLabel.style.width = '100%';
+        nameLabel.style.position = 'absolute';
+        nameLabel.style.bottom = '0';
+        nameLabel.textContent = card.name;
+        cardEl.appendChild(nameLabel);
     } else {
         cardEl.innerText = card.name;
     }
-
-    // Badge logic (Pool only)
-    if (isPool) {
-        const count = getCardCount(card.id);
-        if (count > 0) {
-            const badge = document.createElement('div');
-            badge.className = 'card-count';
-            badge.innerText = count;
-            cardEl.appendChild(badge);
-        }
+	
+    // Badge logic (How many are in the total deck)
+    const count = getCardCount(card.id);
+    if (count > 0) {
+        const badge = document.createElement('div');
+        badge.className = 'card-count';
+        badge.innerText = count;
+        cardEl.appendChild(badge);
     }
 
-    // --- MOUSE TRACKING (For +/- Hotkeys) ---
+    // --- TRACKING FOR HOTKEYS ---
     cardEl.onmouseenter = () => { hoveredCard = card; };
     cardEl.onmouseleave = () => { hoveredCard = null; };
 
     // --- INTERACTIONS ---
-    
-    // 1. Left Click: Show Info (Fixed function name)
-    cardEl.onclick = () => showCardInfo(card);
+    let holdTimer = null;
+    let spamInterval = null;
+    cardEl._lastInteracted = 0; // Tracking time per card element
 
-    // 2. Right Click: Add/Remove (Context menu)
+    cardEl.onmousedown = (e) => {
+        if (e.button !== 0) return; // Only left click
+        e.stopPropagation();
+
+        const now = Date.now();
+        showCardInfo(card); // Always show info instantly
+
+        const triggerAction = () => {
+            if (isPool) addCardToDeck(card);
+            else removeCardFromDeck(card);
+        };
+
+        // 1. CHAIN CLICK LOGIC (4 clicks = 3 cards)
+        // If this click happens within 400ms of the last, trigger add/remove immediately
+        if (now - cardEl._lastInteracted < 400) {
+            triggerAction();
+        }
+        cardEl._lastInteracted = now;
+
+        // 2. HOLD TO AUTO-REPEAT LOGIC
+        // Wait 400ms, then start adding/removing copies every 100ms
+        holdTimer = setTimeout(() => {
+            spamInterval = setInterval(triggerAction, 100);
+        }, 400);
+    };
+
+    const stopSpam = () => {
+        clearTimeout(holdTimer);
+        clearInterval(spamInterval);
+    };
+
+    // Clean up timers when mouse is released or leaves the card
+    cardEl.onmouseup = stopSpam;
+    cardEl.onmouseleave = stopSpam;
+
+    // Prevent default context menu on right-click if you still want right-click support
     cardEl.oncontextmenu = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (isPool) addCardToDeck(card);
         else removeCardFromDeck(card);
     };
-
-    // 3. Double Click: Add/Remove
-    cardEl.ondblclick = (e) => {
-        e.preventDefault();
-        if (isPool) {
-            addCardToDeck(card);
-        } else {
-            removeCardFromDeck(card); // Removes if clicking card in deck list
-        }
-    };
-
+    
     return cardEl;
 }
 
 // === INFO PANEL ===
-function showCardInfo(card) {
+function showDefaultControls() {
     const nameEl = document.getElementById('info-name');
     const statsDiv = document.getElementById('info-stats');
     const textDiv = document.getElementById('info-text');
 
+    if (nameEl) nameEl.innerText = "Select a Card";
+    if (statsDiv) statsDiv.innerHTML = ""; // Leaves the middle section empty
+    if (textDiv) {
+        textDiv.innerHTML = `
+            <strong>Controls:</strong><br>
+            • Left Click to view info.<br>
+            • Press + or - keys to quickly add/remove cards.<br>
+            • Double Click and Holding left click will also add/remove cards.
+        `;
+    }
+}
+
+function showCardInfo(card) {
+    const nameEl = document.getElementById('info-name');
+    const statsDiv = document.getElementById('info-stats');
+    const textDiv = document.getElementById('info-text');
     if (!nameEl) return;
 
     nameEl.innerText = card.name;
@@ -136,7 +179,6 @@ function showCardInfo(card) {
     addStatLine('Form', card.type);
     if (card.level !== undefined) addStatLine('Level', card.level);
     
-    // Archetype formatting
     const archs = [];
     if (card.archetype) archs.push(card.archetype);
     if (card.archetypes && card.archetypes[1]) archs.push(card.archetypes[1]);
@@ -155,24 +197,31 @@ function getCardCount(cardId) {
 }
 
 function addCardToDeck(card) {
-    // Check limits, etc. BEFORE
-    if (getCardCount(card.id) >= 3) return alert('Max 3 copies!');
-    if (currentDeckView === 'main' && currentDeck.main.length >= 50) return;
-    if (currentDeckView === 'side' && currentDeck.side.length >= 15) return;
-    if (currentDeckView === 'extra' && currentDeck.extra.length >= 5) return;
+    if (getCardCount(card.id) >= 3) return; // Silent stop at 3 copies
 
-    // Execute the action instead of doing it directly
-    executeAction('add_to_deck', { cardId: card.id, deckType: currentDeckView });
+    // Check individual tab limits
+    const limit = (currentDeckView === 'main') ? 50 : (currentDeckView === 'side' ? 15 : 5);
+    if (currentDeck[currentDeckView].length >= limit) {
+        alert(`${currentDeckView} deck full!`);
+        return;
+    }
+
+    currentDeck[currentDeckView].push(card);
+    refreshUI();
 }
 
 function removeCardFromDeck(card) {
     const idx = currentDeck[currentDeckView].findIndex(c => c.id === card.id);
-    if (idx !== -1) {
+    if (idx > -1) {
         currentDeck[currentDeckView].splice(idx, 1);
-        updateDeckDisplay();
-        updateDeckStats();
-        filterCards(); // Refresh pool to update count badges
+        refreshUI();
     }
+}
+
+function refreshUI() {
+    updateDeckDisplay();
+    updateDeckStats();
+    filterCards(); // Updates badges in pool
 }
 
 function updateDeckDisplay() {
@@ -194,63 +243,37 @@ function updateDeckStats() {
     document.getElementById('side-deck-count').textContent = sideNum;
     document.getElementById('extra-deck-count').textContent = extraNum;
     
-    // Visual Validation
     document.getElementById('main-deck-count').className = 'stat-value ' + (mainNum >= 30 && mainNum <= 50 ? 'valid' : 'invalid');
 }
 
 function switchDeckView(deckType) {
     currentDeckView = deckType;
     document.querySelectorAll('.deck-tab').forEach(tab => tab.classList.remove('active'));
-    event.target.classList.add('active');
+    // Handle both direct click and function call
+    if (event) event.target.classList.add('active');
     
     ['main', 'side', 'extra'].forEach(t => {
         const el = document.getElementById(`${t}-deck-display`);
         if(el) el.classList.toggle('hidden', t !== deckType);
     });
+    updateDeckDisplay();
 }
 
 function clearDeck() {
     if (!confirm('Clear entire deck?')) return;
     currentDeck = { main: [], extra: [], side: [] };
-    updateDeckDisplay();
-    updateDeckStats();
-    filterCards();
+    refreshUI();
 }
 
 // === SAVING / LOADING / TEST DATA ===
-
-function createTestCards() {
-    const types = ['Phantom', 'Spirit', 'Counter', 'Environment'];
-    const archetypes = ['Standard', 'Life', 'Creation', 'Light', 'Death', 'Destruction', 'Shadow', 'Cosmic', 'Elemental', 'Chaos'];
-    allCards = [];
-    for (let i = 1; i <= 50; i++) {
-        const type = types[Math.floor(Math.random() * types.length)];
-        const mainArch = archetypes[Math.floor(Math.random() * archetypes.length)];
-        const card = {
-            id: `card_${i}`,
-            name: `${type} ${i}`,
-            type: type,
-            description: `Ability text for ${type} ${i}.`,
-            archetype: mainArch,
-            archetypes: [mainArch, "Secondary"]
-        };
-        if (type === 'Phantom') {
-            card.level = Math.floor(Math.random() * 10);
-            card.attack = Math.floor(Math.random() * 3000);
-            card.health = Math.floor(Math.random() * 3000);
-        }
-        allCards.push(card);
-    }
-}
-
 function saveDeck() {
-    const deckName = prompt('Deck Name:', 'MyDeck') || 'MyDeck';
-    const dataStr = JSON.stringify({ name: deckName, ...currentDeck });
+    const name = prompt('Deck Name:', 'MyDeck') || 'MyDeck';
+    const dataStr = JSON.stringify({ name: name, ...currentDeck });
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${deckName}.json`;
+    link.download = `${name}.json`;
     link.click();
 }
 
@@ -262,9 +285,7 @@ function loadDeck(event) {
         try {
             const data = JSON.parse(e.target.result);
             currentDeck = { main: data.main || [], extra: data.extra || [], side: data.side || [] };
-            updateDeckDisplay();
-            updateDeckStats();
-            filterCards();
+            refreshUI();
         } catch (err) {
             alert('Invalid Deck File');
         }
@@ -273,18 +294,28 @@ function loadDeck(event) {
     event.target.value = '';
 }
 
+function createTestCards() {
+    const types = ['Phantom', 'Spirit', 'Counter', 'Environment'];
+    allCards = [];
+    for (let i = 1; i <= 50; i++) {
+        const type = types[Math.floor(Math.random() * types.length)];
+        const card = {
+            id: `card_${i}`,
+            name: `${type} ${i}`,
+            type: type,
+            description: `Ability text for ${type} ${i}.`,
+            level: type === 'Phantom' ? Math.floor(Math.random() * 10) : undefined,
+            attack: type === 'Phantom' ? Math.floor(Math.random() * 3000) : undefined,
+            health: type === 'Phantom' ? Math.floor(Math.random() * 3000) : undefined,
+            archetype: "Standard"
+        };
+        allCards.push(card);
+    }
+}
+
 // === HOTKEYS (+ / -) ===
 document.addEventListener('keydown', (e) => {
-    // Only work if dragging/typing isn't happening
     if (!hoveredCard || document.activeElement.tagName === 'INPUT') return;
-
-    // Plus or Equals key adds card
-    if (e.key === '+' || e.key === '=') {
-        addCardToDeck(hoveredCard);
-    }
-    
-    // Minus or Underscore key removes card
-    if (e.key === '-' || e.key === '_') {
-        removeCardFromDeck(hoveredCard);
-    }
+    if (e.key === '+' || e.key === '=') addCardToDeck(hoveredCard);
+    if (e.key === '-' || e.key === '_') removeCardFromDeck(hoveredCard);
 });

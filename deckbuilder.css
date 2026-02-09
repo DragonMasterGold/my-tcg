@@ -454,3 +454,8 @@ body {
     color: #4caf50;
 }
 
+.card-item {
+    user-select: none; /* Prevents text selection on double-click */
+    -webkit-user-select: none;
+}
+
