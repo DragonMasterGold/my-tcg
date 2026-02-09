@@ -1,0 +1,608 @@
+:root {
+    /* Slightly reduced size to fit screen better */
+    --card-height: 12.5vh;
+    --card-width: 9vh;
+    --gap: 0.5vh;
+    
+    /* Bigger Opponent Cards */
+    --opp-card-height: 10vh;
+    --opp-card-width: 7vh;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+body { 
+    background: #121212; color: white; font-family: 'Segoe UI', sans-serif; 
+    height: 100vh; overflow-y: auto; position: relative;
+}
+
+/* === LAYOUT === */
+.game-board {
+    display: flex; flex-direction: column; height: 100%; width: 100%;
+    padding-bottom: 2vh;
+}
+
+.player-side { flex: 1; display: flex; flex-direction: column; position: relative; padding: 1vh 0.5vh; }
+.opponent-side { border-bottom: 2px solid #333; }
+.player-own-side { border-top: 2px solid #333; }
+
+/* Field & Columns */
+.field-row { flex: 1; display: flex; justify-content: center; gap: 2vw; align-items: center; }
+.col { display: flex; flex-direction: column; justify-content: center; gap: 1vh; }
+
+/* Center Row */
+.center-row { 
+    height: 8vh; 
+    display: flex; justify-content: center; align-items: center; 
+    position: relative;
+    background: #080808; border-top: 1px solid #222; border-bottom: 1px solid #222;
+}
+
+/* Container mimicking field-grid-wrapper layout */
+.center-wrapper {
+    display: flex; gap: var(--gap); align-items: center; justify-content: center;
+}
+
+/* The grid inside center for buttons, matching field grid */
+.center-btn-grid {
+    display: grid;
+    grid-template-columns: repeat(3, var(--card-width));
+    gap: var(--gap);
+    align-items: center;
+    justify-items: center;
+}
+
+.center-btn-grid button { 
+    width: 100%; height: 70%;
+    margin: 0; 
+}
+
+.tools-area-right {
+    position: absolute; right: 20px;
+    display: flex; gap: 8px; align-items: center;
+}
+
+/* === ZONES === */
+.field-grid-wrapper { display: flex; gap: var(--gap); align-items: center; position: relative; }
+.field-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, var(--card-width)); 
+    grid-template-rows: repeat(2, var(--card-height));
+    gap: var(--gap);
+    z-index: 5;
+}
+
+.zone {
+    width: var(--card-width);
+    height: var(--card-height);
+    border: 2px solid #444;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.03);
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+    font-size: 12px; color: #777;
+    background-size: cover; background-position: center;
+}
+
+/* Zone Styles */
+.phantom { border-color: #666; }
+.spirit { border-color: #00bcd4; }
+.balance { border-color: #3f51b5; background: linear-gradient(135deg, rgba(63,81,181,0.2), rgba(233,30,99,0.2)); }
+/* Environment: Fixed dimensions, don't shrink/grow */
+.env { 
+    border-color: #9c27b0; 
+    width: var(--card-width); 
+    height: var(--card-height); 
+    flex-shrink: 0; margin: 0; 
+    overflow: visible; /* Show card if it pops out */
+} 
+
+.deck-main { border-color: #ff9800; cursor: pointer; }
+.deck-extra { border-color: #e91e63; cursor: pointer; }
+.deck-side { border-color: #009688; cursor: pointer; }
+
+.pile { border-color: #888; cursor: pointer; opacity: 0.8; }
+.pile-afterlife { background: rgba(78, 52, 46, 0.3); border-color: #8d6e63; }
+.pile-shadow { background: rgba(49, 27, 146, 0.3); border-color: #7e57c2; }
+.pile-oblivion { background: rgba(183, 28, 28, 0.3); border-color: #ef5350; }
+
+.label { position: absolute; bottom: 2px; font-size: 10px; width: 100%; text-align: center; background: rgba(0,0,0,0.8); z-index: 5; }
+.count { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; color: white; text-shadow: 0 0 5px black; z-index: 5; pointer-events: none; }
+
+/* === TOOLS === */
+.tools-area-right button { font-size: 18px; background: #333; border: 1px solid #555; padding: 5px; border-radius: 4px; cursor: pointer; color: white; }
+.tools-area-right span { font-size: 18px; font-weight: bold; color: #ffeb3b; min-width: 25px; text-align: center; }
+
+.center-btn-grid button { 
+    width: 100%; 
+    height: 90%; /* Taller */
+    margin: 0;
+    border: none;
+    border-radius: 20px; /* More rounded */
+    color: white; /* White text */
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: transform 0.1s, filter 0.2s;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.center-btn-grid button:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Specific Button Colors */
+.end-turn-btn { 
+    background: linear-gradient(to bottom, #e53935, #b71c1c) !important; 
+    border: 1px solid #b71c1c !important;
+}
+
+.phase-btn { 
+    background: linear-gradient(to bottom, #673ab7, #4527a0) !important; 
+    border: 1px solid #4527a0 !important;
+}
+
+/* Animations */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(229, 57, 53, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); }
+}
+
+@keyframes pulse-purple {
+    0% { box-shadow: 0 0 0 0 rgba(103, 58, 183, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(103, 58, 183, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(103, 58, 183, 0); }
+}
+
+.pulsing { animation: pulse-red 1.5s infinite; }
+.pulsing-purple { animation: pulse-purple 1s ease-out; }
+
+/* === HANDS === */
+.hand-area { 
+    display: flex; 
+    gap: 0; 
+    align-items: center; 
+    justify-content: center; 
+    pointer-events: auto; 
+    min-height: 12vh; /* Ensures a drop target exists when empty */
+    min-width: 200px; 
+}
+
+/* Opponent Hand: Lowered significantly (-12vh instead of -20vh) */
+.opponent-hand-hidden {
+    position: absolute;
+    top: -12vh;
+    left: 0; width: 100%;
+    height: 12vh;
+    z-index: 1; 
+}
+.opponent-hand-hidden .card {
+    width: var(--opp-card-width);
+    height: var(--opp-card-height);
+    margin: 0 -1vh;
+    position: relative; /* Fix stacking */
+}
+.opponent-hand-hidden .card:hover { transform: translateY(-2vh); z-index: 20; }
+
+/* Player Hand: Floating, ensure NO STACKING */
+.player-hand-floating {
+    position: absolute;
+    bottom: -3vh;
+    left: 20%; width: 60%;
+    height: 15vh;
+    z-index: 50;
+    pointer-events: none;
+    justify-content: center;
+}
+
+.player-hand-floating .card { 
+    pointer-events: auto; 
+    position: relative !important; /* Forces flex layout to work, overriding generic .card absolute */
+    margin: 0 -1vh;
+    transition: margin 0.2s, transform 0.2s; 
+    flex-shrink: 0; 
+}
+.player-hand-floating .card:hover { transform: translateY(-4vh); z-index: 100; margin: 0 0.5vh; }
+
+/* === CARDS === */
+.card {
+    display: inline-block;
+    width: var(--card-width);
+    height: var(--card-height);
+    border: 2px solid #000; 
+    border-radius: 6px;
+    position: absolute; 
+    
+    /* Ensure images fit the card perfectly */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    font-size: 11px; 
+    text-align: center; 
+    cursor: grab;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    padding: 2px;
+    
+    /* Default background color */
+    background-color: #222; 
+}
+
+.field-grid .card, .zone .card { position: relative; }
+
+/* Only apply gradients IF the card does NOT have the 'has-image' class */
+.card.monster:not(.has-image), .card.phantom:not(.has-image) { 
+    background-image: linear-gradient(135deg, #f1c40f, #d4a017); 
+    color: black; 
+}
+
+.card.spell:not(.has-image), .card.spirit:not(.has-image) { 
+    background-image: linear-gradient(135deg, #2ecc71, #16a085); 
+    color: black; 
+}
+
+.card.trap:not(.has-image), .card.counter:not(.has-image) { 
+    background-image: linear-gradient(135deg, #e74c3c, #c0392b); 
+    color: white; 
+}
+
+/* If it HAS an image, we want the text to be readable (label style) */
+.card.has-image {
+    align-items: flex-end; /* Push text to bottom */
+    color: white;
+    text-shadow: 1px 1px 3px black, 0 0 5px black;
+}
+
+.card.face-down { 
+    background-image: repeating-linear-gradient(45deg, #222, #222 5px, #333 5px, #333 10px) !important; 
+    color: transparent !important; 
+    border-color: #888; 
+}
+
+.card.rotated { transform: rotate(90deg); }
+.card.highlighted { box-shadow: 0 0 20px yellow; border-color: yellow; }
+
+/* === STATS === */
+.stats-widget {
+    position: absolute; padding: 15px; background: rgba(0,0,0,0.9);
+    border: 2px solid #444; border-radius: 8px; z-index: 200;
+    display: flex; flex-direction: column; gap: 10px; width: 220px;
+}
+.opponent-stats { top: 10px; left: 10px; }
+.player-stats { bottom: 10px; right: 10px; }
+
+.stat-row { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; }
+.stat-label { font-weight: bold; color: #aaa; font-size: 16px; white-space: nowrap; }
+
+.lp-btns-row { display: flex; flex-direction: column; gap: 2px; width: 40px; margin: 0; }
+.btn-green, .btn-red { 
+    width: 100%; height: 28px; 
+    font-size: 18px; font-weight: bold; 
+    border: none; cursor: pointer; color: white; 
+    display: flex; justify-content: center; align-items: center; 
+}
+.btn-green { background: #2ecc71; color: black; }
+.btn-red { background: #e74c3c; }
+
+/* Rounded Corners */
+.round-top { border-radius: 6px 6px 0 0; }
+.round-bottom { border-radius: 0 0 6px 6px; }
+
+input[type=number] { 
+    width: 130px; 
+    padding: 4px; background: #222; border: 1px solid #555; 
+    color: #4caf50; font-size: 24px; text-align: center; 
+}
+
+.sp-val { font-size: 32px; font-weight: bold; color: cyan; text-align: center; cursor: pointer; flex: 1; }
+.sp-controls { display: flex; gap: 5px; }
+.sp-controls button { width: 35px; height: 35px; font-size: 20px; border: none; border-radius: 4px; cursor: pointer; }
+.sp-pips { display: flex; gap: 4px; margin-top: 5px; min-height: 12px; justify-content: center; }
+.pip { width: 12px; height: 12px; background: #444; border-radius: 50%; border: 1px solid #666; }
+.pip.active { background: cyan; box-shadow: 0 0 8px cyan; }
+.mt-2 { margin-top: 15px; }
+
+/* === MENUS === */
+.menu-btn { position: fixed; bottom: 20px; left: 20px; background: #2196f3; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; z-index: 500; font-size: 14px; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+.hidden { display: none !important; }
+.menu-box { background: #222; padding: 20px; width: 300px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; text-align: center; border: 1px solid #555; }
+.menu-box button { padding: 10px; font-size: 16px; cursor: pointer; background: #444; color: white; border: none; border-radius: 4px; }
+.divider { height: 1px; background: #555; margin: 5px 0; }
+
+.ctx-menu { 
+    position: fixed; 
+    background: #333; 
+    border: 1px solid #777; 
+    z-index: 5000; 
+    min-width: 180px; 
+    box-shadow: 0 4px 10px black;
+    pointer-events: auto; /* Ensure this is here or not set to none */
+}
+.ctx-menu div { padding: 8px 14px; cursor: pointer; font-size: 14px; color: white; }
+.ctx-menu div:hover { background: #555; }
+.sep { height: 1px; background: #555; padding: 0 !important; }
+
+/* Viewer */
+.viewer-box { width: 80%; height: 80%; background: #1a1a1a; padding: 20px; display: flex; flex-direction: column; border-radius: 8px; border: 1px solid #444; }
+.viewer-header input { flex: 1; margin: 0 20px; padding: 8px; font-size: 16px; background: #333; color: white; border: 1px solid #555; }
+.viewer-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(11vh, 1fr)); gap: 10px; padding: 10px; }
+.viewer-grid .card { position: relative !important; width: 100%; height: 16vh; top: auto; left: auto; transform: none; }
+
+#zoom-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 4000; pointer-events: none; }
+#zoomed-card-img .card { width: 45vh; height: 65vh; font-size: 20px; box-shadow: 0 0 50px black; border-width: 4px; }
+
+.ctx-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    color: white;
+    background: #333;
+    display: block;
+}
+.ctx-item:hover {
+    background: #444;
+}
+#ctx-card {
+    pointer-events: auto !important;
+    display: block; /* Ensure it's not display: none when showing */
+}
+
+/* Custom Counter Visuals */
+.counter-bubble {
+    position: absolute;
+    /* Mostly center, slightly right */
+    top: 50%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    
+    background: #add8e6; /* Light Blue */
+    color: white;
+    width: 5vh; /* 3x bigger than before */
+    height: 5vh;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5vh;
+    font-weight: bold;
+    border: 3px solid black; /* Black outline */
+    z-index: 25;
+    pointer-events: none;
+    /* Text Outline */
+    text-shadow: 
+        -1.5px -1.5px 0 #000,  
+         1.5px -1.5px 0 #000,
+        -1.5px  1.5px 0 #000,
+         1.5px  1.5px 0 #000;
+}
+
+/* Counter position for rotated cards (Centered) */
+.card.rotated .counter-bubble {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+/* Zoomed View Scaling */
+#zoomed-card-img .counter-bubble {
+    width: 15vh;
+    height: 15vh;
+    font-size: 8vh;
+    border-width: 6px;
+    text-shadow: 
+        -3px -3px 0 #000,  
+         3px -3px 0 #000,
+        -3px  3px 0 #000,
+         3px  3px 0 #000;
+}
+
+/* === CARD INFO PANEL VISUALS === */
+.card-info-panel {
+    position: fixed;
+    left: 20px;
+    top: 58%; /* Lowered top further to clear LP bars */
+    transform: translateY(-50%);
+    width: 550px; /* Widened back out (10-15% more than before) */
+    height: 72vh; /* Shortened bottom to prevent it going too low */
+    background: rgba(0,0,0,0.95);
+    border: 2px solid #555;
+    border-radius: 8px;
+    z-index: 300;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Removed global text-align center */
+}
+
+.card-info-header {
+    position: relative;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.card-info-header h3 {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center; /* Name stays centered */
+    width: 100%;
+}
+
+/* Red Circle X at Top Right */
+.close-x {
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    background: #e74c3c;
+    border: none;
+    color: white;
+    font-size: 18px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    z-index: 301;
+}
+
+.info-line {
+    text-align: left; /* Form and Archetypes aligned left */
+    font-size: 21px; /* Handful of points larger */
+    margin: 4px 0;
+    color: #fff;
+}
+
+/* Stats: Bold and White only */
+.editable {
+    color: white !important; 
+    font-weight: bold !important;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+/* Ability Section */
+.card-info-text-container {
+    text-align: center; /* Ability stays centered */
+    margin-top: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-info-text-container strong {
+    display: block;
+    color: white;
+    font-size: 24px; /* Slightly larger header */
+    text-transform: uppercase;
+}
+
+.info-divider {
+    height: 1px;
+    background: #444;
+    width: 100%;
+    margin: 5px 0;
+}
+
+#card-info-text {
+    overflow-y: auto;
+    padding: 10px;
+}
+
+
+/* Level stat at top left */
+.level-stat {
+    position: absolute;
+    left: 2px;
+    top: 17px; /* Lowered by roughly 75% of its height */
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #444;
+    z-index: 11;
+    cursor: pointer;
+}
+
+/* Bottom stats container */
+.card-stats {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    display: flex;
+    gap: 4px;
+    pointer-events: auto;
+    z-index: 11;
+    transition: all 0.1s;
+}
+
+.stat-box {
+    background: rgba(0, 0, 0, 0.85);
+    padding: 3px 0;
+    border-radius: 3px;
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stat-box.atk { color: #ff5252; }
+.stat-box.hp { color: #69f0ae; }
+
+/* === DEFENSE MODE (ROTATED) === */
+
+/* Position level at visual top-left of horizontal card */
+.card.rotated .level-stat {
+    top: auto;
+    left: 4px;
+    bottom: 5px; /* Visual Left */
+    right: auto;
+    transform: rotate(-90deg);
+}
+
+/* Visual Bottom: Moves stats to the new long edge facing the player */
+.card.rotated .card-stats {
+    /* 1. Reset standard positioning */
+    bottom: auto !important;
+    right: auto !important;
+    
+    /* 2. Target the exact center of the card */
+    top: 50% !important;
+    left: 50% !important;
+    
+    /* 3. Match the long-side width of the card */
+    width: 12.5vh !important; 
+    
+    /* 
+       4. The Transform:
+       - translate(-50%, -50%) centers the container perfectly.
+       - rotate(-90deg) makes the text upright for the player.
+       - translateY(4.3vh) pushes the stats "down" to the visual bottom edge.
+    */
+    transform: translate(-50%, -50%) rotate(-90deg) translateY(4.3vh) !important;
+    
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    pointer-events: auto;
+}
+
+.card.rotated .stat-box {
+    font-size: 16px;
+    padding: 2px 0;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* === ZOOMED VIEW === */
+#zoomed-card-img .level-stat {
+    width: 60px;
+    height: 60px;
+    font-size: 32px;
+    left: 10px;
+    top: 80px; /* Way lower and way bigger */
+    border-width: 3px;
+}
+
+#zoomed-card-img .stat-box {
+    font-size: 24px;
+    padding: 10px 0;
+}

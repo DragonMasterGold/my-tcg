@@ -1,0 +1,17 @@
+[
+  {
+    "id": "neurotic_prankstar",
+    "name": "Neurotic PrankStar",
+    "type": "Phantom",
+    "description": "Chaos cards other than this one cannot be Targeted.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos",
+      "PrankStar"
+    ],
+    "image": "Images/Cards/Neurotic PrankStar.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  }
+]

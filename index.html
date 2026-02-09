@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCG Simulator</title>
+    <link rel="stylesheet" href="style.css">
+	<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+</head>
+<body>
+
+    <!-- OPPONENT STATS -->
+    <div class="stats-widget opponent-stats">
+        <div class="stat-row">
+            <span class="stat-label">LP</span>
+            <input type="number" id="opponent-lp" value="10000" step="100" onchange="updateStats()">
+            <div class="lp-btns-row">
+                <button class="btn-green round-top" onclick="adjustLP('opponent', 1)">+</button>
+                <button class="btn-red round-bottom" onclick="adjustLP('opponent', -1)">-</button>
+            </div>
+        </div>
+        <div class="stat-row mt-2">
+            <span class="stat-label">SP</span>
+            <span id="opponent-sp-val" class="sp-val" onclick="resetSP('opponent')">4</span>
+            <div class="sp-controls">
+                <button class="btn-red" onclick="adjustSP('opponent', -1)">-</button>
+                <button class="btn-green" onclick="adjustSP('opponent', 1)">+</button>
+            </div>
+        </div>
+        <div id="opponent-sp-pips" class="sp-pips"></div>
+    
+	</div>
+	
+
+    <!-- PLAYER STATS -->
+    <div class="stats-widget player-stats">
+        <div class="stat-row">
+            <span class="stat-label">LP</span>
+            <input type="number" id="player-lp" value="10000" step="100" onchange="updateStats()">
+            <div class="lp-btns-row">
+                <button class="btn-green round-top" onclick="adjustLP('player', 1)">+</button>
+                <button class="btn-red round-bottom" onclick="adjustLP('player', -1)">-</button>
+            </div>
+        </div>
+        <div class="stat-row mt-2">
+            <span class="stat-label">SP</span>
+            <span id="player-sp-val" class="sp-val" onclick="resetSP('player')">4</span>
+            <div class="sp-controls">
+                <button class="btn-red" onclick="adjustSP('player', -1)">-</button>
+                <button class="btn-green" onclick="adjustSP('player', 1)">+</button>
+            </div>
+        </div>
+        <div id="player-sp-pips" class="sp-pips"></div>
+    </div>
+
+	<div id="card-info-panel" class="card-info-panel hidden">
+		<div class="card-info-header">
+			<h3 id="card-info-name">Card Name</h3>
+			<button onclick="closeCardInfo()" class="close-x">×</button>
+		</div>
+		<div class="card-info-body">
+			<div class="card-info-img" id="card-info-img"></div>
+			<div class="card-info-stats" id="card-info-stats"></div>
+			<div class="card-info-text" id="card-info-text"></div>
+		</div>
+	</div>
+
+    <div class="game-board">
+        
+        <!-- === OPPONENT SIDE === -->
+        <div class="player-side opponent-side">
+            <!-- Field Row -->
+            <div class="field-row">
+                <!-- Decks (Mirrored: Top Left) -->
+                <div class="col decks-col">
+                    <div class="zone deck-main" id="opponent-deck" data-owner="opponent" data-type="deck">
+                        <span class="label">Deck</span><span class="count" id="opponent-deck-count">40</span>
+                    </div>
+                    <div class="zone deck-side" id="opponent-sideDeck" data-owner="opponent" data-type="sideDeck">
+                        <span class="label">Side</span><span class="count" id="opponent-sideDeck-count">15</span>
+                    </div>
+                    <div class="zone deck-extra" id="opponent-extraDeck" data-owner="opponent" data-type="extraDeck">
+                        <span class="label">Extra</span><span class="count" id="opponent-extraDeck-count">5</span>
+                    </div>
+                </div>
+
+                <!-- Board -->
+                <div class="field-grid-wrapper" style="position: relative;">
+                    <!-- Opponent Hand -->
+                    <div class="hand-area opponent-hand-hidden" id="opponent-hand" data-owner="opponent"></div>
+
+                    <div class="zone balance" id="opponent-balance-1" data-zone="field"></div>
+                    <div class="field-grid">
+                        <!-- Opponent Top Row: Spells (Spirit) -->
+                        <div class="zone spell" id="opponent-spell-1" data-zone="field"></div>
+                        <div class="zone spell" id="opponent-spell-2" data-zone="field"></div>
+                        <div class="zone spell" id="opponent-spell-3" data-zone="field"></div>
+                        <!-- Opponent Bottom Row: Monsters (Phantom) -->
+                        <div class="zone monster" id="opponent-monster-1" data-zone="field"></div>
+                        <div class="zone monster" id="opponent-monster-2" data-zone="field"></div>
+                        <div class="zone monster" id="opponent-monster-3" data-zone="field"></div>
+                    </div>
+                    <div class="zone balance" id="opponent-balance-2" data-zone="field"></div>
+                </div>
+
+                <!-- Piles (Mirrored: Top Right) -->
+                <div class="col piles-col">
+                    <div class="zone pile pile-afterlife" id="opponent-afterlife" data-owner="opponent" data-type="afterlife" onclick="viewPile('opponent', 'afterlife')">
+                        <span class="label">Afterlife</span><span class="count" id="opponent-afterlife-count">0</span>
+                    </div>
+                    <div class="zone pile pile-shadow" id="opponent-shadow" data-owner="opponent" data-type="shadow" onclick="viewPile('opponent', 'shadow')">
+                        <span class="label">Shadow</span><span class="count" id="opponent-shadow-count">0</span>
+                    </div>
+                    <div class="zone pile pile-oblivion" id="opponent-oblivion" data-owner="opponent" data-type="oblivion" onclick="viewPile('opponent', 'oblivion')">
+                        <span class="label">Oblivion</span><span class="count" id="opponent-oblivion-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER STRIP -->
+        <div class="center-row">
+            <!-- Structure mimics field-grid-wrapper: Balance(Env) | Gap | 3-Grid | Gap | Balance(Env) -->
+            <div class="center-wrapper">
+                <!-- Left Env -->
+                <div class="zone env" id="opponent-env" data-zone="field"><span class="label">Environment</span></div>
+                
+                <!-- Middle Grid (3 Columns) -->
+                <div class="center-btn-grid">
+                    <button class="phase-btn" onclick="drawPhase()">Draw Phase</button>
+                    <div><!-- GAP --></div>
+                    <button id="end-turn-btn" class="end-turn-btn" onclick="endTurn()">End Turn</button>
+                </div>
+
+                <!-- Right Env -->
+                <div class="zone env" id="player-env" data-zone="field"><span class="label">Environment</span></div>
+            </div>
+
+            <div class="tools-area-right">
+				<button onclick="spawnToken('player')" title="Spawn Token">💠</button>
+                <button onclick="rollDie()">🎲</button>
+                <span id="die-result">-</span>
+                <button onclick="flipCoin()">🪙</button>
+                <span id="coin-result">-</span>
+                
+                <button class="eye-btn" onclick="toggleOpponentHand()" title="Reveal Opponent Hand">👁️ Opp</button>
+                <button class="eye-btn" onclick="togglePlayerHand()" title="Reveal My Hand">👁️ My</button>
+            </div>
+        </div>
+
+        <!-- === PLAYER SIDE === -->
+        <div class="player-side player-own-side" style="position: relative;">
+            <!-- Field Row -->
+            <div class="field-row">
+                <!-- Piles (Left) -->
+                <div class="col piles-col">
+                    <div class="zone pile pile-oblivion" id="player-oblivion" data-owner="player" data-type="oblivion" onclick="viewPile('player', 'oblivion')">
+                        <span class="label">Oblivion</span><span class="count" id="player-oblivion-count">0</span>
+                    </div>
+                    <div class="zone pile pile-shadow" id="player-shadow" data-owner="player" data-type="shadow" onclick="viewPile('player', 'shadow')">
+                        <span class="label">Shadow</span><span class="count" id="player-shadow-count">0</span>
+                    </div>
+                    <div class="zone pile pile-afterlife" id="player-afterlife" data-owner="player" data-type="afterlife" onclick="viewPile('player', 'afterlife')">
+                        <span class="label">Afterlife</span><span class="count" id="player-afterlife-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Board -->
+                <div class="field-grid-wrapper">
+                    <div class="zone balance" id="player-balance-1" data-zone="field"></div>
+                    <div class="field-grid">
+                        <!-- Player Top Row: Monsters (Phantom) -->
+                        <div class="zone monster" id="player-monster-1" data-zone="field"></div>
+                        <div class="zone monster" id="player-monster-2" data-zone="field"></div>
+                        <div class="zone monster" id="player-monster-3" data-zone="field"></div>
+                        <!-- Player Bottom Row: Spells (Spirit) -->
+                        <div class="zone spell" id="player-spell-1" data-zone="field"></div>
+                        <div class="zone spell" id="player-spell-2" data-zone="field"></div>
+                        <div class="zone spell" id="player-spell-3" data-zone="field"></div>
+                    </div>
+                    <div class="zone balance" id="player-balance-2" data-zone="field"></div>
+                </div>
+
+                <!-- Decks (Right) -->
+                <div class="col decks-col">
+                    <div class="zone deck-extra" id="player-extraDeck" data-owner="player" data-type="extraDeck">
+                        <span class="label">Extra</span><span class="count" id="player-extraDeck-count">5</span>
+                    </div>
+                    <div class="zone deck-side" id="player-sideDeck" data-owner="player" data-type="sideDeck">
+                        <span class="label">Side</span><span class="count" id="player-sideDeck-count">15</span>
+                    </div>
+                    <div class="zone deck-main" id="player-deck" data-owner="player" data-type="deck">
+                        <span class="label">Deck</span><span class="count" id="player-deck-count">40</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hand Floating -->
+            <div class="hand-area player-hand-floating" id="player-hand" data-owner="player"></div>
+        </div>
+    </div>
+
+    <!-- MENU BUTTON -->
+    <div class="menu-btn" onclick="toggleMenu()">MENU</div>
+
+    <!-- MAIN MENU -->
+    <div id="main-menu" class="modal hidden">
+        <div class="menu-box">
+            <h2>Game Menu</h2>
+			<button onclick="window.location.href='menu.html'">Main Menu</button>
+			<button onclick="openMultiplayerMenu()">Multiplayer</button>
+			<button onclick="window.location.href='deckbuilder.html'">Deck Builder</button>
+			<div class="divider"></div>
+            <button onclick="startGame()">Start New Game</button>
+			<button onclick="loadDeckFile()">Load Deck</button>
+            <button onclick="resetGame()">Reset Board</button>
+            <div class="divider"></div>
+            <button onclick="toggleMenu()" class="close-btn">Resume Game</button>
+        </div>
+    </div>
+	
+	<!-- MULTIPLAYER MENU -->
+	<div id="multiplayer-menu" class="modal hidden">
+		<div class="menu-box">
+			<h2>Multiplayer</h2>
+			<button onclick="createRoom()">Create Private Room</button>
+			<div class="divider"></div>
+			<input type="text" id="room-code-input" placeholder="Enter Room Code" style="width: 100%; padding: 10px; font-size: 16px;">
+			<button onclick="joinRoom()">Join Room</button>
+			<div class="divider"></div>
+			<button onclick="closeMultiplayerMenu()">Back</button>
+			<div id="room-status" style="margin-top: 10px; color: #4a90e2; text-align: center; user-select: text; cursor: text;"></div>
+		</div>
+	</div>
+
+    <!-- DECK VIEWER -->
+    <div id="deck-viewer" class="modal hidden">
+        <div class="viewer-box">
+            <div class="viewer-header">
+                <h3 id="viewer-title">Deck</h3>
+                <input type="text" id="viewer-search" placeholder="Search cards..." oninput="filterViewer()">
+                <button onclick="closeViewer()" class="close-x">×</button>
+            </div>
+            <div id="viewer-grid" class="viewer-grid"></div>
+        </div>
+    </div>
+
+    <!-- ZOOM -->
+    <div id="zoom-overlay" class="hidden">
+        <div id="zoomed-card-img"></div>
+    </div>
+
+ <!-- CONTEXT MENU FOR CARDS -->
+    <div id="ctx-card" class="ctx-menu hidden"></div>
+
+    <!-- CONTEXT MENU FOR DECKS -->
+    <div id="ctx-deck" class="ctx-menu hidden">
+        <div onclick="deckAction('draw')">Draw</div>
+                <div class="sep"></div>
+        <div onclick="deckAction('search')">Search (Sorted) (I)</div>
+        <div onclick="deckAction('view')">View (Current Order)</div>
+		<div class="sep"></div>
+		<div onclick="deckAction('draw-bottom')">Draw Bottom</div>
+        <div onclick="deckAction('draw-first-Phantom')">Draw First Phantom</div>
+        <div onclick="deckAction('draw-first-Spirit')">Draw First Spirit</div>
+        <div onclick="deckAction('draw-first-Counter')">Draw First Counter</div>
+        <div class="sep"></div>
+        <div onclick="deckAction('shuffle')">Shuffle (R)</div>
+        <div onclick="deckAction('mill')">Mill (A)</div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

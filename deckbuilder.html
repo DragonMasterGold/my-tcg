@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCG - Deck Builder</title>
+    <link rel="stylesheet" href="deckbuilder.css">
+</head>
+<body>
+    <div class="deck-builder-container">
+        <!-- Header -->
+        <div class="header">
+            <a href="menu.html" class="back-btn">← Back to Menu</a>
+            <h1>Deck Builder</h1>
+            <div class="header-actions">
+                <button class="action-btn" onclick="saveDeck()">💾 Save Deck</button>
+                <button class="action-btn" onclick="document.getElementById('load-deck-input').click()">📂 Load Deck</button>
+                <input type="file" id="load-deck-input" accept=".json" style="display: none;" onchange="loadDeck(event)">
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+    <!-- 1. Card Info (LEFT) -->
+    <div class="card-info-section">
+        <div class="section-header"><h2>Card Details</h2></div>
+        <div class="info-panel-content">
+            <h3 id="info-name">Select a Card</h3>
+            <div id="info-stats"></div>
+            <div id="info-text"></div>
+        </div>
+    </div>
+
+    <!-- 2. CARD POOL (MIDDLE) -->
+    <div class="card-pool-section">
+        <div class="section-header">
+            <input type="text" id="card-search" class="search-input" placeholder="Search name or ability..." oninput="filterCards()">
+        </div>
+        
+        <!-- Type Filters -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterByType('All')">All</button>
+            <button class="filter-btn" onclick="filterByType('Phantom')">Phantoms</button>
+            <button class="filter-btn" onclick="filterByType('Spirit')">Spirits</button>
+            <button class="filter-btn" onclick="filterByType('Counter')">Counters</button>
+            <button class="filter-btn" onclick="filterByType('Environment')">Env</button>
+        </div>
+
+        <!-- Card Grid -->
+        <div id="card-pool" class="card-pool"></div>
+    </div>
+
+    <!-- 3. Current Deck (RIGHT) -->
+    <div class="current-deck-section">
+        <div class="section-header">
+            <h2>Current Deck</h2>
+            <button class="clear-btn" onclick="clearDeck()">Clear</button>
+        </div>
+        <div class="deck-stats">
+            <div class="stat-item">Main: <span id="main-deck-count">0</span>/50</div>
+            <div class="stat-item">Side: <span id="side-deck-count">0</span>/15</div>
+            <div class="stat-item">Extra: <span id="extra-deck-count">0</span>/5</div>
+        </div>
+        <div class="deck-tabs">
+            <button class="deck-tab active" onclick="switchDeckView('main')">Main</button>
+            <button class="deck-tab" onclick="switchDeckView('side')">Side</button>
+            <button class="deck-tab" onclick="switchDeckView('extra')">Extra</button>
+        </div>
+        <div id="main-deck-display" class="deck-display"></div>
+        <div id="side-deck-display" class="deck-display hidden"></div>
+        <div id="extra-deck-display" class="deck-display hidden"></div>
+    </div>
+</div>
+
+    <script src="deckbuilder.js"></script>
+</body>
+</html>
