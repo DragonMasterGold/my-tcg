@@ -4,6 +4,7 @@ let allCards = [];
 let currentDeck = { main: [], extra: [], side: [] };
 let currentFilter = 'All';
 let currentDeckView = 'main'; // This is our active tab ('main', 'extra', or 'side')
+let keywordRepo = {};
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', loadCards);
@@ -12,8 +13,12 @@ async function loadCards() {
     try {
         const response = await fetch('cards.json');
         allCards = await response.json();
+        
+        // --- ADD THIS: Load Keywords ---
+        const kwResponse = await fetch('keywords.json');
+        keywordRepo = await kwResponse.json();
     } catch (error) {
-        console.error('Error loading cards:', error);
+        console.error('Error loading databases:', error);
         createTestCards();
     }
     filterCards();
@@ -188,7 +193,7 @@ function showCardInfo(card) {
         addStatLine('Stats', `ATK: ${card.attack} / HP: ${card.health}`);
     }
 
-    textDiv.innerHTML = card.description ? `<strong>Ability:</strong><br>${card.description}` : '';
+    textDiv.innerHTML = card.description ? `<strong>Ability:</strong><br>${injectKeywords(card.description)}` : '';
 }
 
 // === DECK MANAGEMENT ===
@@ -315,7 +320,50 @@ function createTestCards() {
 
 // === HOTKEYS (+ / -) ===
 document.addEventListener('keydown', (e) => {
-    if (!hoveredCard || document.activeElement.tagName === 'INPUT') return;
+    // Escape key logic
+    if (e.key === 'Escape') {
+        const popup = document.getElementById('keyword-popup');
+        if (popup && !popup.classList.contains('hidden')) {
+            popup.classList.add('hidden');
+            return;
+        }
+    }
+	if (!hoveredCard || document.activeElement.tagName === 'INPUT') return;
     if (e.key === '+' || e.key === '=') addCardToDeck(hoveredCard);
     if (e.key === '-' || e.key === '_') removeCardFromDeck(hoveredCard);
 });
+
+function injectKeywords(text) {
+    if (!text) return "";
+    if (!keywordRepo || Object.keys(keywordRepo).length === 0) return text;
+    let html = text;
+    try {
+        const sortedKeys = Object.keys(keywordRepo).sort((a, b) => b.length - a.length);
+        sortedKeys.forEach(key => {
+            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b(${escapedKey})\\b`, 'gi');
+            html = html.replace(regex, `<span class="kw-trigger" onclick="handleKeywordClick(event, '$1')">$1</span>`);
+        });
+    } catch (err) { return text; }
+    return html;
+}
+
+function handleKeywordClick(event, word) {
+    event.stopPropagation(); 
+    const exactKey = Object.keys(keywordRepo).find(k => k.toLowerCase() === word.toLowerCase());
+    const definition = keywordRepo[exactKey];
+    if (!definition) return;
+
+    const popup = document.getElementById('keyword-popup');
+    popup.innerHTML = `
+        <span class="kw-close" onclick="document.getElementById('keyword-popup').classList.add('hidden')">×</span>
+        <strong style="color:#3498db; font-size:1.1em;">${exactKey}</strong>
+        <br><div style="margin-top:5px; border-top:1px solid #444; padding-top:5px;">${definition}</div>
+    `;
+    popup.classList.remove('hidden');
+    popup.style.left = (event.pageX + 15) + 'px';
+    popup.style.top = (event.pageY - 20) + 'px';
+
+    if (window.kwTimer) clearTimeout(window.kwTimer);
+    window.kwTimer = setTimeout(() => { popup.classList.add('hidden'); }, 10000);
+}

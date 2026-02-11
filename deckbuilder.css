@@ -459,3 +459,37 @@ body {
     -webkit-user-select: none;
 }
 
+.kw-trigger {
+    color: #3498db !important;
+    text-decoration: none !important;
+    cursor: help;
+    font-weight: bold;
+}
+
+#keyword-popup {
+    position: fixed;
+    background: rgba(10, 15, 25, 0.98);
+    border: 1px solid #3498db;
+    color: #eee;
+    padding: 15px;
+    border-radius: 8px;
+    z-index: 5000;
+    max-width: 280px;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+.kw-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    color: #3498db;
+    font-size: 18px;
+}
+
+#keyword-popup.hidden {
+    display: none;
+}
+

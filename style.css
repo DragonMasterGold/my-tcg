@@ -606,3 +606,121 @@ input[type=number] {
     font-size: 24px;
     padding: 10px 0;
 }
+
+@keyframes pulseGold {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0.7); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.golden-pulse {
+    animation: pulseGold 0.5s ease-out;
+    border-color: #ffd700 !important;
+    color: #ffd700 !important;
+}
+
+/* Red Outline for Reveal Hand */
+.active-red {
+    border: 2px solid #ff4444 !important;
+    box-shadow: 0 0 10px #ff0000;
+    color: #ff4444 !important;
+}
+
+.coin-icon {
+    display: inline-block;
+    width: 12px;
+    height: 14px;
+    background: #ffd700;
+    border: 2px solid #b8860b;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 0px;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
+}
+
+#card-info-panel {
+    z-index: 3000 !important; /* Higher than the deck viewer modal */
+}
+
+/* The keyword in the card description */
+.kw-trigger {
+    color: #3498db !important; /* Bright Blue */
+    text-decoration: none !important; /* No underline */
+    cursor: help;
+    font-weight: bold;
+    display: inline;
+}
+
+.kw-trigger:hover {
+    color: #5dade2 !important;
+    text-shadow: 0 0 5px #3498db;
+}
+
+/* Update Popup to Blue theme and add space for 'X' */
+#keyword-popup {
+    position: fixed;
+    background: rgba(10, 15, 25, 0.98); /* Slightly bluer background */
+    border: 1px solid #3498db;
+    color: #eee;
+    padding: 15px; /* More padding for the X */
+    border-radius: 8px;
+    z-index: 5000;
+    max-width: 280px;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+/* The Close 'X' button inside the popup */
+.kw-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    color: #3498db;
+    font-size: 18px;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.kw-close:hover {
+    color: #ff4444;
+}
+
+/* Main Menu Styling */
+#main-menu .modal-content {
+    background: rgba(10, 15, 25, 0.95);
+    border: 2px solid #3498db;
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    min-width: 250px;
+}
+
+/* The Blue Line Breaks */
+.menu-sep {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #3498db, transparent);
+    margin: 12px 0;
+    opacity: 0.6;
+}
+
+/* Menu Buttons */
+.menu-btn {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px solid #3498db;
+    color: white;
+    padding: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.menu-btn:hover {
+    background: rgba(52, 152, 219, 0.3);
+    box-shadow: 0 0 10px #3498db;
+    transform: scale(1.02);
+}

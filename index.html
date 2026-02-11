@@ -208,15 +208,30 @@
     <div id="main-menu" class="modal hidden">
         <div class="menu-box">
             <h2>Game Menu</h2>
-			<button onclick="window.location.href='menu.html'">Main Menu</button>
-			<button onclick="openMultiplayerMenu()">Multiplayer</button>
-			<button onclick="window.location.href='deckbuilder.html'">Deck Builder</button>
-			<div class="divider"></div>
-            <button onclick="startGame()">Start New Game</button>
-			<button onclick="loadDeckFile()">Load Deck</button>
-            <button onclick="resetGame()">Reset Board</button>
+            
+            <!-- 1. Resume Game -->
+            <button onclick="toggleMenu()">Resume Game</button>
+            
             <div class="divider"></div>
-            <button onclick="toggleMenu()" class="close-btn">Resume Game</button>
+
+            <!-- 2. Multiplayer -->
+            <button onclick="openMultiplayerMenu()">Multiplayer</button>
+
+            <div class="divider"></div>
+
+            <!-- 3. Deck Options -->
+            <button onclick="loadDeckFile()">Load Deck</button>
+            <button onclick="window.location.href='deckbuilder.html'">Deck Builder</button>
+
+            <div class="divider"></div>
+
+            <!-- 4. Start New Game -->
+            <button onclick="if(confirm('Start new game? This resets the current board.')) startGame()">Start New Game</button>
+
+            <div class="divider"></div>
+
+            <!-- 5. Main Menu -->
+            <button onclick="window.location.href='menu.html'">Main Menu</button>
         </div>
     </div>
 	
@@ -271,5 +286,6 @@
     </div>
 
     <script src="game.js"></script>
+	<div id="keyword-popup" class="hidden"></div>
 </body>
 </html>
