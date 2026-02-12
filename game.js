@@ -25,9 +25,18 @@ const state = {
     opponent: { lp: 10000, sp: 4, hand: [], deck: [], sideDeck: [], extraDeck: [], afterlife: [], shadow: [], oblivion: [], field: [], handVisible: false }
 };
 
+const defaultImages = {
+    'phantom': 'Images/Cards/Phantom Card.png',
+    'spirit': 'Images/Cards/Spirit Card.png',
+    'counter': 'Images/Cards/Counter Card.png',
+    'environment': 'Images/Cards/Environment Card.png',
+    'token': 'Images/Cards/Token Card.png'
+};
+
 let idCounter = 0;
 let draggedId = null;
 let hoveredId = null;
+let currentZoomId = null;
 let ctxTarget = null;
 let viewerTarget = null;
 let highlightTimer = null;
@@ -59,24 +68,23 @@ function setupListeners() {
             const info = document.getElementById('card-info-panel');
             const viewer = document.getElementById('deck-viewer');
 
-            // 1. Close Keyword Popup first if it's open
             if (kwPopup && !kwPopup.classList.contains('hidden')) {
                 kwPopup.classList.add('hidden');
             } 
-            // 2. Close Info Panel second (if open)
             else if (info && !info.classList.contains('hidden')) {
                 if (typeof closeCardInfo === 'function') closeCardInfo();
             } 
-            // 3. Close Deck Viewer third (if open)
             else if (viewer && !viewer.classList.contains('hidden')) {
                 viewer.classList.add('hidden');
             } 
-            // 4. Otherwise, toggle the Main Menu
             else {
                 toggleMenu();
             }
+        } else {
+            // FIX: This line connects the hotkeys (F, R, W, etc.) back to the game
+            handleKeys(e);
         }
-	});
+    });
     
     document.addEventListener('keyup', e => {
         if (e.key === 'Shift') { shiftHeld = false; hideZoom(); }
@@ -84,8 +92,14 @@ function setupListeners() {
     
     document.addEventListener('mousemove', e => {
         if (shiftHeld && hoveredId) {
+            // Only trigger zoom if we aren't already zooming this specific card
+            if (hoveredId === currentZoomId) return; 
+            
             const card = findCard(hoveredId);
-            if (card) showZoom(card);
+            if (card) {
+                showZoom(card);
+                currentZoomId = hoveredId;
+            }
         }
     });
     
@@ -396,9 +410,11 @@ function createCardEl(data) {
         e.stopPropagation(); 
     });
     
+	const oldEl = document.getElementById(data.id);
+	if (data.isHighlighted) el.classList.add('highlighted');
     // Maintain highlight across refreshes
-    const oldEl = document.getElementById(data.id);
-    if (oldEl && oldEl.classList.contains('highlighted')) el.classList.add('highlighted');
+    
+    
     
     if (data.rotated) el.classList.add('rotated');
     el.draggable = true;
@@ -417,26 +433,44 @@ function createCardEl(data) {
         el.innerHTML = ''; // Completely empty content
     } else {
         el.classList.remove('face-down');
+		
         
-        // Apply Images or Name
-        if (data.image) {
-            el.style.backgroundImage = `url('${data.image}')`;
-            el.classList.add('has-image');
-        } else {
-            el.style.backgroundImage = 'none';
-            el.classList.remove('has-image');
-            el.innerText = data.name;
-        }
+        // Determine and apply image with fallback
+		// Always set name first
+		const nameEl = document.createElement('div');
+		nameEl.className = 'card-name';
+		nameEl.innerText = data.name;
+		el.appendChild(nameEl);
 
-        // Apply Stats (Level/ATK/HP) only for Phantoms on the field
-        if (data.type === 'Phantom' && data.loc === 'field') {
-            el.innerHTML = `
+		// Start with default image immediately
+		const typeKey = (data.type || "").toLowerCase().trim();
+		const defaultImg = defaultImages[typeKey];
+		const primaryImage = data.image && data.image.trim() !== "" ? data.image : null;
+
+		// Set default first (always visible)
+		if (defaultImg) {
+			el.style.backgroundImage = `url('${defaultImg}')`;
+			el.classList.add('has-image');
+		}
+
+		// Then try to upgrade to specific image if it exists
+		if (primaryImage) {
+			const img = new Image();
+			img.onload = () => {
+				// Specific image loaded successfully - use it
+				el.style.backgroundImage = `url('${primaryImage}')`;
+			};
+			// If it fails, we already have default showing
+			img.src = primaryImage;
+		}
+		if (data.type === 'Phantom') {
+            el.insertAdjacentHTML('beforeend', `
                 <div class="level-stat" onclick="event.stopPropagation(); editStat('${data.id}', 'level')">${data.level ?? 0}</div>
                 <div class="card-stats">
                     <div class="stat-box atk" onclick="event.stopPropagation(); editStat('${data.id}', 'attack')">${data.attack || 0}</div>
                     <div class="stat-box hp" onclick="event.stopPropagation(); editStat('${data.id}', 'health')">${data.health || 0}</div>
                 </div>
-            `;
+            `);
         }
     }
 
@@ -451,7 +485,10 @@ function createCardEl(data) {
     // --- EVENT LISTENERS ---
     el.addEventListener('dragstart', e => { draggedId = data.id; el.style.opacity = '0.5'; });
     el.addEventListener('dragend', () => el.style.opacity = '1');
-    el.addEventListener('mouseenter', e => { hoveredId = data.id; if (e.shiftKey) showZoom(data); });
+    el.addEventListener('mouseenter', e => { 
+		hoveredId = data.id; 
+		if (e.shiftKey) showZoom(data); 
+	});
     el.addEventListener('mouseleave', () => { hoveredId = null; hideZoom(); });
     
     el.addEventListener('click', e => { 
@@ -480,32 +517,33 @@ function toggleHighlight(el) {
     const card = findCard(el.id);
     if (!card) return;
 
-    el.classList.toggle('highlighted');
-    const isNowHighlighted = el.classList.contains('highlighted');
-
-    // FIX: Only reveal if it is MY card in MY hand
+    // 1. Set highlight state in data
+    card.isHighlighted = true;
+    
+    // 2. Reveal if in player's hand
     if (card.loc === 'hand' && card.owner === 'player') {
-        card.revealed = isNowHighlighted;
-        refreshCard(card);
+        card.revealed = true;
     }
+
+    // 3. Redraw the card (it will now have the 'highlighted' class)
+    refreshCard(card);
 
     if (isMultiplayer) {
-        sendAction('highlight', { 
-            cardId: card.id, 
-            highlighted: isNowHighlighted 
-        });
+        sendAction('highlight', { cardId: card.id, highlighted: true });
     }
 
-    if (isNowHighlighted) {
-        setTimeout(() => {
-            el.classList.remove('highlighted');
-            // FIX: Only hide if it is MY card
-            if (card.loc === 'hand' && card.owner === 'player') {
-                card.revealed = false;
-                refreshCard(card);
-            }
-        }, 2000);
-    }
+    // 4. Timer handles the cleanup by updating data and refreshing again
+    setTimeout(() => {
+        card.isHighlighted = false;
+        if (card.loc === 'hand' && card.owner === 'player') {
+            card.revealed = false;
+        }
+        refreshCard(card);
+        
+        if (isMultiplayer) {
+            sendAction('highlight', { cardId: card.id, highlighted: false });
+        }
+    }, 2000);
 }
 
 function renderHand(owner) {
@@ -955,37 +993,37 @@ function cardAction(act) {
     // --- PLAY / SET OPTIONS ---
     if (act === 'play-atk') {
         playCardToField(card, card.type, true, false);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: true, rotated: false, fromZone: 'hand' });
     }
     else if (act === 'play-def') {
         playCardToField(card, card.type, true, true);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: true, rotated: true, fromZone: 'hand' });
     }
     else if (act === 'set-atk') {
         playCardToField(card, card.type, false, false);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: false, rotated: false, fromZone: 'hand' });
     }
     else if (act === 'set-def') {
         playCardToField(card, card.type, false, true);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: false, rotated: true, fromZone: 'hand' });
     }
     else if (act === 'play-spirit') {
         let type = (card.type === 'Spirit' || card.type === 'Counter') ? card.type : 'Spirit';
         playCardToField(card, type, true, false);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: true, rotated: false, fromZone: 'hand' });
     }
     else if (act === 'set-spirit') {
         let type = (card.type === 'Spirit' || card.type === 'Counter') ? card.type : 'Spirit';
         playCardToField(card, type, false, false);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: false, rotated: false, fromZone: 'hand' });
     }
     else if (act === 'play-env') {
         playCardToField(card, 'Environment', true, false);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-env' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-env', faceUp: true, rotated: false, fromZone: 'hand' });
     }
     else if (act === 'set-env') {
         playCardToField(card, 'Environment', false, false);
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-env' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-env', faceUp: false, rotated: false, fromZone: 'hand' });
     }
 	
     // State Actions
@@ -1008,17 +1046,20 @@ function cardAction(act) {
         const isSet = act.startsWith('set-');
         const isDef = act.endsWith('-def');
         
-        // Use your existing logic to move it to the field
         playCardToField(card, card.type, !isSet, isDef);
         
         if (isMultiplayer) {
-                // Find where it landed to tell the opponent the exact zone ID
-                const el = document.getElementById(card.id);
-                if (el && el.parentElement) {
-                    // Added fromZone
-                    sendAction('move', { cardId: card.id, toZone: el.parentElement.id, fromZone: card.loc }); 
-                }
+            const el = document.getElementById(card.id);
+            if (el && el.parentElement) {
+                sendAction('move', { 
+                    cardId: card.id, 
+                    toZone: el.parentElement.id, 
+                    fromZone: 'hand',
+                    faceUp: card.faceUp,    // ADD THIS
+                    rotated: card.rotated   // ADD THIS
+                }); 
             }
+        }
     }
     
     // --- MOVEMENT TO PILES ---
@@ -1319,7 +1360,10 @@ function triggerPulse(el) {
     el.classList.add('golden-pulse');
     setTimeout(() => el.classList.remove('golden-pulse'), 500);
 }
-function hideZoom() { document.getElementById('zoom-overlay').classList.add('hidden'); }
+function hideZoom() { 
+    document.getElementById('zoom-overlay').classList.add('hidden');
+    currentZoomId = null; // Reset tracking so we can zoom again
+}
 function toggleMenu() { document.getElementById('main-menu').classList.toggle('hidden'); }
 function rollDie() { 
     const result = Math.floor(Math.random() * 6) + 1;
@@ -1520,7 +1564,7 @@ function spawnToken(owner) {
         attack: 0,
         health: 0,
         description: 'Generated Token.',
-        image: null,
+        image: 'Images/Cards/Token Card.png', // Set the specific image here
         faceUp: true,
         rotated: true, // Defense Position
         loc: 'field',
@@ -1659,6 +1703,9 @@ function applyRemoteAction(action) {
         removeCard(card);
 		
 		if (payload.faceUp !== undefined) card.faceUp = payload.faceUp;
+        if (payload.rotated !== undefined) card.rotated = payload.rotated;
+		
+		if (payload.faceUp !== undefined) card.faceUp = payload.faceUp;
         
         // 2. Flip the zone ID (player-afterlife -> opponent-afterlife)
         const targetId = flipZoneId(payload.toZone);
@@ -1738,31 +1785,29 @@ function applyRemoteAction(action) {
 
     // --- HIGHLIGHT ---
     if (type === 'highlight') {
-        const el = document.getElementById(payload.cardId);
         const card = findCard(payload.cardId);
-        if (el && card) {
+        if (card) {
             if (payload.highlighted) {
-                el.classList.add('highlighted');
-                
-                // FIX: Only reveal if the OPPONENT is highlighting THEIR own hand card
+                card.isHighlighted = true;
                 if (card.loc === 'hand' && card.owner === 'opponent') {
                     card.revealed = true;
-                    refreshCard(card);
                 }
+                refreshCard(card);
 
+                // Setup the same auto-cleanup timer
                 setTimeout(() => {
-                    el.classList.remove('highlighted');
+                    card.isHighlighted = false;
                     if (card.loc === 'hand' && card.owner === 'opponent') {
                         card.revealed = false;
-                        refreshCard(card);
                     }
+                    refreshCard(card);
                 }, 2000);
             } else {
-                el.classList.remove('highlighted');
+                card.isHighlighted = false;
                 if (card.loc === 'hand' && card.owner === 'opponent') {
                     card.revealed = false;
-                    refreshCard(card);
                 }
+                refreshCard(card);
             }
         }
     }

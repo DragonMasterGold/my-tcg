@@ -254,12 +254,56 @@ body {
     color: white; 
 }
 
-/* If it HAS an image, we want the text to be readable (label style) */
+/* If it HAS an image, we want the text CENTERED, WHITE, with a BLACK outline */
 .card.has-image {
-    align-items: flex-end; /* Push text to bottom */
-    color: white;
-    text-shadow: 1px 1px 3px black, 0 0 5px black;
+    display: flex !important;
+    align-items: center !important; 
+    justify-content: center !important;
+    
+    /* ADD THIS LINE */
+    padding-bottom: 2.5vh !important; /* Increases the 'push' from the bottom, moving text up */
+
+    color: #fff !important; 
+    font-weight: 700 !important; 
+    font-size: 15px !important; 
+    text-align: center;
+    padding-left: 0px;
+    padding-right: 0px;
+    z-index: 10;
+    
+    /* Mega Black Outline */
+    text-shadow: 
+        2px  2px 0 #000,
+       -2px -2px 0 #000, 
+        2px -2px 0 #000,
+       -2px  2px 0 #000,
+        0px  2px 0 #000,
+        0px -2px 0 #000,
+       -2px  0px 0 #000,
+        2px  0px 0 #000,
+        3px  3px 5px rgba(0,0,0,0.8) !important;
 }
+
+
+
+.card.rotated .card-name {
+    /* rotate(-90deg) keeps it upright */
+    /* translateX(-2vh) moves it globally LEFT toward the level stat */
+    transform: rotate(-90deg) translateX(-0.5vh);
+}
+
+.zone .phantom .card-name {
+    transform: translateY(0.7vh);
+}
+
+
+.zone .phantom.rotated .card-name {
+    /* We combine the "Left" move and the "Lower" move */
+    /* Note: In rotation, Y becomes X, so we adjust accordingly */
+    transform: rotate(-90deg) translateX(-0.5vh);
+}
+
+
 
 .card.face-down { 
     background-image: repeating-linear-gradient(45deg, #222, #222 5px, #333 5px, #333 10px) !important; 
@@ -687,40 +731,3 @@ input[type=number] {
     color: #ff4444;
 }
 
-/* Main Menu Styling */
-#main-menu .modal-content {
-    background: rgba(10, 15, 25, 0.95);
-    border: 2px solid #3498db;
-    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
-    display: flex;
-    flex-direction: column;
-    padding: 30px;
-    min-width: 250px;
-}
-
-/* The Blue Line Breaks */
-.menu-sep {
-    height: 1px;
-    background: linear-gradient(to right, transparent, #3498db, transparent);
-    margin: 12px 0;
-    opacity: 0.6;
-}
-
-/* Menu Buttons */
-.menu-btn {
-    background: rgba(52, 152, 219, 0.1);
-    border: 1px solid #3498db;
-    color: white;
-    padding: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.menu-btn:hover {
-    background: rgba(52, 152, 219, 0.3);
-    box-shadow: 0 0 10px #3498db;
-    transform: scale(1.02);
-}

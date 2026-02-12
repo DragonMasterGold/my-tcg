@@ -27,6 +27,14 @@ async function loadCards() {
     showDefaultControls();
 }
 
+const defaultImages = {
+    'phantom': 'Images/Cards/Phantom Card.png',
+    'spirit': 'Images/Cards/Spirit Card.png',
+    'counter': 'Images/Cards/Counter Card.png',
+    'environment': 'Images/Cards/Environment Card.png',
+    'token': 'Images/Cards/Token Card.png'
+};
+
 // === ROBUST FILTERING & RENDERING ===
 function filterCards() {
     const term = document.getElementById('card-search').value.toLowerCase();
@@ -63,24 +71,39 @@ function createCardElement(card, isPool = false) {
     cardEl.dataset.type = card.type;
 
     // Visual Content
-    if (card.image) {
-        // Use the same method as the main game for consistency
-        cardEl.style.backgroundImage = `url("${card.image}")`;
-        cardEl.style.backgroundSize = "cover";
-        cardEl.style.backgroundPosition = "center";
-        
-        // Add a fallback label so name is visible on the image
-        const nameLabel = document.createElement('div');
-        nameLabel.className = 'card-name-fallback';
-        nameLabel.style.background = 'rgba(0,0,0,0.6)';
-        nameLabel.style.width = '100%';
-        nameLabel.style.position = 'absolute';
-        nameLabel.style.bottom = '0';
-        nameLabel.textContent = card.name;
-        cardEl.appendChild(nameLabel);
-    } else {
-        cardEl.innerText = card.name;
-    }
+	const typeKey = card.type.toLowerCase();
+	const defaultImg = defaultImages[typeKey];
+	const primaryImage = card.image && card.image.trim() !== "" ? card.image : null;
+
+	// Set default image first
+	if (defaultImg) {
+		cardEl.style.backgroundImage = `url("${defaultImg}")`;
+		cardEl.style.backgroundSize = "cover";
+		cardEl.style.backgroundPosition = "center";
+	}
+
+	// Try to upgrade to specific image
+	if (primaryImage) {
+		const img = new Image();
+		img.onload = () => {
+			cardEl.style.backgroundImage = `url("${primaryImage}")`;
+		};
+		img.src = primaryImage;
+	}
+
+	// Always add name label if there's any image
+	if (defaultImg || primaryImage) {
+		const nameLabel = document.createElement('div');
+		nameLabel.className = 'card-name-fallback';
+		nameLabel.style.background = 'rgba(0,0,0,0.6)';
+		nameLabel.style.width = '100%';
+		nameLabel.style.position = 'absolute';
+		nameLabel.style.bottom = '0';
+		nameLabel.textContent = card.name;
+		cardEl.appendChild(nameLabel);
+	} else {
+		cardEl.innerText = card.name;
+	}
 	
     // Badge logic (How many are in the total deck)
     const count = getCardCount(card.id);

@@ -1,5 +1,258 @@
 [
   {
+    "id": "ability_constraint",
+    "name": "Ability Constraint",
+    "type": "Counter",
+    "description": "Condition: An Enemy Phantom is Summoned or activates an Ability. <br>Target a face up Phantom, it cannot activate it’s Abilities while this card is face up on the field.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Ability Constraint.png"
+  },
+  {
+    "id": "after_life_empty",
+    "name": "After Life Empty",
+    "type": "Spirit",
+    "description": "Special Resurrect every level 2-and-lower Death Phantom card in the AL. <br>Their Abilities are negated. Their SP is set to zero.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/After Life Empty.png"
+  },
+  {
+    "id": "air_elemental",
+    "name": "Air Elemental",
+    "type": "Phantom",
+    "description": "Field Ability: Targeted Dodge Roll.<br>Balance Ability: This card can Attack Directly.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Air"
+    ],
+    "image": "Images/Cards/Air Elemental.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "ancient_city",
+    "name": "Ancient City",
+    "type": "Environment",
+    "description": "Counter cards within the Environment Range are shuffled back into the deck instead of Breaking.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Ancient City.png"
+  },
+  {
+    "id": "ancient_curse",
+    "name": "Ancient Curse",
+    "type": "Counter",
+    "description": "Condition: Opponent’s Phantom deals damage from a direct attack.<br>As long as that card remains on the field, at the start of each of your turns, damage the opponent’s Life points equal to the Phantom’s attack points.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Ancient Curse.png"
+  },
+  {
+    "id": "aquatic_flip_flapper",
+    "name": "Aquatic Flip-Flapper",
+    "type": "Phantom",
+    "description": "Both players select an Ally card to have its current position flipped -- either up or down.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos",
+      "Aquatic"
+    ],
+    "image": "Images/Cards/Aquatic Flip-Flapper.png",
+    "level": 2,
+    "attack": 500,
+    "health": 500
+  },
+  {
+    "id": "arbian_librarian",
+    "name": "Arbian Librarian",
+    "type": "Phantom",
+    "description": "Condition: Summoned. Search for a Level 2 Life card from your Main Deck.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life",
+      "Librarian"
+    ],
+    "image": "Images/Cards/Arbian Librarian.png",
+    "level": 2,
+    "attack": 0,
+    "health": 200
+  },
+  {
+    "id": "arbitration",
+    "name": "Arbitration",
+    "type": "Counter",
+    "description": "If a card you control is Defeated, your opponent cannot declare another Attack this turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Arbitration.png"
+  },
+  {
+    "id": "attack_redirect",
+    "name": "Attack Redirect",
+    "type": "Counter",
+    "description": "Condition: An enemy Card initiates a Direct Attack.  <br>Redirect the Attack.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Attack Redirect.png"
+  },
+  {
+    "id": "bail_out",
+    "name": "Bail Out",
+    "type": "Counter",
+    "description": "If you were going to take enough damage to lose the game, gain 2500 health.  <br>Once per card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Bail Out.png"
+  },
+  {
+    "id": "balancing_of_elements",
+    "name": "Balancing Of Elements",
+    "type": "Counter",
+    "description": "Condition: An Ally Elemental is Targeted for an Attack. <br><br>Field Ability: Redirect that attack to another Ally Elemental. Then flip this card back down. Once per turn. <br><br>Balance Slot Ability: Redirect that attack to this card. If this card Breaks from an attack, Break the attacking card.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental"
+    ],
+    "image": "Images/Cards/Balancing Of Elements.png"
+  },
+  {
+    "id": "battle_counter",
+    "name": "Battle Counter",
+    "type": "Counter",
+    "description": "Condition: An Enemy Card initiates Battle. <br>Targeted Break.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Battle Counter.png"
+  },
+  {
+    "id": "beat_boxer_boy",
+    "name": "Beat Boxer Boy",
+    "type": "Phantom",
+    "description": "",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Beat Boxer Boy.png",
+    "level": 4,
+    "attack": 500,
+    "health": 1500
+  },
+  {
+    "id": "blood_pact",
+    "name": "Blood Pact",
+    "type": "Spirit",
+    "description": "Take 1000 points of damage and give your opponent 1000 Life Points. Draw 1 card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Blood Pact.png"
+  },
+  {
+    "id": "blow_back",
+    "name": "Blow Back",
+    "type": "Counter",
+    "description": "If a Phantom attacks one of your cards in Defense Position, the opponent then takes damage equal to the Health of the Phantom that was attacked.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Blow Back.png"
+  },
+  {
+    "id": "break_everything",
+    "name": "Break Everything",
+    "type": "Counter",
+    "description": "Select a Destruction Phantom Card from your hand or field to Break, Targeted Break a card. <br>AL Ability: Target any number of Destruction Phantom’s in your AL to Destroy. <br>Break that many cards from the top of your opponent’s deck.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Break Everything.png"
+  },
+  {
+    "id": "brilliance_custodian",
+    "name": "Brilliance Custodian",
+    "type": "Phantom",
+    "description": "Cycle. <br>1-AP Per Round. <br>● AP: Targeted Deal 500 Damage. <br>● AP: Give an Ally Light Phantom Shielding. <br>● AP: Lose 2 Levels and then Draw.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Brilliance Custodian.png",
+    "level": 6,
+    "attack": 1500,
+    "health": 1500
+  },
+  {
+    "id": "budding_rascal",
+    "name": "Budding Rascal",
+    "type": "Phantom",
+    "description": "Condition: Have an Ally level 2 or lower Life Phantom. Special Summon this card. It’s Field level becomes zero.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life",
+      "Plant"
+    ],
+    "image": "Images/Cards/Budding Rascal.png",
+    "level": 2,
+    "attack": 500,
+    "health": 500
+  },
+  {
+    "id": "call_to_oblivion",
+    "name": "Call To Oblivion",
+    "type": "Counter",
+    "description": "Condition: An Enemy Phantom Attacks an Ally Destruction Card. <br>The Attacking Phantom takes 200 Damage for every Card in Oblivion. <br>If that card would Break from this Ability, it is Destroyed.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Call To Oblivion.png"
+  },
+  {
+    "id": "chance_counter",
+    "name": "Chance Counter",
+    "type": "Counter",
+    "description": "When an Ally card is targeted for an Attack, you can flip a coin for every face up Chaos card on the field. <br><br>Apply the following for each correctly called coin flip.<br>1: Negate the attack. <br>2: Deal damage to the opponent equal to the Attacking Card. <br>3: Break the Attacking Card.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos"
+    ],
+    "image": "Images/Cards/Chance Counter.png"
+  },
+  {
+    "id": "channeling_chaos",
+    "name": "Channeling Chaos",
+    "type": "Spirit",
+    "description": "On activation: Add a counter to this card for every face up Chaos Card on the field. <br>Starting next turn, every turn each Player gains SP equal to this card’s counters.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos"
+    ],
+    "image": "Images/Cards/Channeling Chaos.png"
+  },
+  {
     "id": "chaos_thriver",
     "name": "Chaos Thriver",
     "type": "Phantom",
@@ -14,160 +267,10 @@
     "health": 0
   },
   {
-    "id": "cosmic_twinkle",
-    "name": "Cosmic Twinkle",
-    "type": "Phantom",
-    "description": "Equip Card. Equipped: This card’s Stats are added to the Equipped Card. Once per turn you can target a face down card on the field and Reveal it.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Twinkle.png",
-    "level": 1,
-    "attack": 0,
-    "health": 500
-  },
-  {
-    "id": "neurotic_prankstar",
-    "name": "Neurotic PrankStar",
-    "type": "Phantom",
-    "description": "Chaos cards other than this one cannot be Targeted.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos",
-      "PrankStar"
-    ],
-    "image": "Images/Cards/Neurotic PrankStar.png",
-    "level": 1,
-    "attack": 0,
-    "health": 500
-  },
-  {
-    "id": "aquatic_flip_flapper",
-    "name": "Aquatic Flip-Flapper",
-    "type": "Phantom",
-    "description": "Both players select an Ally card to have its current position flipped either up or down.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos",
-      "Aquatic"
-    ],
-    "image": "Images/Cards/Aquatic Flip-Flapper.png",
-    "level": 2,
-    "attack": 500,
-    "health": 500
-  },
-  {
-    "id": "chronic_necrotic",
-    "name": "Chronic Necrotic",
-    "type": "Phantom",
-    "description": "Hand Ability: If a Chaos Phantom would Break, instead Discard this card. Field Ability: If this card defeats a Phantom in Battle, that Phantom is added to the owner Chronic Necrotic’s hand. AL Ability: If a Phantom would be sent to the AL, instead place that card and this card onto the bottom of their owner’s deck.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Chronic Necrotic.png",
-    "level": 3,
-    "attack": 1500,
-    "health": 500
-  },
-  {
-    "id": "cosmic_redeemer",
-    "name": "Cosmic Redeemer",
-    "type": "Phantom",
-    "description": "1-AP. When this Card Breaks a card that card can be Equipped to this card. Equip Card. AP: Discard a Card Equipped to this card. Gain 1-SP. AP: Discard two Cards Equipped to this card. Draw a card. AP Discard three Cards Equipped to this card. Target a card to Break.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Redeemer.png",
-    "level": 4,
-    "attack": 1000,
-    "health": 1000
-  },
-  {
-    "id": "cosmic_watcher",
-    "name": "Cosmic Watcher",
-    "type": "Phantom",
-    "description": "This card gains 1-AP for every card equipped to it. When this Card Breaks a card that card can be Equipped to this card. Equip Card. AP: Target an Enemy Phantom to switch to Defense position. AP: Cost 2 AP: Target an Enemy Phantom and flip it face down. AP Cost 3 AP: Target an Enemy Phantom and take control of it.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Watcher.png",
-    "level": 4,
-    "attack": 1000,
-    "health": 1000
-  },
-  {
-    "id": "spirit_swapper",
-    "name": "Spirit Swapper",
-    "type": "Phantom",
-    "description": "Spirit cards that would affect the currently activating Player are applied to the Enemy Player instead.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Spirit Swapper.png",
-    "level": 4,
-    "attack": 1000,
-    "health": 1000
-  },
-  {
-    "id": "quixotic_axolotl",
-    "name": "Quixotic Axolotl",
-    "type": "Phantom",
-    "description": "Roll a dice. 1: Break this card. 2-5: Add a counter to this card equal to the Die roll.6: Targeted Break another card. You can detach any number of counters on this card to increase the roll by the number of counters removed. You can remove 6 counters from any Ally card to activate this Ability an additional time.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Quixotic Axolotl.png",
-    "level": 5,
-    "attack": 1000,
-    "health": 1500
-  },
-  {
-    "id": "cosmic_balancer",
-    "name": "Cosmic Balancer",
-    "type": "Phantom",
-    "description": "On Summon: This card gains 500 stats for every Cosmic Phantom in the AL. 3-AP. You can Destroy a card Equipped to this card instead of Destroying a Cosmic Phantom Card in your AL. Equip Card. Cycle. AP: Destroy a Cosmic Phantom in your AL. Targeted Break a face down card. AP: Destroy two Cosmic Phantoms in your AL. Targeted Banish a card. AP: Destroy three Cosmic Phantoms in your AL. Targeted Break a card. Your opponent selects a card in their hand to Destroy.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Balancer.png",
-    "level": 8,
-    "attack": 0,
-    "health": 0
-  },
-  {
-    "id": "blood_pact",
-    "name": "Blood Pact",
-    "type": "Spirit",
-    "description": "Take 1000 points of damage and give your opponent 1000 Life Points. Draw 1 card.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Blood Pact.png"
-  },
-  {
-    "id": "channeling_chaos",
-    "name": "Channeling Chaos",
-    "type": "Spirit",
-    "description": "On activation: Add a counter to this card for every face up Chaos Card on the field. Starting next turn, every turn each Player gains SP equal to this card’s counters.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Channeling Chaos.png"
-  },
-  {
     "id": "chaotic_phantom_swap",
     "name": "Chaotic Phantom Swap",
     "type": "Spirit",
-    "description": "Target a Chaos Phantom and an Enemy Phantom of equal or less SP, swap control of the selected cards. You can re-activate this Ability up to the number of Chaos Phantom Cards you controlled during this card’s activation.",
+    "description": "Target a Chaos Phantom and an Enemy Phantom of equal or less SP, swap control of the selected cards. <br>You can re-activate this Ability up to the number of Chaos Phantom Cards you controlled during this card’s activation.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos"
@@ -178,7 +281,7 @@
     "id": "chaotic_stat_swap",
     "name": "Chaotic Stat Swap",
     "type": "Spirit",
-    "description": "Every face up Phantom on the field has its Attack and Health Swapped. Chaos Phantoms can choose to not have their stats swapped.",
+    "description": "Every face up Phantom on the field has its Attack and Health Swapped. <br>Chaos Phantoms can choose to not have their stats swapped.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos"
@@ -186,10 +289,147 @@
     "image": "Images/Cards/Chaotic Stat Swap.png"
   },
   {
+    "id": "chronic_necrotic",
+    "name": "Chronic Necrotic",
+    "type": "Phantom",
+    "description": "Hand Ability: If a Chaos Phantom would Break, instead Discard this card. <br><br>Field Ability: If this card defeats a Phantom in Battle, that Phantom is added to the owner Chronic Necrotic’s hand. <br><br>AL Ability: If a Phantom would be sent to the AL, instead place that card and this card onto the bottom of their owner’s deck.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos",
+      "Death"
+    ],
+    "image": "Images/Cards/Chronic Necrotic.png",
+    "level": 3,
+    "attack": 1500,
+    "health": 500
+  },
+  {
+    "id": "city_of_tomorrow",
+    "name": "City Of Tomorrow",
+    "type": "Environment",
+    "description": "Spirit cards within the Environment Range are shuffled back into the deck instead of Breaking.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/City Of Tomorrow.png"
+  },
+  {
+    "id": "cityscape",
+    "name": "Cityscape",
+    "type": "Environment",
+    "description": "The first Phantom card Broken per-turn for each Player within the Environment Range is shuffled back into the deck instead.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Cityscape.png"
+  },
+  {
+    "id": "clarity_purveyor",
+    "name": "Clarity Purveyor",
+    "type": "Phantom",
+    "description": "Flip: Targeted Break a face down card.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Clarity Purveyor.png",
+    "level": 2,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "clear_being",
+    "name": "Clear Being",
+    "type": "Phantom",
+    "description": "At the end of the Round this card’s level increases by 1. This Ability applies while face down. <br>If this Ability goes off gain the following Break Impowering: Gain 1 SP.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Clear Being.png",
+    "level": 1,
+    "attack": 200,
+    "health": 300
+  },
+  {
+    "id": "coded_injection",
+    "name": "Coded Injection",
+    "type": "Spirit",
+    "description": "Equip: When Equipped to an Ally Card increase its Attack by 500. <br>When Equipped to an Enemy Card decrease it’s Attack by 500.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Coded Injection.png"
+  },
+  {
+    "id": "collateral_damage",
+    "name": "Collateral Damage",
+    "type": "Counter",
+    "description": "If a Chaos card would Break, instead the opponent Targets another card to Break in its place.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos"
+    ],
+    "image": "Images/Cards/Collateral Damage.png"
+  },
+  {
+    "id": "column_breaker",
+    "name": "Column Breaker",
+    "type": "Counter",
+    "description": "Condition: All slots in this card’s column have a card in them.  <br>Break all cards in this column.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Column Breaker.png"
+  },
+  {
+    "id": "consuming_void",
+    "name": "Consuming Void",
+    "type": "Phantom",
+    "description": "Cards that are Attacked by this card are instead Bounced. <br>If a card loses Battle against this card it is Banished. <br>This card gains 100 Attack for every card in the Shadow Realm.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Consuming Void.png",
+    "level": 6,
+    "attack": 0,
+    "health": 1500
+  },
+  {
+    "id": "copy_cat",
+    "name": "Copy Cat",
+    "type": "Counter",
+    "description": "Condition: Turn start activate this card. <br>Summon a Copy of the first Phantom card your opponent plays. <br>If they don’t play a Phantom card, send this card to the After Life.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Copy Cat.png"
+  },
+  {
+    "id": "copying_cat",
+    "name": "Copying Cat",
+    "type": "Phantom",
+    "description": "Flip: Summon a Copy.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Copying Cat.png",
+    "level": 2,
+    "attack": 0,
+    "health": 0
+  },
+  {
     "id": "corrupted_cultivation",
     "name": "Corrupted Cultivation",
     "type": "Spirit",
-    "description": "Equip: Increase the Equipped card’s Attack by 1000. Turn End: The Equipped Card’s Attack goes back to normal, and then it loses 1000 Stat Points.",
+    "description": "Equip: Increase the Equipped card’s Attack by 1000. <br>Turn End: The Equipped Card’s Attack goes back to normal, and then it loses 1000 Stat Points.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -197,10 +437,25 @@
     "image": "Images/Cards/Corrupted Cultivation.png"
   },
   {
+    "id": "cosmic_balancer",
+    "name": "Cosmic Balancer",
+    "type": "Phantom",
+    "description": "Cycle. Equip Card.<br>On Summon: This card gains 500 stats for every Cosmic Phantom in the AL. <br>You can Destroy a card Equipped to this card instead of Destroying a Cosmic Phantom Card in your AL. <br><br>3-AP. <br>● AP: Destroy a Cosmic Phantom in your AL. Targeted Break a face down card. <br>● AP: Destroy two Cosmic Phantoms in your AL. Targeted Banish a card. <br>● AP: Destroy three Cosmic Phantoms in your AL. Targeted Break a card. Your opponent selects a card in their hand to Destroy.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic",
+      "Destruction"
+    ],
+    "image": "Images/Cards/Cosmic Balancer.png",
+    "level": 8,
+    "attack": 0,
+    "health": 0
+  },
+  {
     "id": "cosmic_balancing",
     "name": "Cosmic Balancing",
     "type": "Spirit",
-    "description": "Your opponent selects 3 cards from their Deck. You then choose each card individually to be sent into the AL, Shadow Realm, and Oblivion, respectively. This Ability then activates for your opponent, but you may only select Cosmic cards.",
+    "description": "Your opponent selects 3 cards from their Deck. <br>You then choose each card individually to be sent into the AL, Shadow Realm, and Oblivion, respectively. <br>This Ability then activates for your opponent, but you may only select Cosmic cards.",
     "archetype": "Cosmic",
     "archetypes": [
       "Cosmic"
@@ -208,10 +463,21 @@
     "image": "Images/Cards/Cosmic Balancing.png"
   },
   {
+    "id": "cosmic_binding",
+    "name": "Cosmic Binding",
+    "type": "Counter",
+    "description": "Condition: An Enemy Phantom would leave the field from a means other than being Unsummoned. <br>Negate its Abilities and reduce its Stats to zero. <br>It becomes Field Locked for 3 Turns. At the end of 3 turns Break that card, or Equip it to an Ally Cosmic Phantom.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Binding.png"
+  },
+  {
     "id": "cosmic_command",
     "name": "Cosmic Command",
     "type": "Spirit",
-    "description": "Cost: Discard at least 1 Cosmic card and however many other cards on your side of the field. Gain 1-SP for each discarded card. Target an Enemy Phantom of equal or less summoning points than you currently have. Equip this card to it and take control of them. Lose any leftover summoning points gained by this card.",
+    "description": "Cost: Discard at least 1 Cosmic card and however many other cards on your side of the field. <br>Gain 1-SP for each discarded card.<br><br>Target an Enemy Phantom of equal or less summoning points than you currently have. <br>Equip this card to it and take control of them.<br><br>Lose any leftover summoning points gained by this card.",
     "archetype": "Cosmic",
     "archetypes": [
       "Cosmic"
@@ -222,7 +488,7 @@
     "id": "cosmic_control",
     "name": "Cosmic Control",
     "type": "Spirit",
-    "description": "Condition: Have a Cosmic card in either hand, field, or AL. Target a level 4 or lower Enemy Phantom to Equip to, then pay summoning points equal to the Target, and take control of that Phantom.",
+    "description": "Condition: Have a Cosmic card in either hand, field, or AL. <br>Target a level 4 or lower Enemy Phantom to Equip to, then pay summoning points equal to the Target, and take control of that Phantom.",
     "archetype": "Cosmic",
     "archetypes": [
       "Cosmic"
@@ -230,10 +496,83 @@
     "image": "Images/Cards/Cosmic Control.png"
   },
   {
+    "id": "cosmic_rebalance",
+    "name": "Cosmic Rebalance",
+    "type": "Counter",
+    "description": "Condition: Control a Cosmic Phantom Card. <br>If your opponent has more Phantoms on the field than you, have them be returned to the opponents hand in order of Level from lowest to highest, until they have the same number of Phantoms.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Rebalance.png"
+  },
+  {
+    "id": "cosmic_redeemer",
+    "name": "Cosmic Redeemer",
+    "type": "Phantom",
+    "description": "Equip Card.<br>When this Card Breaks a card that card can be Equipped to this card. <br><br>1-AP. <br>● AP: Discard a Card Equipped to this card. Gain 1-SP. <br>● AP: Discard two Cards Equipped to this card. Draw a card. <br>● AP: Discard three Cards Equipped to this card. Target a card to Break.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Redeemer.png",
+    "level": 4,
+    "attack": 1000,
+    "health": 1000
+  },
+  {
+    "id": "cosmic_relativity",
+    "name": "Cosmic Relativity",
+    "type": "Counter",
+    "description": "When an Ally Cosmic Phantom engages in Battle, swap the Stats of the two Battling Phantoms.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Relativity.png"
+  },
+  {
+    "id": "cosmic_required",
+    "name": "Cosmic Required",
+    "type": "Counter",
+    "description": "When an Ally Cosmic Phantom would Break, the break is negated and this card is equipped to it. <br>Equipped: Each time the Equipped card would Break you can instead Detach a card Equipped to it.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Required.png"
+  },
+  {
+    "id": "cosmic_tie",
+    "name": "Cosmic Tie",
+    "type": "Counter",
+    "description": "When an Enemy Phantom would Break or be Discarded, instead negate it’s Abilities and Equip it to an Ally Cosmic Phantom. <br>This card also Equips to the Selected Phantom.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Tie.png"
+  },
+  {
+    "id": "cosmic_twinkle",
+    "name": "Cosmic Twinkle",
+    "type": "Phantom",
+    "description": "Equip Card. <br>Equipped: This card’s Stats are added to the Equipped Card. <br>Once per turn you can target a face down card on the field and Reveal it.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic",
+      "Light"
+    ],
+    "image": "Images/Cards/Cosmic Twinkle.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  },
+  {
     "id": "cosmic_view",
     "name": "Cosmic View",
     "type": "Spirit",
-    "description": "For every Cosmic Card you control, select cards in your opponent’s hand for them to reveal. If you reveal every card in your opponent’s hand, they can choose a card to place back onto either the top or bottom of their deck.",
+    "description": "For every Cosmic Card you control, select cards in your opponent’s hand for them to reveal. If you Reveal every card in your opponent’s hand, they can choose a card to place back onto either the top or bottom of their deck.",
     "archetype": "Cosmic",
     "archetypes": [
       "Cosmic"
@@ -241,10 +580,35 @@
     "image": "Images/Cards/Cosmic View.png"
   },
   {
+    "id": "cosmic_watcher",
+    "name": "Cosmic Watcher",
+    "type": "Phantom",
+    "description": "Equip Card.<br>This card gains 1-AP for every card equipped to it. <br>When this Card Breaks a card that card can be Equipped to this card.<br><br>● AP: Target an Enemy Phantom to switch to Defense position. <br>● Cost 2 AP: Target an Enemy Phantom and flip it face down.<br>● Cost 3 AP: Target an Enemy Phantom and take control of it.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Cosmic Watcher.png",
+    "level": 4,
+    "attack": 1000,
+    "health": 1000
+  },
+  {
+    "id": "counter_draw",
+    "name": "Counter Draw",
+    "type": "Counter",
+    "description": "Condition: The opponent draws a card.<br>Draw a card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Counter Draw.png"
+  },
+  {
     "id": "coup_detat",
     "name": "Coup D'etat",
     "type": "Spirit",
-    "description": "Discard 2 cards from your hand and draw 3. If your hand has no cards to Discard, draw 5 cards and then Discard 3.",
+    "description": "Discard 2 cards from your hand and draw 3. <br>If your hand has no cards to Discard, draw 5 cards and then Discard 3.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -252,15 +616,167 @@
     "image": "Images/Cards/Coup D'etat.png"
   },
   {
+    "id": "creation_fairy",
+    "name": "Creation Fairy",
+    "type": "Phantom",
+    "description": "When this card is summoned, Create a level 0 Creation Sprite. <br><br>1-AP per round. <br>● AP: This card can Attack twice. <br>● AP: Unsummon a Creation Sprite and Search a copy of it.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation",
+      "Fairy"
+    ],
+    "image": "Images/Cards/Creation Fairy.png",
+    "level": 4,
+    "attack": 1000,
+    "health": 1000
+  },
+  {
+    "id": "creation_genie",
+    "name": "Creation Genie",
+    "type": "Phantom",
+    "description": "When this card is summoned, Create 3 Level-1 Creation Sprite Phantoms. <br><br>3-AP per Round. <br>● AP: Break Creation Sprite then Search a copy of it. <br>● AP: Break Creation Spright then draw a card. ● AP: Break Creation Spright then Targeted Deal 1000 damage. <br>● AP: Break Creation Sprite then flip a card face down. <br>● 3-AP: Break three Creation Spright Phantoms then Targeted Break a card.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creation Genie.png",
+    "level": 8,
+    "attack": 2500,
+    "health": 2500
+  },
+  {
+    "id": "creation_nymph",
+    "name": "Creation Nymph",
+    "type": "Phantom",
+    "description": "When this card is summoned, Create a level 0 Creation Fairy Phantom. <br><br>1-AP per turn. <br>● AP: Negate an Attack. <br>● AP: Unsummon Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creation Nymph.png",
+    "level": 6,
+    "attack": 1000,
+    "health": 1000
+  },
+  {
+    "id": "creation_sprite",
+    "name": "Creation Sprite",
+    "type": "Phantom",
+    "description": "When summoned Create a 0-SP Copy.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creation Sprite.png",
+    "level": 2,
+    "attack": 200,
+    "health": 200
+  },
+  {
+    "id": "creation_stream",
+    "name": "Creation Stream",
+    "type": "Spirit",
+    "description": "Put a Counter on this card for every card Created. This card spends tokens for AP. <br>It can only activate each AP once per turn. <br><br>1-● AP: Give a Creation Phantom 500 Attack. <br>● 2-AP: Excavate 1 card and if it is a Creation Phantom Draw it. <br>● 3-AP: Select a Creation Phantom and Search a copy of it. <br>● 4-AP: Give all face up Creation Cards Sturdy this turn. <br>● 5-AP: Select an Ally Creation Phantom and have them Activate their Creation Ability again.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creation Stream.png"
+  },
+  {
+    "id": "creative_burnout",
+    "name": "Creative Burnout",
+    "type": "Counter",
+    "description": "When a Creation card you control Breaks, instead return it to your deck and then draw a card.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creative Burnout.png"
+  },
+  {
+    "id": "creative_inspiration",
+    "name": "Creative Inspiration",
+    "type": "Spirit",
+    "description": "Unsummon an Ally Creation Phantom. Target a Phantom on the field of equal or less SP and Create a Copy of it.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creative Inspiration.png"
+  },
+  {
+    "id": "creative_overflow",
+    "name": "Creative Overflow",
+    "type": "Spirit",
+    "description": "Gain 1 SP for every Creation card Unsummoned this turn.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Creative Overflow.png"
+  },
+  {
+    "id": "crooks_freeze!",
+    "name": "Crooks Freeze!",
+    "type": "Counter",
+    "description": "No face up cards can attack this Round.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Crooks Freeze!.png"
+  },
+  {
     "id": "crossroads",
     "name": "Crossroads",
     "type": "Spirit",
-    "description": "Instant Play On Draw: Look at the top zero-to-three cards of your deck. Choose one to draw and place the other(s) on the bottom of your deck. Pay 1000 for each card revealed. Skip your next draw phase.",
+    "description": "Instant Play On Draw: Look at the top zero-to-three cards of your deck. <br>Choose one to draw and place the other(s) on the bottom of your deck. <br>Pay 1000 for each card revealed. Skip your next draw phase.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
     ],
     "image": "Images/Cards/Crossroads.png"
+  },
+  {
+    "id": "crystal_elemental",
+    "name": "Crystal Elemental",
+    "type": "Phantom",
+    "description": "Field Ability: Targeted Dodge Roll. <br>Balance Ability: Sturdy. You can Attack Directly. <br>Once Per Round When an Ally card Activates an Ability in the Balance Slot, you can Targeted Break a Spirit Card.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Earth, Air, Crystal"
+    ],
+    "image": "Images/Cards/Crystal Elemental.png",
+    "level": 4,
+    "attack": 0,
+    "health": 1500
+  },
+  {
+    "id": "curious_spright",
+    "name": "Curious Spright",
+    "type": "Phantom",
+    "description": "Pay 1000-to-3000 LP. Excavate 1 card for every 1000 LP paid. You may Draw 1 Excavated Life Phantom.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Curious Spright.png",
+    "level": 3,
+    "attack": 1000,
+    "health": 500
+  },
+  {
+    "id": "cyber_space",
+    "name": "Cyber Space",
+    "type": "Environment",
+    "description": "Players within the Environment Range gain +1 Summoning Point per turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Cyber Space.png"
   },
   {
     "id": "cycle",
@@ -274,10 +790,32 @@
     "image": "Images/Cards/Cycle.png"
   },
   {
+    "id": "dark_veiling_cloak",
+    "name": "Dark Veiling Cloak",
+    "type": "Counter",
+    "description": "Condition: An enemy Phantom targets a Shadow card for an Attack. <br>This card becomes a Shadow 0/0/0 Token. <br>Select this card and any number of Ally Shadow Phantoms to flip face down. <br>Shuffle the selected cards and place them back onto your side of the field in any position.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Dark Veiling Cloak.png"
+  },
+  {
+    "id": "deadly_bargain",
+    "name": "Deadly Bargain",
+    "type": "Spirit",
+    "description": "Condition: Control a Death card. <br>Spend any number of Summoning Points to Discard an equal number of cards from the top of your Deck. <br>Then Select a Discarded card and add it to your hand.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Deadly Bargain.png"
+  },
+  {
     "id": "death_&_rebirth",
     "name": "Death & Rebirth",
     "type": "Spirit",
-    "description": "Break a selected Ally Phantom card. During the start of the same phase of the next turn, Resurrect it from the After Life.",
+    "description": "Break a selected Ally Phantom card. <br>During the start of the same phase of the next turn, Special Resurrect it from the After Life.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -285,10 +823,63 @@
     "image": "Images/Cards/Death & Rebirth.png"
   },
   {
+    "id": "death_mark",
+    "name": "Death Mark",
+    "type": "Spirit",
+    "description": "Condition: Have a Death card on the field or in the AL. <br>Target a Phantom Card on the field, it is Marked to be Discarded at the end of the Round.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Death Mark.png"
+  },
+  {
+    "id": "deathly_apparition",
+    "name": "Deathly Apparition",
+    "type": "Phantom",
+    "description": "Hand & Field Ability: If a Death Phantom card is targeted for Battle, Discard this card and increase that card by 500 Attack. <br>AL Ability: Once Per Duel you can Special Summon this card and it gains Summon Binding. Immune to Targeted Break.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Deathly Apparition.png",
+    "level": 2,
+    "attack": 500,
+    "health": 500
+  },
+  {
+    "id": "deathly_shadow",
+    "name": "Deathly Shadow",
+    "type": "Phantom",
+    "description": "Fragile. <br>Hand & Field Ability: Discard this card. <br>AL Ability: Equip to a Death Phantom. <br>Equipped Ability: If the Equipped card would Break you can Banish this card and Negate the Break.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Deathly Shadow.png",
+    "level": 1,
+    "attack": 300,
+    "health": 200
+  },
+  {
+    "id": "deathly_specter",
+    "name": "Deathly Specter",
+    "type": "Phantom",
+    "description": "This card cannot be Attacked.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Deathly Specter.png",
+    "level": 5,
+    "attack": 1500,
+    "health": 1000
+  },
+  {
     "id": "deck_flip!",
     "name": "Deck Flip!",
     "type": "Spirit",
-    "description": "Both Players flip their Decks upside down for the remainder of the duel. If the card revealed by the flip is a Chaos card draw it. All other Deck related Abilities are applied the same as before.",
+    "description": "Both Players flip their Decks upside down for the remainder of the duel. <br>If the card revealed by the flip is a Chaos card draw it. <br>All other Deck related Abilities are applied the same as before.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos"
@@ -307,6 +898,195 @@
     "image": "Images/Cards/Deck Fusion.png"
   },
   {
+    "id": "desert",
+    "name": "Desert",
+    "type": "Environment",
+    "description": "Players within the Environment Range take 500 damage each turn.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental"
+    ],
+    "image": "Images/Cards/Desert.png"
+  },
+  {
+    "id": "destroyer’s_offering",
+    "name": "Destroyer’s Offering",
+    "type": "Spirit",
+    "description": "Whenever a Phantom card is Destroyed add a counter to this card. Max of five counters. <br>You can activate this card to turn the counters into Summoning Points. Then send this card to Oblivion.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destroyer’s Offering.png"
+  },
+  {
+    "id": "destruction_forager",
+    "name": "Destruction Forager",
+    "type": "Phantom",
+    "description": "Summon Binding. Break Impowering: Gain 1 SP.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Forager.png",
+    "level": 1,
+    "attack": 300,
+    "health": 200
+  },
+  {
+    "id": "destruction_predator",
+    "name": "Destruction Predator",
+    "type": "Phantom",
+    "description": "Breaker. Destructive. Break a card from your hand or field, then Targeted Break a card. Destructive Surge: Gain 1-SP.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Predator.png",
+    "level": 8,
+    "attack": 2000,
+    "health": 1500
+  },
+  {
+    "id": "destruction_ravager",
+    "name": "Destruction Ravager",
+    "type": "Phantom",
+    "description": "Breaker. Destructive. <br>This card gains an additional Attack for every Enemy Phantom. <br>Every time this card Breaks a Phantom in Battle, Destroy the top card of your opponent’s deck. <br>This card can initiate a Direct Attack the turn it is Summoned. <br>Break Impowering: Draw. Destructive Surge: Draw.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Ravager.png",
+    "level": 10,
+    "attack": 2000,
+    "health": 2000
+  },
+  {
+    "id": "destruction_scavenger",
+    "name": "Destruction Scavenger",
+    "type": "Phantom",
+    "description": "Break Impowering: Draw.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Scavenger.png",
+    "level": 2,
+    "attack": 800,
+    "health": 200
+  },
+  {
+    "id": "destruction_stalker",
+    "name": "Destruction Stalker",
+    "type": "Phantom",
+    "description": "Breaker. Destructive. Break Impowering: Your opponent picks a card in their hand to Break.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Stalker.png",
+    "level": 6,
+    "attack": 500,
+    "health": 1000
+  },
+  {
+    "id": "destruction_trapper",
+    "name": "Destruction Trapper",
+    "type": "Phantom",
+    "description": "Flip: Targeted Destroy. Summon Binding.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Trapper.png",
+    "level": 4,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "destruction_viper",
+    "name": "Destruction Viper",
+    "type": "Phantom",
+    "description": "Breaker. Destructive. Break Impowering: Deal 200 damage to the opponent for every card in Oblivion.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Viper.png",
+    "level": 4,
+    "attack": 200,
+    "health": 300
+  },
+  {
+    "id": "destruction_vulture",
+    "name": "Destruction Vulture",
+    "type": "Phantom",
+    "description": "Break Impowering: Targeted Destroy a card in the AL. <br>AL Ability: If this card’s Break Impowering Destroyed a card, you can Destroy this card and gain 1 SP.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destruction Vulture.png",
+    "level": 3,
+    "attack": 1000,
+    "health": 500
+  },
+  {
+    "id": "destructive_deal",
+    "name": "Destructive Deal",
+    "type": "Spirit",
+    "description": "Target an Ally Destruction Phantom and any number of Enemy Phantom Cards of equal or lessor SP total, Break all selected Cards.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Destructive Deal.png"
+  },
+  {
+    "id": "divesting_shadows",
+    "name": "Divesting Shadows",
+    "type": "Spirit",
+    "description": "Select an Ally Shadow Phantom and Target an Enemy Phantom of equal or less SP. <br>Bounce both cards.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Divesting Shadows.png"
+  },
+  {
+    "id": "divine_light",
+    "name": "Divine Light",
+    "type": "Spirit",
+    "description": "Targeted Deal 500 Damage to an Enemy. Or give 500 Health to an Ally Light Card.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Divine Light.png"
+  },
+  {
+    "id": "dodge_roll!",
+    "name": "Dodge Roll!",
+    "type": "Counter",
+    "description": "Condition: A Phantom that would be Broken.  <br>Apply to it and Activate Dodge Roll.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Dodge Roll!.png"
+  },
+  {
+    "id": "draw_counter",
+    "name": "Draw Counter",
+    "type": "Counter",
+    "description": "Condition: The opponent draws a card.  <br>The opponent Discards that card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Draw Counter.png"
+  },
+  {
     "id": "draw_deduction",
     "name": "Draw Deduction",
     "type": "Spirit",
@@ -316,6 +1096,124 @@
       "Standard"
     ],
     "image": "Images/Cards/Draw Deduction.png"
+  },
+  {
+    "id": "dream_eater",
+    "name": "Dream Eater",
+    "type": "Phantom",
+    "description": "Flip: Targeted Discard.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death",
+      "Oddity"
+    ],
+    "image": "Images/Cards/Dream Eater.png",
+    "level": 4,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "earth_elemental",
+    "name": "Earth Elemental",
+    "type": "Phantom",
+    "description": "Field Ability: Sturdy. <br>Balance Ability: This card’s Attack is equal to its health while in Defense Position.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Earth"
+    ],
+    "image": "Images/Cards/Earth Elemental.png",
+    "level": 3,
+    "attack": 0,
+    "health": 1000
+  },
+  {
+    "id": "elemental_totem",
+    "name": "Elemental Totem",
+    "type": "Phantom",
+    "description": "Select one of the Four Elements. This card gains that Archetype Branch. <br>Other cards with the same Architype as this Card’s Archetype-Branches gain 500 attack.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Totem"
+    ],
+    "image": "Images/Cards/Elemental Totem.png",
+    "level": 2,
+    "attack": 0,
+    "health": 1000
+  },
+  {
+    "id": "emergency_diffusion",
+    "name": "Emergency Diffusion",
+    "type": "Counter",
+    "description": "Condition: If a Fusion Phantom would Break in battle, or by card effect. <br>Discard that Phantom Card, then resummon the fusion materials used to summon the Phantom card. <br>Dodge.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Emergency Diffusion.png"
+  },
+  {
+    "id": "endurance_test",
+    "name": "Endurance Test",
+    "type": "Counter",
+    "description": "When a direct attack is issued, you can activate this card. Both players send the top five cards of their deck to the AL. <br>Once per turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Endurance Test.png"
+  },
+  {
+    "id": "field_of_whispers",
+    "name": "Field Of Whispers",
+    "type": "Environment",
+    "description": "This card cannot be activated the turn it is played. <br>Players in the Environment Range can activate this Card’s Ability. <br>Gain a Summoning Point.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Field Of Whispers.png"
+  },
+  {
+    "id": "fire_elemental",
+    "name": "Fire Elemental",
+    "type": "Phantom",
+    "description": "Field Summon: Targeted Deal 500 damage. <br>Balance Summon: This card loses 1000 attack. Targeted Deal this card’s Attack.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Fire"
+    ],
+    "image": "Images/Cards/Fire Elemental.png",
+    "level": 4,
+    "attack": 1500,
+    "health": 500
+  },
+  {
+    "id": "flicker_shade",
+    "name": "Flicker Shade",
+    "type": "Phantom",
+    "description": "Shadow Step.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Flicker Shade.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "forgotten_statuary_hall",
+    "name": "Forgotten Statuary Hall",
+    "type": "Environment",
+    "description": "Players in the Environment Range Draw a card from their Side Deck instead during the Draw Phase.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Forgotten Statuary Hall.png"
   },
   {
     "id": "fusion_kit",
@@ -340,10 +1238,21 @@
     "image": "Images/Cards/Gracious Deal.png"
   },
   {
+    "id": "guiding_light",
+    "name": "Guiding Light",
+    "type": "Spirit",
+    "description": "Excavate 3 cards. You may Draw 1 Excavated Light Card.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Guiding Light.png"
+  },
+  {
     "id": "hand_remake",
     "name": "Hand Remake",
     "type": "Spirit",
-    "description": "Cost: Reduce your current SP to zero. Place all the cards in your hand onto the bottom of your deck. Draw the same number of cards back. Pay 500 LP for each card drawn. Once per duel.",
+    "description": "Cost: Reduce your current SP to zero. <br>Place all the cards in your hand onto the bottom of your deck. <br>Draw the same number of cards back. <br>Pay 500 LP for each card drawn. <br>Once per duel.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -351,10 +1260,65 @@
     "image": "Images/Cards/Hand Remake.png"
   },
   {
+    "id": "happy_to_be_alive",
+    "name": "Happy To Be Alive",
+    "type": "Counter",
+    "description": "Whenever a Life card is taken out of the AL, add a counter to this card. <br><br>3-AP per turn. <br>● AP: Spend 1 Counter and Add a level 3 or lower Life card from the AL to the hand. <br>● AP: Spend 2 Counters and Draw a card. <br>● AP: Spend 3 counters and Search the Side deck for a Life Phantom.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Happy To Be Alive.png"
+  },
+  {
+    "id": "hateful_retribution",
+    "name": "Hateful Retribution",
+    "type": "Counter",
+    "description": "Discard Impowering: Your opponent must Discard one of their own cards from where ever this card was Discarded from. <br>Field Ability: If this Card Breaks, your opponent must choose one of their own Cards to Break.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Hateful Retribution.png"
+  },
+  {
+    "id": "healing_tears",
+    "name": "Healing Tears",
+    "type": "Counter",
+    "description": "When a Life Phantom would Break, this card can be activated before the damage step. The Damage dealt for the rest of the turn is instead turned into LP that is added to the Player’s LP total.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Healing Tears.png"
+  },
+  {
+    "id": "held_by_memories",
+    "name": "Held By Memories",
+    "type": "Counter",
+    "description": "If your LP would be reduced to zero, gain 1000 LP for every Phantom in your After Life. <br>You can then select any number of Death Phantoms in your AL to be After Life Sealed.<br>For every Phantom After Life Sealed this way, draw that many cards. <br>Your LP is reduced to zero at the end of your next turn.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Held By Memories.png"
+  },
+  {
+    "id": "hoarder_counter",
+    "name": "Hoarder Counter",
+    "type": "Counter",
+    "description": "Activate after the opponent has drawn a card, and they have more cards in hand than you. <br>The opponent chooses 1 card from their hand to shuffle back into their deck.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Hoarder Counter.png"
+  },
+  {
     "id": "hourglass_of_time",
     "name": "Hourglass Of Time",
     "type": "Spirit",
-    "description": "Draw 2 cards. Lose your next 2 draw phases. Lose half your life points. You cannot attack the turn this card is activated.",
+    "description": "Draw 2 cards. <br>Lose your next 2 draw phases.<br>Lose half your life points. <br>You cannot attack the turn this card is activated.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -362,10 +1326,47 @@
     "image": "Images/Cards/Hourglass Of Time.png"
   },
   {
+    "id": "ice_elemental",
+    "name": "Ice Elemental",
+    "type": "Phantom",
+    "description": "Sturdy. <br>Balance Ability: Once per round: When a card would be flipped up, you can flip it back down for the rest of the turn.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Water, Earth, Ice"
+    ],
+    "image": "Images/Cards/Ice Elemental.png",
+    "level": 5,
+    "attack": 500,
+    "health": 1500
+  },
+  {
+    "id": "illuminating_energy",
+    "name": "Illuminating Energy",
+    "type": "Spirit",
+    "description": "Target an Ally Light Phantom. Discard them and then Draw 1 card for every two levels of the Target.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Illuminating Energy.png"
+  },
+  {
+    "id": "imbuing_life",
+    "name": "Imbuing Life",
+    "type": "Environment",
+    "description": "Give every Ally Life Phantom 500 Health.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Imbuing Life.png"
+  },
+  {
     "id": "imposed_deduction",
     "name": "Imposed Deduction",
     "type": "Spirit",
-    "description": "Your opponent declares a Phantom Level from 1 to 10. Draw cards from the top of your Deck until you draw a Phantom that can be Normal Summoned. If that Phantom is the same Level as the one declared by your opponent, Discard all drawn cards. If not, Special Summon the drawn Phantom and Discard the remaining cards.",
+    "description": "Your opponent declares a Phantom Level from 1 to 4. <br>Draw cards from the top of your Deck until you draw a Phantom between Level 1-4.<br><br>If that Phantom is the same Level as the one declared by your opponent, Discard all drawn cards. <br>If not, Summon the drawn Phantom and then Discard the remaining cards.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -373,15 +1374,256 @@
     "image": "Images/Cards/Imposed Deduction.png"
   },
   {
+    "id": "inspiring_creativity",
+    "name": "Inspiring Creativity",
+    "type": "Spirit",
+    "description": "Discard any number of Creation cards from your hand and field. Excavate that many cards. Draw each Creation Card Excavated.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Inspiring Creativity.png"
+  },
+  {
+    "id": "kings’_lead",
+    "name": "Kings’ Lead",
+    "type": "Counter",
+    "description": "When your opponent activates a Spirit/Counter Card that would destroy a Phantom(s) on the field: Pay 2000 LP to Negate the activation, then destroy it. <br>Once per Round.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Kings’ Lead.png"
+  },
+  {
+    "id": "land_of_radiance",
+    "name": "Land Of Radiance",
+    "type": "Environment",
+    "description": "Both Players in the Environment Range Play with their hands Revealed. <br>Once per turn when an Ally Light Phantom leaves the field, look at the top card of your Deck.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Land Of Radiance.png"
+  },
+  {
+    "id": "last_resort_comeback",
+    "name": "Last Resort Comeback",
+    "type": "Counter",
+    "description": "Condition: The combined total Attack of all enemy Phantom’s is higher than your LP.<br><br>Your opponent chooses one of their Phantoms and optionally any number more. <br>Each chosen Phantom will now Direct Attack. In the order of either lowest to highest or highest to lowest Attack, based on your opponent’s decision. <br>These Attacks can be reacted to and interacted with as normal. <br><br>Every time you take a Direct Attack this way, Draw a card, and Gain 1 SP on your turn. <br>If you Draw a copy of this Card the pervious Direct Attack Damage is reset to zero. <br><br>After all the Direct Attacks have resolved, gain 1000 LP for every Creation Phantom you Drew from this Card.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Last Resort Comeback.png"
+  },
+  {
+    "id": "lava_elemental",
+    "name": "Lava Elemental",
+    "type": "Phantom",
+    "description": "On Summon: Targeted Deal 500 damage. <br>When this card Battles, cards on either side of the Battled Card take 500 damage. <br>Sturdy.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Fire, Earth, Lava"
+    ],
+    "image": "Images/Cards/Lava Elemental.png",
+    "level": 7,
+    "attack": 1500,
+    "health": 1500
+  },
+  {
+    "id": "law_of_death",
+    "name": "Law Of Death",
+    "type": "Counter",
+    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their AL. <br>Negate the activation. <br>If you control a Cosmic Phantom, that card in their AL becomes AL Sealed.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Law Of Death.png"
+  },
+  {
+    "id": "law_of_shadow",
+    "name": "Law Of Shadow",
+    "type": "Counter",
+    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Shadow Realm. <br>Negate the activation. <br>If you control a Cosmic Phantom, that card in their Shadow Realm becomes Shadow Sealed.",
+    "archetype": "Cosmic",
+    "archetypes": [
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Law Of Shadow.png"
+  },
+  {
+    "id": "life_bug",
+    "name": "Life Bug",
+    "type": "Phantom",
+    "description": "Pay LP in intervals of 100 up to 1000. This card gains Health Points equal to the Paid LP. Once per round.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life",
+      "Bug"
+    ],
+    "image": "Images/Cards/Life Bug.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "life_fairy",
+    "name": "Life Fairy",
+    "type": "Phantom",
+    "description": "Condition: A Life card is Targeted for Attack and would Break by the following Battle. You can Redirect the Attack to this card. <br>Summoner Damage from this Attack is instead turned into LP.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life",
+      "Fairy"
+    ],
+    "image": "Images/Cards/Life Fairy.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "life_genesius",
+    "name": "Life Genesius",
+    "type": "Environment",
+    "description": "When a Life card Breaks, instead of sending it to the AL place it onto the bottom of the deck. <br>Once per Round Players can Reveal the bottom Card of their deck and if it is a Life Phantom Draw it.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Life Genesius.png"
+  },
+  {
+    "id": "lifeful_wildflower",
+    "name": "Lifeful Wildflower",
+    "type": "Phantom",
+    "description": "This card can take the Battle for another Level 2 or lower Life Phantom. <br>Summoner Battle Damage is turned into LP.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Lifeful Wildflower.png",
+    "level": 3,
+    "attack": 500,
+    "health": 1000
+  },
+  {
+    "id": "light_keeper",
+    "name": "Light Keeper",
+    "type": "Phantom",
+    "description": "Blocker. Break Impowering: Target a card on field to Reveal, or have your Opponent choose a card in hand to Reveal.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Light Keeper.png",
+    "level": 2,
+    "attack": 0,
+    "health": 1000
+  },
+  {
+    "id": "light_of_before",
+    "name": "Light Of Before",
+    "type": "Spirit",
+    "description": "Excavate cards equal to the number of Light Phantoms in the AY.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Light Of Before.png"
+  },
+  {
+    "id": "lighting_elemental",
+    "name": "Lighting Elemental",
+    "type": "Phantom",
+    "description": "When this card Battles, it’s Attack is also delt to the enemy Player. <br>When this card Breaks, it’s Attack is delt to the owning Player’s LP.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Fire, Air, Lighting"
+    ],
+    "image": "Images/Cards/Lighting Elemental.png",
+    "level": 5,
+    "attack": 1500,
+    "health": 1000
+  },
+  {
+    "id": "luminescent_form",
+    "name": "Luminescent Form",
+    "type": "Phantom",
+    "description": "Stat Swap. Cycle.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Luminescent Form.png",
+    "level": 3,
+    "attack": 1000,
+    "health": 500
+  },
+  {
+    "id": "memories_of_four_elements",
+    "name": "Memories Of Four Elements",
+    "type": "Spirit",
+    "description": "Condition: Have at least one Phantom Card for each of the Four Elements in your AL. <br>Select 1-4 Elemental Phantom cards in your AL of 4 or less SP. <br>Create 4 Token Copies of the selected cards.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental"
+    ],
+    "image": "Images/Cards/Memories Of Four Elements.png"
+  },
+  {
     "id": "messing_up_the_balance",
     "name": "Messing Up The Balance",
     "type": "Spirit",
-    "description": "Condition: Have two face up Chaos Phantoms in both your Balance Slots. Cost: Negate their Abilities and set their stats to 0. Give control of them to your opponent. They are then Field Sealed for the next 3 turns.",
+    "description": "Condition: Have two face up Chaos Phantoms in both your Balance Slots. <br>Cost: Negate their Abilities and set their stats to 0. <br><br>Give control of them to your opponent.<br>They are then Field Sealed for the next 3 turns.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos"
     ],
     "image": "Images/Cards/Messing Up The Balance.png"
+  },
+  {
+    "id": "mirthful_luminescence",
+    "name": "Mirthful Luminescence",
+    "type": "Phantom",
+    "description": "1-AP Per Round. <br>● AP: Gain 500 Attack. <br>● AP: Gain 500 HP. <br>● AP: Lose 500 Stats and then Draw.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Mirthful Luminescence.png",
+    "level": 4,
+    "attack": 1000,
+    "health": 1000
+  },
+  {
+    "id": "mist_elemental",
+    "name": "Mist Elemental",
+    "type": "Phantom",
+    "description": "Targeted Dodge Roll. When this card would Break in Battle, Bounce it back to hand.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Air, Water, Mist"
+    ],
+    "image": "Images/Cards/Mist Elemental.png",
+    "level": 3,
+    "attack": 500,
+    "health": 1500
+  },
+  {
+    "id": "mutual_destruction",
+    "name": "Mutual Destruction",
+    "type": "Counter",
+    "description": "If a Destruction Phantom would be Defeated in Battle, add Breaker to it.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Mutual Destruction.png"
   },
   {
     "id": "mutual_destruction",
@@ -395,10 +1637,194 @@
     "image": "Images/Cards/Mutual Destruction.png"
   },
   {
+    "id": "my_body_your_shield",
+    "name": "My Body Your Shield",
+    "type": "Counter",
+    "description": "Condition: Your Phantoms must only be Level 1 or lower Life Phantoms. <br>For this turn, the first Attack directed at each of these Ally Life Phantoms are Redirect to Direct Attacks.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/My Body Your Shield.png"
+  },
+  {
+    "id": "nature’s_healing",
+    "name": "Nature’s Healing",
+    "type": "Spirit",
+    "description": "Fully Heal all Life Phantoms on the field.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Nature’s Healing.png"
+  },
+  {
+    "id": "negate_negation",
+    "name": "Negate Negation",
+    "type": "Counter",
+    "description": "Condition: An enemy Ability would Negate one of your cards or Abilities.  <br>Negate that Negate.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Negate Negation.png"
+  },
+  {
+    "id": "nekomata",
+    "name": "Nekomata",
+    "type": "Phantom",
+    "description": "Field Ability: Condition: Breaks. Summon a 1-SP Copy without this Ability.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death",
+      "Ghost, Yokai"
+    ],
+    "image": "Images/Cards/Nekomata.png",
+    "level": 2,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "neurotic_prankstar",
+    "name": "Neurotic PrankStar",
+    "type": "Phantom",
+    "description": "Chaos cards other than this one cannot be Targeted.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos",
+      "PrankStar"
+    ],
+    "image": "Images/Cards/Neurotic PrankStar.png",
+    "level": 1,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "no_return",
+    "name": "No Return",
+    "type": "Counter",
+    "description": "When an Ally Death Phantom is Attacked, both cards are Marked with After Life Sealed. <br>Additionally both Cards are Marked for Discard at the end of the Turn.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/No Return.png"
+  },
+  {
+    "id": "nothing",
+    "name": "Nothing",
+    "type": "Phantom",
+    "description": "On Summon: All cards on the field are Banished. <br>For every card Banished this way add a counter to this card. <br><br>While this card has Counters it has Summon Binding. <br>This card loses one Counter every turn.<br>You can Shadow Seal any number of the top cards from your Deck up to the number of Counters on this card, then remove an equal number of counters. <br><br>For every Counter this card loses deal 500 damage to both Players. <br>Shadow Seal this card when it leaves the field.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow",
+      "Unknown"
+    ],
+    "image": "Images/Cards/Nothing.png",
+    "level": 10,
+    "attack": 0,
+    "health": 0
+  },
+  {
+    "id": "oblivion_gate",
+    "name": "Oblivion Gate",
+    "type": "Environment",
+    "description": "Add a counter to this card every time a card is Destroyed. <br>Once per Round You can Target a Phantom in the Environment range, remove counters from this card equal to the Target’s SP, then Targeted Break that card. <br>If you activate this Ability on an Ally Destruction Phantom Draw a card.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Oblivion Gate.png"
+  },
+  {
+    "id": "oblivion_summoning",
+    "name": "Oblivion Summoning",
+    "type": "Spirit",
+    "description": "Select a Phantom in Oblivion to Summon. You can then select any number of cards you own to Break, and if you do reduce the selected Phantom’s SP by 1.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Oblivion Summoning.png"
+  },
+  {
+    "id": "open_ending",
+    "name": "Open Ending",
+    "type": "Environment",
+    "description": "Every time a card would leave the field, roll a 6-sided Die, and send the card to the corresponding location. <br><br>1: AL <br>2: Shadow Realm <br>3: Oblivion <br>4: Bottom of the main Deck. <br>5: Side Deck. <br>6: Extra Deck",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos"
+    ],
+    "image": "Images/Cards/Open Ending.png"
+  },
+  {
+    "id": "opposing_elements",
+    "name": "Opposing Elements",
+    "type": "Spirit",
+    "description": "Field Ability: Face up Fire and Air Phantoms gain 500 Attack. <br>Balance Ability: Face up Earth and Water Phantoms gain 500 health.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental"
+    ],
+    "image": "Images/Cards/Opposing Elements.png"
+  },
+  {
+    "id": "other_worldly_guardian",
+    "name": "Other Worldly Guardian",
+    "type": "Phantom",
+    "description": "Hand & Field Ability: If an Ally Death Phantom would Break, Discard this card and Negate that Break. <br>AL Ability: When an Ally Death Phantom engages in Battle, Banish this card, and give it 500 Attack.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death",
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Other Worldly Guardian.png",
+    "level": 3,
+    "attack": 500,
+    "health": 1000
+  },
+  {
+    "id": "persistent_light",
+    "name": "Persistent Light",
+    "type": "Phantom",
+    "description": "Shielded. Double Attack.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Persistent Light.png",
+    "level": 2,
+    "attack": 200,
+    "health": 100
+  },
+  {
+    "id": "phantom_binding",
+    "name": "Phantom Binding",
+    "type": "Counter",
+    "description": "Condition: Activate at the start of the Turn.  <br>The first Phantom Summoned gains Summoning Binding.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Phantom Binding.png"
+  },
+  {
+    "id": "place_of_remembrance",
+    "name": "Place Of Remembrance",
+    "type": "Environment",
+    "description": "When this card is played Draw a card. Players in the Environment Range Draw 2 cards during the Draw Phase.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Place Of Remembrance.png"
+  },
+  {
     "id": "preparation_deduction",
     "name": "Preparation Deduction",
     "type": "Spirit",
-    "description": "Declare 1 card name, if that card is in your opponent's hand, they must discard that card and any other copies in their hand. If not, you discard 1 card from your hand or field.",
+    "description": "Declare 1 card name, if that card is in your opponent's hand, they must discard that card and any other copies in their hand. <br>If not, you discard 1 card from your hand or field.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -417,6 +1843,57 @@
     "image": "Images/Cards/Preparation Draw.png"
   },
   {
+    "id": "psychopomp_of_the_dead",
+    "name": "Psychopomp Of The Dead",
+    "type": "Phantom",
+    "description": "On Summon: You can select a Level 4 or lower Death card from your AL to Special Resurrect. <br><br>Once per turn: You can select a card in your opponent’s AL to Banish. <br>When this card Breaks a card it is sent to the bottom of the owner’s deck. If this card Breaks by a Card Ability that card is Discarded. <br><br>AL Ability: 1-AP per card. <br>● AP: Banish two pairs of cards in your AL up to four sets and receive SP for each pair banished. <br>● AP: Banish 8 Cards in your AL then Resurrect this card.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Psychopomp Of The Dead.png",
+    "level": 8,
+    "attack": 2000,
+    "health": 2000
+  },
+  {
+    "id": "quixotic_axolotl",
+    "name": "Quixotic Axolotl",
+    "type": "Phantom",
+    "description": "Roll a dice. <br><br>1: Unsummon this card. <br>2-5: Add a counter to this card equal to the Die roll. <br>6: Targeted Break another card. You can detach any number of counters on this card to increase the roll by the number of counters removed. <br><br>You can remove 6 counters from any Ally card to activate this Ability an additional time.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos",
+      "Aquatic"
+    ],
+    "image": "Images/Cards/Quixotic Axolotl.png",
+    "level": 5,
+    "attack": 1000,
+    "health": 1500
+  },
+  {
+    "id": "re_creation",
+    "name": "Re-Creation",
+    "type": "Spirit",
+    "description": "Condition: Have a Creation card in hand or on your Field. <br>Select a Phantom Card in either Player’s AL, pay SP equal to that card’s total, Create a Copy of that card. This Creation gains the Creation Archetype.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Re-Creation.png"
+  },
+  {
+    "id": "re_life",
+    "name": "Re-Life",
+    "type": "Counter",
+    "description": "If a Life Phantom would Break, instead return it to the owners hand. Half the Phantom’s SP are given to the Player on their turn.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Re-Life.png"
+  },
+  {
     "id": "reincarnation",
     "name": "Reincarnation",
     "type": "Spirit",
@@ -428,10 +1905,302 @@
     "image": "Images/Cards/Reincarnation.png"
   },
   {
+    "id": "return_from_shadow",
+    "name": "Return From Shadow",
+    "type": "Spirit",
+    "description": "Select a Shadow Phantom from the Shadow Realm. Shadow Seal cards in your AL or Shadow Realm equal to its SP. <br>Special Summon the selected card in three turns.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Return From Shadow.png"
+  },
+  {
+    "id": "rising_to_the_creation",
+    "name": "Rising To The Creation",
+    "type": "Spirit",
+    "description": "Create a level 0 Creation Sprite for every Phantom Card your opponent controls.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Rising To The Creation.png"
+  },
+  {
+    "id": "sacrificial_pawn",
+    "name": "Sacrificial Pawn",
+    "type": "Counter",
+    "description": "If a Phantom card would Break in battle, instead summon a 0/500 token that the attack is directed at instead.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Sacrificial Pawn.png"
+  },
+  {
+    "id": "salient_sentry",
+    "name": "Salient Sentry",
+    "type": "Phantom",
+    "description": "Cycle. <br>1-AP Per Round. <br>● AP: Targeted Deal 1000 Damage. <br>● AP: Targeted Break a Facedown Card. <br>● AP: Lose 2 levels and gain 2 AP.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Salient Sentry.png",
+    "level": 8,
+    "attack": 2000,
+    "health": 2000
+  },
+  {
+    "id": "sand_ambler",
+    "name": "Sand Ambler",
+    "type": "Phantom",
+    "description": "Blocker. <br>When this card is sent to the AL, you can Search a Desert Environment from your Deck or Side Deck.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Wanderer"
+    ],
+    "image": "Images/Cards/Sand Ambler.png",
+    "level": 3,
+    "attack": 500,
+    "health": 1000
+  },
+  {
+    "id": "sarpanch_ayah",
+    "name": "Sarpanch Ayah",
+    "type": "Phantom",
+    "description": "While your LP is higher than your opponent's, all Ally Life Phantoms gain 500 Attack. <br>Your opponent cannot Target level 1-3 Life Phantoms for Attack. <br>Condition: You gain LP. Once per turn Special Summon a Level 1 Life Phantom from the AL.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Sarpanch Ayah.png",
+    "level": 7,
+    "attack": 500,
+    "health": 3000
+  },
+  {
+    "id": "sealing_amulet",
+    "name": "Sealing Amulet",
+    "type": "Spirit",
+    "description": "Search a level 4 or lower Shadow Phantom to Shadow Seal. At the start of your next turn, if this card is still on the field, add that card to your hand.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Sealing Amulet.png"
+  },
+  {
+    "id": "second_chance!",
+    "name": "Second Chance!",
+    "type": "Spirit",
+    "description": "Target all Life cards in both Players’ After Life, shuffle them all back into the owner’s decks.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Second Chance!.png"
+  },
+  {
+    "id": "seeking_balance",
+    "name": "Seeking Balance",
+    "type": "Spirit",
+    "description": "You can only use one of this card’s Abilities per Turn. <br>Field Ability: Draw 1-2 Copies of this Card. <br><br>Balance Ability: If you play one copy of this card you can select move An Ally card to one of your open Balance Slots (including this Card’s slot). <br>And then if you do you can move an Enemy card to one of your opponent’s available Balance Slots.<br><br>If you play a copy of this card in both Balance Slots you can select two Ally Elemental Phantoms of 4 or less SP and which have different Architype Branches. <br>You can then Special Summon a Phantom which has a combined SP equal to or less than the selected cards total, and that has Archetype Branches which contain all Branches of the two select cards.<br><br>If you Special Summon a card this way, discard the selected Phantoms.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental"
+    ],
+    "image": "Images/Cards/Seeking Balance.png"
+  },
+  {
+    "id": "self_destruct",
+    "name": "Self-Destruct",
+    "type": "Counter",
+    "description": "Condition: Both players are below 2500 Life Points. Deal 2500 damage to each player.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Self-Destruct.png"
+  },
+  {
+    "id": "serving_glow",
+    "name": "Serving Glow",
+    "type": "Phantom",
+    "description": "Excavate 3 cards. You may Draw 1 Excavated Light Phantom.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Serving Glow.png",
+    "level": 2,
+    "attack": 500,
+    "health": 500
+  },
+  {
+    "id": "shadow_bind",
+    "name": "Shadow Bind",
+    "type": "Counter",
+    "description": "When an enemy Phantom targets a Shadow card for an Attack, flip that Phantom face down.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadow Bind.png"
+  },
+  {
+    "id": "shadow_blink",
+    "name": "Shadow Blink",
+    "type": "Counter",
+    "description": "Choose one face up Shadow Phantom you control, Banish it until this turn is over.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadow Blink.png"
+  },
+  {
+    "id": "shadow_eater",
+    "name": "Shadow Eater",
+    "type": "Phantom",
+    "description": "This card gains the Attack of any card it Breaks.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadow Eater.png",
+    "level": 4,
+    "attack": 500,
+    "health": 1500
+  },
+  {
+    "id": "shadow_field",
+    "name": "Shadow Field",
+    "type": "Environment",
+    "description": "Cards within the Environment Range that would be sent to the AL are instead Banished.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadow Field.png"
+  },
+  {
+    "id": "shadow_pact",
+    "name": "Shadow Pact",
+    "type": "Spirit",
+    "description": "Can only be activated while a Shadow card is on the field. <br>Both players Banish a card from their hand, then Search for a card to draw from either their Main Deck or Side Deck.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadow Pact.png"
+  },
+  {
+    "id": "shadow_stealer",
+    "name": "Shadow Stealer",
+    "type": "Phantom",
+    "description": "Flip: Targeted Banish.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadow Stealer.png",
+    "level": 4,
+    "attack": 0,
+    "health": 500
+  },
+  {
+    "id": "shadowy_spirit",
+    "name": "Shadowy Spirit",
+    "type": "Phantom",
+    "description": "Stealth.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Shadowy Spirit.png",
+    "level": 2,
+    "attack": 500,
+    "health": 500
+  },
+  {
+    "id": "smiting_light",
+    "name": "Smiting Light",
+    "type": "Spirit",
+    "description": "Add a counter to this card for every Light Card in the AY. <br>Once per Round Ability: Remove up to 5 Counters from this card and Deal 200 damage to the Opponent per counter removed.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/Smiting Light.png"
+  },
+  {
+    "id": "song_of_healing",
+    "name": "Song Of Healing",
+    "type": "Spirit",
+    "description": "Gain 1000 LP for every Life Phantom on the field.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Song Of Healing.png"
+  },
+  {
+    "id": "speaker_to_life",
+    "name": "Speaker To Life",
+    "type": "Phantom",
+    "description": "Select a level 1 Life Phantom in the AL and Resurrect it. Once Per Summon.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Speaker To Life.png",
+    "level": 3,
+    "attack": 500,
+    "health": 1000
+  },
+  {
+    "id": "spirit_destruction",
+    "name": "Spirit Destruction",
+    "type": "Spirit",
+    "description": "Target 1-5 cards from your AL and Destroy them.",
+    "archetype": "Destruction",
+    "archetypes": [
+      "Destruction"
+    ],
+    "image": "Images/Cards/Spirit Destruction.png"
+  },
+  {
+    "id": "spirit_give",
+    "name": "Spirit Give",
+    "type": "Spirit",
+    "description": "Select Death Phantoms from your AL in pairs of two up to four pairs and Shadow Seal them. Gain 1 SP for each pair banished.",
+    "archetype": "Death",
+    "archetypes": [
+      "Death"
+    ],
+    "image": "Images/Cards/Spirit Give.png"
+  },
+  {
+    "id": "spirit_swapper",
+    "name": "Spirit Swapper",
+    "type": "Phantom",
+    "description": "Spirit cards that would affect the currently activating Player are applied to the Enemy Player instead.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos"
+    ],
+    "image": "Images/Cards/Spirit Swapper.png",
+    "level": 4,
+    "attack": 1000,
+    "health": 1000
+  },
+  {
     "id": "spy_vs._spy",
     "name": "Spy Vs. Spy",
     "type": "Spirit",
-    "description": "Both Players choose 5 cards from their deck, each Player selects 1 of their opponent’s chosen cards and that card is then added to the respective Player’s hand. The opponent shuffles their cards back. The activating Player Oblivion Seals their remaining cards. You cannot Attack the turn this Ability is activated. Once Per Game.",
+    "description": "Both Players choose 5 cards from their deck, each Player selects 1 of their opponent’s chosen cards and that card is then added to the respective Player’s hand. <br><br>The opponent shuffles their cards back. <br>The activating Player Oblivion Seals their remaining cards. <br>You cannot Attack the turn this Ability is activated. <br>Once Per Game.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -439,15 +2208,30 @@
     "image": "Images/Cards/Spy Vs. Spy.png"
   },
   {
-    "id": "stimulant_booster",
-    "name": "Stimulant Booster",
-    "type": "Spirit",
-    "description": "Equip: When Equipped to an Ally Card increase its Attack by 500. When Equipped to an Enemy Card decrease it’s Attack by 500.",
+    "id": "steal_from_the_rich!",
+    "name": "Steal From The Rich!",
+    "type": "Counter",
+    "description": "During your opponent’s draw phase, activate this card if their hand has three more cards in it than yours. <br>The opponent chooses one card to give to the activating player.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
     ],
-    "image": "Images/Cards/Stimulant Booster.png"
+    "image": "Images/Cards/Steal From The Rich!.png"
+  },
+  {
+    "id": "steam_elemental",
+    "name": "Steam Elemental",
+    "type": "Phantom",
+    "description": "Field Summon: Targeted Deal 500 damage. When this card Breaks, Search another copy of it. <br><br>Balance Summon: This card loses 1000 attack. Targeted Deal this card’s Attack. <br>Damage dealt to this Card’s Health in Battle is also dealt to the Battler.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Water, Fire, Steam"
+    ],
+    "image": "Images/Cards/Steam Elemental.png",
+    "level": 6,
+    "attack": 2000,
+    "health": 1000
   },
   {
     "id": "stimulant_booster",
@@ -464,7 +2248,7 @@
     "id": "summoner_overdrive",
     "name": "Summoner Overdrive",
     "type": "Spirit",
-    "description": "Condition: This card cannot be activated the same turn the player Unsummons. Gain 4-SP. You cannot gain any SP your next turn. Any card summoned this turn after activating this card is discarded at Turn end. Lose 2000 LP your next turn. Once per turn.",
+    "description": "Condition: This card cannot be activated the same turn the player Unsummons. <br>Gain 4-SP. <br>You cannot gain any SP your next turn. <br>Any card summoned this turn after activating this card is discarded at Turn end. <br>Lose 2000 LP your next turn. <br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -483,21 +2267,94 @@
     "image": "Images/Cards/Summoner’s Draw.png"
   },
   {
-    "id": "summoners_pact",
-    "name": "Summoners Pact",
+    "id": "summoners’_pact",
+    "name": "Summoners’ Pact",
     "type": "Spirit",
-    "description": "Lose 2000 LP. Gain 2-SP. Your opponent gains 4-SP their next turn. Once per turn.",
+    "description": "Lose 2000 LP. Gain 2-SP. <br>Your opponent gains 4-SP their next turn. Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
     ],
-    "image": "Images/Cards/Summoners Pact.png"
+    "image": "Images/Cards/Summoners’ Pact.png"
+  },
+  {
+    "id": "summoning_auditorium",
+    "name": "Summoning Auditorium",
+    "type": "Environment",
+    "description": "Players in the Environment Range Draw from the opponent’s deck.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Summoning Auditorium.png"
+  },
+  {
+    "id": "summoning_library",
+    "name": "Summoning Library",
+    "type": "Environment",
+    "description": "When this card is played Draw a card. <br>This card cannot be activated the turn it is played. <br>Players in the Environment Range can activate this Card’s Ability. <br>Both Players draw a card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Summoning Library.png"
+  },
+  {
+    "id": "summoning_point_parasite",
+    "name": "Summoning Point Parasite",
+    "type": "Phantom",
+    "description": "Condition: Direct Attacks the opponent. <br>They lose 1 SP on their turn. <br>The owning player gains 1 SP their next turn.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Summoning Point Parasite.png",
+    "level": 3,
+    "attack": 500,
+    "health": 500
+  },
+  {
+    "id": "those_who_give_life",
+    "name": "Those Who Give Life",
+    "type": "Phantom",
+    "description": "While your LP is higher than your opponent's: <br>You may Select Life Phantoms in the AL and pay 1000 LP per SP they have and then Special Summon them. <br>This card gains 500 Stats for every 1000 LP paid. <br><br>While your LP is lower than your opponent's: <br>Damage dealt to this card is instead directly dealt to the owning Player. <br>This Card cannot be Targeted by Abilities. This card cannot target a Phantom for Attack. <br>Direct Attack Damage by this Card is not delt, the owner gains LP equal to this card’s Attack.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life",
+      "Unknown"
+    ],
+    "image": "Images/Cards/Those Who Give Life.png",
+    "level": 9,
+    "attack": 0,
+    "health": 0
+  },
+  {
+    "id": "token_creation",
+    "name": "Token Creation",
+    "type": "Spirit",
+    "description": "Create two 0-SP 0/0 Tokens.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Token Creation.png"
+  },
+  {
+    "id": "tournament_arena",
+    "name": "Tournament Arena",
+    "type": "Environment",
+    "description": "When a Phantom Card would Break by Battle, instead bounce it back to the owner's hand.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Tournament Arena.png"
   },
   {
     "id": "trading_cards",
     "name": "Trading Cards",
     "type": "Spirit",
-    "description": "Each player selects a card in hand to give to the other player. If another Chaos card is face up on the field, return this card to the owner’s hand. Once per turn.",
+    "description": "Each player selects a card in hand to give to the other player. <br>If another Chaos card is face up on the field, return this card to the owner’s hand. <br>Once per turn.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos"
@@ -508,7 +2365,7 @@
     "id": "trolly_problem",
     "name": "Trolly Problem",
     "type": "Spirit",
-    "description": "Choose 5 cards from your deck, your opponent chooses which card is added to your hand. The other 4 cards are Oblivion Sealed. On your opponent’s next turn, this Ability activates for them, except 2 Cards must be selected to be added to their hand. Once Per Game.",
+    "description": "Choose 5 cards from your deck, your opponent chooses which card is added to your hand. <br>The other 4 cards are Oblivion Sealed.<br><br>On your opponent’s next turn, this Ability activates for them, except 2 Cards must be selected to be added to their hand. <br><br>Once Per Game.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -516,329 +2373,58 @@
     "image": "Images/Cards/Trolly Problem.png"
   },
   {
-    "id": "will_from_beyond",
-    "name": "Will From Beyond",
-    "type": "Spirit",
-    "description": "Select a Phantom from the After Life and Resurrect it for 1-turn at summoning cost. At the end of the turn, if it is still on the field, After Life Seal it.",
-    "archetype": "Standard",
+    "id": "true_destruction",
+    "name": "True Destruction",
+    "type": "Counter",
+    "description": "The first card sent to the AL each turn is Destroyed instead.",
+    "archetype": "Destruction",
     "archetypes": [
-      "Standard"
+      "Destruction"
     ],
-    "image": "Images/Cards/Will From Beyond.png"
+    "image": "Images/Cards/True Destruction.png"
   },
   {
-    "id": "ancient_curse",
-    "name": "Ancient Curse",
+    "id": "vengeance_of_the_dead",
+    "name": "Vengeance Of The Dead",
     "type": "Counter",
-    "description": "Activate Condition: Opponent’s Phantom deals damage from a direct attack. As long as that card remains on the field, at the start of each of your turns, damage the opponent’s Life points equal to the Phantom’s attack points.",
-    "archetype": "Standard",
+    "description": "If an Ally Death card is Defeated in Battle, the card that Defeated it will Break at the end of the Round. <br>The Ally Death card is then added back to the hand.",
+    "archetype": "Death",
     "archetypes": [
-      "Standard"
+      "Death"
     ],
-    "image": "Images/Cards/Ancient Curse.png"
+    "image": "Images/Cards/Vengeance Of The Dead.png"
   },
   {
-    "id": "arbitration",
-    "name": "Arbitration",
+    "id": "vengeful_shade",
+    "name": "Vengeful Shade",
     "type": "Counter",
-    "description": "If a card you control is Defeated, your opponent cannot declare another Attack this turn.",
-    "archetype": "Standard",
+    "description": "When an Ally Shadow card Breaks from an Ability, Banish both cards.",
+    "archetype": "Shadow",
     "archetypes": [
-      "Standard"
+      "Shadow"
     ],
-    "image": "Images/Cards/Arbitration.png"
+    "image": "Images/Cards/Vengeful Shade.png"
   },
   {
-    "id": "bail_out",
-    "name": "Bail Out",
-    "type": "Counter",
-    "description": "If you were going to take enough damage to lose the game, gain 2500 health. Once per card.",
-    "archetype": "Standard",
+    "id": "water_elemental",
+    "name": "Water Elemental",
+    "type": "Phantom",
+    "description": "Field Ability: When this card Breaks, Search another copy of it. <br>Balance Ability: Damage dealt to this Card’s Health in Battle is also dealt to the Battler.",
+    "archetype": "Elemental",
     "archetypes": [
-      "Standard"
+      "Elemental",
+      "Water"
     ],
-    "image": "Images/Cards/Bail Out.png"
-  },
-  {
-    "id": "battle_counter",
-    "name": "Battle Counter",
-    "type": "Counter",
-    "description": "Condition: An enemy Card initiates a Direct Attack. Redirect the Attack.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Battle Counter.png"
-  },
-  {
-    "id": "battle_counter",
-    "name": "Battle Counter",
-    "type": "Counter",
-    "description": "Condition: An Enemy Card initiates Battle. Targeted Break.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Battle Counter.png"
-  },
-  {
-    "id": "blow_back",
-    "name": "Blow Back",
-    "type": "Counter",
-    "description": "If a Phantom attacks one of your cards in Defense Position, the opponent then takes damage equal to the Health of the Phantom that was attacked.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Blow Back.png"
-  },
-  {
-    "id": "chance_counter",
-    "name": "Chance Counter",
-    "type": "Counter",
-    "description": "When an Ally card is targeted for an Attack, you can flip a coin for every face up Chaos card on the field. Apply the following for each correctly called coin flip: 1: Negate the attack. 2: Deal damage to the opponent equal to the card Attacking Card. 3: Break the Attacking Card.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Chance Counter.png"
-  },
-  {
-    "id": "collateral_damage",
-    "name": "Collateral Damage",
-    "type": "Counter",
-    "description": "If a Chaos card would Break, instead the opponent Targets another card to Break in its place.",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Collateral Damage.png"
-  },
-  {
-    "id": "column_breaker",
-    "name": "Column Breaker",
-    "type": "Counter",
-    "description": "Condition: All slots in this card’s column have a card in them. Break all cards in this column.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Column Breaker.png"
-  },
-  {
-    "id": "copy_cat",
-    "name": "Copy Cat",
-    "type": "Counter",
-    "description": "Condition: Turn start activate this card. Summon a Copy of the first Phantom card your opponent plays. If they don’t play a Phantom card, send this card to the After Life.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Copy Cat.png"
-  },
-  {
-    "id": "cosmic_binding",
-    "name": "Cosmic Binding",
-    "type": "Counter",
-    "description": "Condition: An Enemy Phantom would leave the field from a means other than being Unsummoned. Negate its Abilities and reduce its Stats to zero. It becomes Field Locked for 3 Turns. At the end of 3 turns Break that card, or Equip it to an Ally Cosmic Phantom.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Binding.png"
-  },
-  {
-    "id": "cosmic_rebalance",
-    "name": "Cosmic Rebalance",
-    "type": "Counter",
-    "description": "Condition: Control a Cosmic Phantom Card. If your opponent has more Phantoms on the field than you, have them be returned to the opponents hand in order of Level from lowest to highest, until they have the same number of Phantoms.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Rebalance.png"
-  },
-  {
-    "id": "cosmic_relativity",
-    "name": "Cosmic Relativity",
-    "type": "Counter",
-    "description": "When an Ally Cosmic Phantom engages in Battle, swap the stats of the two Battling Phantoms.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Relativity.png"
-  },
-  {
-    "id": "cosmic_required",
-    "name": "Cosmic Required",
-    "type": "Counter",
-    "description": "When an Ally Cosmic Phantom would Break, the break is negated and this card is equipped to it. Equipped: Each time the Equipped card would Break you can instead Detach a card Equipped to it.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Required.png"
-  },
-  {
-    "id": "cosmic_tie",
-    "name": "Cosmic Tie",
-    "type": "Counter",
-    "description": "When an Enemy Phantom would Break or be discarded, instead negate it’s Abilities and Equip it to an Ally Cosmic Phantom. This card also Equips to the Selected Phantom.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Cosmic Tie.png"
-  },
-  {
-    "id": "counter_draw",
-    "name": "Counter Draw",
-    "type": "Counter",
-    "description": "Condition: The opponent draws a card. Draw a card.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Counter Draw.png"
-  },
-  {
-    "id": "crooks_freeze!",
-    "name": "Crooks Freeze!",
-    "type": "Counter",
-    "description": "No face up cards can attack this Round.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Crooks Freeze!.png"
-  },
-  {
-    "id": "dodge_roll!",
-    "name": "Dodge Roll!",
-    "type": "Counter",
-    "description": "Condition: A Phantom that would be Broken. Apply to it and Activate Dodge Roll.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Dodge Roll!.png"
-  },
-  {
-    "id": "draw_counter",
-    "name": "Draw Counter",
-    "type": "Counter",
-    "description": "Condition: The opponent draws a card. The opponent Discards that card.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Draw Counter.png"
-  },
-  {
-    "id": "emergency_diffusion",
-    "name": "Emergency Diffusion",
-    "type": "Counter",
-    "description": "Condition: If a Fusion Phantom would be destroyed in battle, or by card effect. Discard that Phantom Card, then resummon the fusion materials used to summon the Phantom card. Dodge.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Emergency Diffusion.png"
-  },
-  {
-    "id": "endurance_test",
-    "name": "Endurance Test",
-    "type": "Counter",
-    "description": "When a direct attack is issued, you can activate this card. Both players send the top five cards of their deck to the AL. Once per turn.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Endurance Test.png"
-  },
-  {
-    "id": "hoarder_counter",
-    "name": "Hoarder Counter",
-    "type": "Counter",
-    "description": "Activate after the opponent has drawn a card, and they have more cards in hand than you. The opponent chooses 1 card from their hand to shuffle back into their deck.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Hoarder Counter.png"
-  },
-  {
-    "id": "kings’_lead",
-    "name": "Kings’ Lead",
-    "type": "Counter",
-    "description": "When your opponent activates a Spirit/Counter Card that would destroy a Phantom(s) on the field: Pay 2000 LP to Negate the activation, then destroy it. Once per Round.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Kings’ Lead.png"
-  },
-  {
-    "id": "law_of_death",
-    "name": "Law Of Death",
-    "type": "Counter",
-    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their AY. Negate the activation. If you control a Cosmic Phantom, that card in their AY becomes AY Sealed.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Law Of Death.png"
-  },
-  {
-    "id": "law_of_shadow",
-    "name": "Law Of Shadow",
-    "type": "Counter",
-    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Shadow Realm. Negate the activation. If you control a Cosmic Phantom, that card in their Shadow Realm becomes Shadow Sealed.",
-    "archetype": "Cosmic",
-    "archetypes": [
-      "Cosmic"
-    ],
-    "image": "Images/Cards/Law Of Shadow.png"
-  },
-  {
-    "id": "sacrificial_pawn",
-    "name": "Sacrificial Pawn",
-    "type": "Counter",
-    "description": "If a Phantom card would be destroyed in battle, instead summon a 0/500 token that the attack is directed at instead.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Sacrificial Pawn.png"
-  },
-  {
-    "id": "self_destruct",
-    "name": "Self-Destruct",
-    "type": "Counter",
-    "description": "Condition: Both players are below 2500 Life Points. Deal 2500 damage to each player.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Self-Destruct.png"
-  },
-  {
-    "id": "steal_from_the_rich!",
-    "name": "Steal From The Rich!",
-    "type": "Counter",
-    "description": "During your opponent’s draw phase, activate this card if their hand has three more cards in it than yours. The opponent chooses one card to give to the activating player.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Steal From The Rich!.png"
+    "image": "Images/Cards/Water Elemental.png",
+    "level": 2,
+    "attack": 500,
+    "health": 500
   },
   {
     "id": "white_flag_counter",
     "name": "White Flag Counter",
     "type": "Counter",
-    "description": "After Life Seal all cards in hand. For each card Sealed, draw that many more in your next draw phase. Your opponent’s first Battle of the turn is negated. Optional: Select a Phantom Card on your field, to have it Direct Attack the opponent and be Discarded after the attack. Cost: The opponent can select one of your field cards to be Discarded.",
+    "description": "After Life Seal all cards in hand. <br>For each card Sealed, draw that many more in your next draw phase. <br>Your opponent’s first Battle of the turn is negated. <br><br>Optional: Select a Phantom Card on your field, to have it Direct Attack the opponent and be Discarded after the attack. <br>Cost: The opponent can select one of your field cards to be Discarded.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -846,10 +2432,21 @@
     "image": "Images/Cards/White Flag Counter.png"
   },
   {
+    "id": "will_from_beyond",
+    "name": "Will From Beyond",
+    "type": "Spirit",
+    "description": "Select a Phantom from the After Life and Resurrect it for 1-turn at summoning cost. <br>At the end of the turn, if it is still on the field, After Life Seal it.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Will From Beyond.png"
+  },
+  {
     "id": "wretched_deduction",
     "name": "Wretched Deduction",
     "type": "Counter",
-    "description": "At the start of your turn, select a card from the opponent’s hand and predict what type of card it is (Phantom, Spirit, Counter). The opponent shows the card. If you guessed correctly, deal 1000 damage to the opponent. Once per turn.",
+    "description": "At the start of your turn, select a card from the opponent’s hand and predict what type of card it is (Phantom, Spirit, Counter). <br>The opponent shows the card. <br>If you guessed correctly, deal 1000 damage to the opponent. <br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -860,88 +2457,11 @@
     "id": "you’ll_pay_for_this!",
     "name": "You’ll Pay For This!",
     "type": "Counter",
-    "description": "If a card is destroyed in battle, select another card you control and increase their Stat Points by 1000.",
+    "description": "If a card Breaks in battle, select another card you control and increase their Stat Points by 1000.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
     ],
     "image": "Images/Cards/You’ll Pay For This!.png"
-  },
-  {
-    "id": "ancient_city",
-    "name": "Ancient City",
-    "type": "Environment",
-    "description": "Counter cards within the Environment Range are shuffled back into the deck instead of being destroyed.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Ancient City.png"
-  },
-  {
-    "id": "city_of_tomorrow",
-    "name": "City Of Tomorrow",
-    "type": "Environment",
-    "description": "Spirit cards within the Environment Range are shuffled back into the deck instead of being destroyed.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/City Of Tomorrow.png"
-  },
-  {
-    "id": "cityscape",
-    "name": "Cityscape",
-    "type": "Environment",
-    "description": "The first Phantom card destroyed per-turn for each Player within the Environment Range is shuffled back into the deck instead of being destroyed.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Cityscape.png"
-  },
-  {
-    "id": "cyber_space",
-    "name": "Cyber Space",
-    "type": "Environment",
-    "description": "Players within the Environment Range gain +1 Summoning Point per turn.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Cyber Space.png"
-  },
-  {
-    "id": "desert",
-    "name": "Desert",
-    "type": "Environment",
-    "description": "Players within the Environment Range take 500 damage a turn.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Desert.png"
-  },
-  {
-    "id": "open_ending",
-    "name": "Open Ending",
-    "type": "Environment",
-    "description": "Every time a card would leave the field, roll a 6-sided Die, and send the card to the corresponding location. 1: AL 2: Shadow Realm 3: Oblivion 4: Bottom of the main Deck. 5: Side Deck. 6: Extra Deck",
-    "archetype": "Chaos",
-    "archetypes": [
-      "Chaos"
-    ],
-    "image": "Images/Cards/Open Ending.png"
-  },
-  {
-    "id": "tournament_arena",
-    "name": "Tournament Arena",
-    "type": "Environment",
-    "description": "When a Phantom Card would be destroyed by Battle, instead bounce it back to the owner's hand.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
-    ],
-    "image": "Images/Cards/Tournament Arena.png"
   }
 ]

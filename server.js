@@ -2,9 +2,13 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'menu.html'));
+});
 app.use(express.static(__dirname));
 
 const server = http.createServer(app);
