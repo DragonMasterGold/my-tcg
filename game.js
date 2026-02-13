@@ -2,6 +2,7 @@ let allCards = [];
 let cardImages = {};
 let keywordRepo = {};
 let battleState = { attackerId: null, targetId: null };
+let autoSP = true;
 
 async function loadCardDatabase() {
     try {
@@ -206,22 +207,36 @@ function setupListeners() {
 function handleKeys(e) {
     const k = e.key.toLowerCase();
 	
-	// 1. --- GLOBAL HOTKEYS (Work anywhere) ---
+	// 1. --- GLOBAL HOTKEYS ---
     if (k === 'n') {
-        cardAction('cancel-atk'); 
+        const aId = battleState.attackerId;
+        const tId = battleState.targetId;
+        battleState = { attackerId: null, targetId: null };
+        if (aId) { const c = findCard(aId); if(c) refreshCard(c); }
+        if (tId) { const c = findCard(tId); if(c) refreshCard(c); }
+        if (isMultiplayer) sendAction('battle_sync', { step: 'cancel' });
         return;
     }
     if (k === 'i') { openViewer('player', 'deck', true); return; }	
 
+    // STEP 3: Execute Battle (Global Check)
+    // If both IDs are already set, pressing B executes immediately regardless of hover.
+    // This fixes the "3rd click" lag.
+    if (k === 'b' && battleState.attackerId && battleState.targetId) {
+        executeBattleLogic();
+        return;
+    }
+
     // 2. --- DYNAMIC HOVER CHECK ---
-    // We look for a card physically under the mouse instead of relying on hoveredId
-    const hoveredEl = document.querySelector('.card:hover');
+    // We use .closest('.card') to find the card even if hovering the name or stats
+    const hoveredEl = document.querySelector('.card:hover') || 
+                      document.querySelector('.card *:hover')?.closest('.card');
     
     if (hoveredEl) {
         const card = findCard(hoveredEl.id);
         if (!card) return;
 
-		// B - Battle Logic (Now follows the mouse perfectly)
+		// B - Battle Selection (Steps 1 & 2)
         if (k === 'b') {
             if (card.type !== 'Phantom' || card.loc !== 'field') return;
 
@@ -238,11 +253,6 @@ function handleKeys(e) {
                     battleState.targetId = card.id;
                     refreshCard(card);
                     if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
-                }
-            } else {
-                // Step 3: Execute Battle
-                if (card.id === battleState.attackerId || card.id === battleState.targetId) {
-                    cardAction('execute-battle');
                 }
             }
             return;
@@ -321,8 +331,16 @@ function handleKeys(e) {
                 });
             }
         }
+		
+		// In handleKeys, add 'u' and update 'w'
+		if (k === 'u') {
+			if (card.loc === 'field') unsummonPhantom(card);
+			return;
+		}
+		
         // W - Play to Field
         if (k === 'w') {
+			if (!handleSummonCost(card)) return; // Check cost
             let typeName = 'Phantom';
             if (card.type === 'Spirit') typeName = 'Spirit';
             if (card.type === 'Counter') typeName = 'Counter';
@@ -619,12 +637,18 @@ function renderHand(owner) {
 function handleDrop(e) {
     e.preventDefault();
     if (!draggedId) return;
-
     const card = findCard(draggedId);
     if (!card) return;
     
     let target = e.target.closest('.zone, .hand-area');
     if (!target) return;
+	
+	 // --- NEW: COST CHECK ---
+    // If moving from Hand to Field, check cost
+    if (card.loc === 'hand' && target.id.includes('field') || target.dataset.zone === 'field') {
+        if (!handleSummonCost(card)) return; // Stop the drop if can't afford
+    }
+    
 
     executeAction('move_card', {
         cardId: draggedId,
@@ -1085,7 +1109,7 @@ function openCardCtx(e, card) {
 	const onField = card.loc === 'field';
     const isMyCard = card.owner === 'player';
 	
-	// Battle Menu Options
+	// --- SECTION 1: ACTION OPTIONS ---
     if (onField && card.faceUp && card.type === 'Phantom') {
         // Battle options at top of field cards
         if (!battleState.attackerId) {
@@ -1097,13 +1121,16 @@ function openCardCtx(e, card) {
             addMsg('Execute Battle (B)', 'execute-battle');
             addMsg('Cancel Attack (N)', 'cancel-atk');
         }
-    } else if ((!onField || card.loc === 'pile') && (isMyCard || !inHand)) {
-        // Play/Set options at top of hand/pile cards
+    } else if ((!onField || ['deck', 'sideDeck', 'extraDeck', 'pile'].includes(card.loc)) && (isMyCard || !inHand)) {
         if (card.type === 'Phantom') {
             addMsg('Play in Attack (W)', 'play-atk');
             addMsg('Play in Defense', 'play-def');
+            addSep();
             addMsg('Set in Attack', 'set-atk');
             addMsg('Set in Defense', 'set-def');
+			addSep();
+            addMsg('Special Summon', 'special-atk');
+			
         } else if (card.type === 'Spirit' || card.type === 'Counter') {
             addMsg('Play', 'play-spirit');
             addMsg('Set', 'set-spirit');
@@ -1112,10 +1139,17 @@ function openCardCtx(e, card) {
             addMsg('Set Environment', 'set-env');
         }
     }
-    
+	
+	   
 	addSep();
     // Highlight
     addMsg(inHand && isMyCard ? 'Reveal & Highlight (E)' : 'Highlight (E)', 'highlight');
+	addSep();
+	
+	if (onField) {
+        if (card.type === 'Phantom') addMsg('Unsummon (U)', 'unsummon');
+    }
+	
 	addSep();
 
 
@@ -1131,6 +1165,14 @@ function openCardCtx(e, card) {
     if (isMyCard || !inHand) {
         addMsg('Copy/Clone (C)', 'clone');
     }
+	
+	// 5. Counters
+    if (card.loc === 'field') {
+        addMsg('Add Counter', 'add-counter');
+        if (card.counter > 0) addMsg('Remove Counter', 'remove-counter');
+        addSep();
+    }
+	
     addSep();
 
     // 4. Movement
@@ -1140,13 +1182,7 @@ function openCardCtx(e, card) {
     addMsg('To Deck Random (P)', 'randomdeck');
     addSep();
 
-    // 5. Counters
-    if (card.loc === 'field') {
-        addMsg('Add Counter', 'add-counter');
-        if (card.counter > 0) addMsg('Remove Counter', 'remove-counter');
-        addSep();
-    }
-
+    
     // 6. Piles
     addMsg('To Afterlife (D)', 'afterlife');
     addMsg('To Shadow (S)', 'shadow');
@@ -1159,7 +1195,7 @@ function cardAction(act) {
     hideCtx();
     if (!ctxTarget) return;
     const card = ctxTarget;
-
+	
     // --- PLAY / SET OPTIONS ---
     if (act === 'play-atk') {
         playCardToField(card, card.type, true, false);
@@ -1228,6 +1264,39 @@ function cardAction(act) {
                     faceUp: card.faceUp,    // ADD THIS
                     rotated: card.rotated   // ADD THIS
                 }); 
+            }
+        }
+    }
+	
+	// 1. Handle Unsummon (This fixes the menu button doing nothing)
+    if (act === 'unsummon') {
+        unsummonPhantom(card);
+    }
+
+    // 2. Handle standard Play/Set (Ensure cost check is here)
+    else if (act === 'play-atk' || act === 'play-def' || act === 'set-atk' || act === 'set-def') {
+        if (!handleSummonCost(card)) return; // Check SP
+        const isSet = act.startsWith('set-');
+        const isDef = act.endsWith('-def');
+        playCardToField(card, card.type, !isSet, isDef);
+        
+        if (isMultiplayer) {
+            const el = document.getElementById(card.id);
+            if (el && el.parentElement) {
+                sendAction('move', { cardId: card.id, toZone: el.parentElement.id, fromZone: card.loc, faceUp: !isSet, rotated: isDef });
+            }
+        }
+    }
+
+    // 3. Handle Special Summon (Bypasses cost check)
+    else if (act === 'special-atk' || act === 'special-def') {
+        const isDef = act.endsWith('-def');
+        playCardToField(card, card.type, true, isDef); // Always face-up
+        
+        if (isMultiplayer) {
+            const el = document.getElementById(card.id);
+            if (el && el.parentElement) {
+                sendAction('move', { cardId: card.id, toZone: el.parentElement.id, fromZone: card.loc, faceUp: true, rotated: isDef });
             }
         }
     }
@@ -1876,6 +1945,9 @@ function executeBattleLogic() {
     const atkCard = findCard(battleState.attackerId);
     const defCard = findCard(battleState.targetId);
     if (!atkCard || !defCard) return;
+	
+	// 1. Clear the IDs immediately so the hotkey "un-sticks"
+    battleState = { attackerId: null, targetId: null };
 
     // Detect Keywords
     const atkHasBreaker = atkCard.description.includes("Breaker");
@@ -1899,6 +1971,11 @@ function executeBattleLogic() {
     // Capture IDs for sync before cards potentially move
     const aId = atkCard.id;
     const tId = defCard.id;
+	battleState = { attackerId: null, targetId: null };
+	
+	refreshCard(atkCard);
+    refreshCard(defCard);
+    updateStats();
 
     // --- KEYWORD & BREAK LOGIC ---
 
@@ -1961,6 +2038,52 @@ function applyBreak(targetCard, sourceCard = null) {
                 toZone: `${targetOwner}-${destination}` 
             });
         }
+    }
+}
+
+function toggleAutoSP() {
+    autoSP = !autoSP;
+    const btn = document.getElementById('auto-sp-toggle');
+    if (btn) {
+        btn.classList.toggle('active-blue', autoSP);
+        btn.innerText = autoSP ? "SP: ON" : "SP: OFF";
+    }
+}
+
+function handleSummonCost(card, isSpecial = false) {
+    if (!autoSP || isSpecial || card.type !== 'Phantom') return true;
+    
+    const cost = parseInt(card.level) || 0;
+    if (state.player.sp >= cost) {
+        state.player.sp -= cost;
+        updateStats();
+        if (isMultiplayer) sendAction('sp', { player: 'player', value: state.player.sp });
+        return true;
+    } else {
+        alert(`Not enough SP! (Need ${cost}, have ${state.player.sp})`);
+        return false;
+    }
+}
+
+function unsummonPhantom(card) {
+    if (!card || card.loc !== 'field') return;
+    
+    // Add current level to SP
+    const refund = parseInt(card.level) || 0;
+    state.player.sp += refund;
+    updateStats();
+    
+    if (isMultiplayer) sendAction('sp', { player: 'player', value: state.player.sp });
+    
+    // Move specifically to YOUR afterlife (since it was your card on your field)
+    moveCardTo(card, 'afterlife');
+    if (isMultiplayer) {
+        sendAction('move', { 
+            cardId: card.id, 
+            fromZone: 'field', 
+            toZone: 'player-afterlife', 
+            owner: 'player' 
+        });
     }
 }
 
@@ -2158,17 +2281,33 @@ function applyRemoteAction(action) {
     }
 
     if (type === 'battle_exec') {
-        const atk = findCard(flipZoneId(payload.atkId));
-        const def = findCard(flipZoneId(payload.defId));
-        if (atk) { atk.health = payload.atkH; atk.rotated = payload.atkR; refreshCard(atk); }
+        const atk = findCard(payload.atkId);
+        const def = findCard(payload.defId);
+
+        // 1. Clear the IDs FIRST so that the upcoming refreshCard calls 
+        // will see battleState is null and remove the classes.
+        const oldAtkId = battleState.attackerId;
+        const oldTgtId = battleState.targetId;
+        battleState = { attackerId: null, targetId: null };
+
+        // 2. Update stats and refresh participants
+        if (atk) { 
+            atk.health = payload.atkH; 
+            atk.rotated = payload.atkR; 
+            refreshCard(atk); 
+        }
         if (def) { 
             def.health = payload.defH; 
             def.rotated = payload.defR; 
             state[def.owner].lp = payload.defLP; 
             refreshCard(def); 
         }
+
+        // 3. Cleanup safety: refresh original IDs if they differ from the ones provided
+        if (oldAtkId && oldAtkId !== payload.atkId) { const c = findCard(oldAtkId); if(c) refreshCard(c); }
+        if (oldTgtId && oldTgtId !== payload.defId) { const c = findCard(oldTgtId); if(c) refreshCard(c); }
+
         updateStats();
-        battleState = { attackerId: null, targetId: null };
     }
 
     // --- BUTTON PULSE ---

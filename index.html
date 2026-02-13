@@ -120,34 +120,39 @@
         </div>
 
         <!-- CENTER STRIP -->
-        <div class="center-row">
-            <!-- Structure mimics field-grid-wrapper: Balance(Env) | Gap | 3-Grid | Gap | Balance(Env) -->
-            <div class="center-wrapper">
-                <!-- Left Env -->
-                <div class="zone env" id="opponent-env" data-zone="field"><span class="label">Environment</span></div>
-                
-                <!-- Middle Grid (3 Columns) -->
-                <div class="center-btn-grid">
-                    <button class="phase-btn" onclick="drawPhase()">Draw Phase</button>
-                    <div><!-- GAP --></div>
-                    <button id="end-turn-btn" class="end-turn-btn" onclick="endTurn()">End Turn</button>
-                </div>
+		<div class="center-row">
+			<!-- NEW: Left Tools Area -->
+			<div class="tools-area-left">
+				<button id="auto-sp-toggle" class="auto-sp-btn active-blue" onclick="toggleAutoSP()" title="Toggle Auto SP Cost">SP: ON</button>
+			</div>
 
-                <!-- Right Env -->
-                <div class="zone env" id="player-env" data-zone="field"><span class="label">Environment</span></div>
-            </div>
+			<div class="center-wrapper">
+				<!-- Left Env -->
+				<div class="zone env" id="opponent-env" data-zone="field"><span class="label">Environment</span></div>
+				
+				<!-- Middle Grid (Restored to original order) -->
+				<div class="center-btn-grid">
+					<button class="phase-btn" onclick="drawPhase()">Draw Phase</button>
+					<div><!-- GAP --></div>
+					<button id="end-turn-btn" class="end-turn-btn" onclick="endTurn()">End Turn</button>
+				</div>
 
-            <div class="tools-area-right">
+				<!-- Right Env -->
+				<div class="zone env" id="player-env" data-zone="field"><span class="label">Environment</span></div>
+			</div>
+
+			<!-- Right Tools Area (Existing) -->
+			<div class="tools-area-right">
 				<button onclick="spawnToken('player')" title="Spawn Token">💠</button>
-                <button onclick="rollDie()">🎲</button>
-                <span id="die-result">-</span>
-                <button onclick="flipCoin()">🪙</button>
-                <span id="coin-result">-</span>
-                
-                <button class="eye-btn" onclick="toggleOpponentHand()" title="Reveal Opponent Hand">👁️ Opp</button>
-                <button class="eye-btn" onclick="togglePlayerHand()" title="Reveal My Hand">👁️ My</button>
-            </div>
-        </div>
+				<button onclick="rollDie()">🎲</button>
+				<span id="die-result">-</span>
+				<button onclick="flipCoin()">🪙</button>
+				<span id="coin-result">-</span>
+				
+				<button class="eye-btn" onclick="toggleOpponentHand()" title="Reveal Opponent Hand">👁️ Opp</button>
+				<button class="eye-btn" onclick="togglePlayerHand()" title="Reveal My Hand">👁️ My</button>
+			</div>
+		</div>
 
         <!-- === PLAYER SIDE === -->
         <div class="player-side player-own-side" style="position: relative;">
