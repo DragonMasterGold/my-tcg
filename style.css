@@ -773,3 +773,15 @@ input[type=number] {
     color: #ff4444;
 }
 
+/* Battle Visuals - High priority glow */
+.battle-attacker {
+    box-shadow: 0 0 25px 8px #ff4444 !important;
+    border: 3px solid #ff4444 !important;
+    z-index: 100 !important;
+}
+
+.battle-target {
+    box-shadow: 0 0 25px 8px #ff8c00 !important;
+    border: 3px solid #ff8c00 !important;
+    z-index: 100 !important;
+}
