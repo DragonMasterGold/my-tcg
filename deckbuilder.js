@@ -37,18 +37,45 @@ const defaultImages = {
 
 // === ROBUST FILTERING & RENDERING ===
 function filterCards() {
-    const term = document.getElementById('card-search').value.toLowerCase();
+    const rawTerm = document.getElementById('card-search').value.toLowerCase().trim();
     const cardPool = document.getElementById('card-pool');
     cardPool.innerHTML = ''; 
 
-    const filtered = allCards.filter(card => {
+    let filtered = allCards.filter(card => {
+        // Handle the Top Category Filter Buttons first
         if (currentFilter !== 'All' && card.type !== currentFilter) return false;
-        const nameMatch = card.name.toLowerCase().includes(term);
-        const descMatch = (card.description || "").toLowerCase().includes(term);
-        return nameMatch || descMatch;
+
+        if (!rawTerm) return true;
+
+        // --- Structured Search (e.g., "Level: 2") ---
+        if (rawTerm.includes(':')) {
+            const parts = rawTerm.split(':');
+            const key = parts[0].trim();
+            const val = parts[1].trim();
+
+            if (key === 'level') return String(card.level) === val;
+            if (key === 'archetype') {
+                return (card.archetype || "").toLowerCase().includes(val) || 
+                       (card.archetypes || []).some(a => a.toLowerCase().includes(val));
+            }
+            if (key === 'form' || key === 'type') return (card.type || "").toLowerCase().includes(val);
+        }
+
+        // --- General Search (Search everything at once) ---
+        const searchableText = [
+            card.name,
+            card.type,
+            card.description,
+            card.archetype,
+            ...(card.archetypes || []),
+            `level ${card.level}`
+        ].join(' ').toLowerCase();
+
+        return searchableText.includes(rawTerm);
     });
 
-    filtered.forEach(card => {
+    // Apply the sorting rules before displaying
+    sortCardList(filtered).forEach(card => {
         cardPool.appendChild(createCardElement(card, true));
     });
 }
@@ -57,11 +84,12 @@ function filterByType(type) {
     currentFilter = type;
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.textContent.includes(type) || (type === 'All' && btn.textContent === 'All')) {
+        // Match button text to Form
+        if (btn.textContent.toLowerCase().includes(type.toLowerCase()) || (type === 'All' && btn.textContent === 'All')) {
             btn.classList.add('active');
         }
     });
-    filterCards();
+    filterCards(); // This now handles the sorting automatically
 }
 
 // === CARD CREATION (Unified) ===
@@ -257,7 +285,9 @@ function updateDeckDisplay() {
         const display = document.getElementById(`${type}-deck-display`);
         if (display) {
             display.innerHTML = '';
-            currentDeck[type].forEach(card => display.appendChild(createCardElement(card, false)));
+            // Sort the cards in this deck tab before rendering
+            const sortedDeck = sortCardList([...currentDeck[type]]); 
+            sortedDeck.forEach(card => display.appendChild(createCardElement(card, false)));
         }
     });
 }
@@ -359,15 +389,54 @@ document.addEventListener('keydown', (e) => {
 function injectKeywords(text) {
     if (!text) return "";
     if (!keywordRepo || Object.keys(keywordRepo).length === 0) return text;
+
     let html = text;
-    try {
-        const sortedKeys = Object.keys(keywordRepo).sort((a, b) => b.length - a.length);
-        sortedKeys.forEach(key => {
-            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`\\b(${escapedKey})\\b`, 'gi');
-            html = html.replace(regex, `<span class="kw-trigger" onclick="handleKeywordClick(event, '$1')">$1</span>`);
+    const placeholders = []; 
+    let pIndex = 0;
+
+    // 1. Identify Special Context Keys
+    const specialKeys = ['Copy', 'Flip'];
+
+    // 2. Sort Standard Keys (Longest First), EXCLUDING the special ones
+    const standardKeys = Object.keys(keywordRepo)
+        .filter(k => !specialKeys.includes(k))
+        .sort((a, b) => b.length - a.length);
+
+    // 3. Helper to process replacements
+    const processReplacement = (regex, key) => {
+        html = html.replace(regex, (match) => {
+            placeholders.push(`<span class="kw-trigger" onclick="handleKeywordClick(event, '${key}')">${match}</span>`);
+            return `%%%KW${pIndex++}%%%`;
         });
-    } catch (err) { return text; }
+    };
+
+    // --- PHASE 1: Run Special Context Rules FIRST ---
+    // This ensures "Create a Copy" is caught before "Create" can break it.
+
+    if (keywordRepo["Copy"]) {
+        // Matches: "Copy this", "Create a Copy", "Create a 1-SP Copy"
+        // (?: [\w-]+) handles words with hyphens like "1-SP"
+        processReplacement(/\b(Create a(?: [\w-]+){0,4} Copy|Copy this)\b/gi, "Copy");
+    }
+
+    if (keywordRepo["Flip"]) {
+        // Matches "Flip:" (must have colon)
+        processReplacement(/\b(Flip):/g, "Flip");
+    }
+
+    // --- PHASE 2: Run Standard Keys ---
+    standardKeys.forEach(key => {
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Match whole words only
+        const regex = new RegExp(`\\b(${escapedKey})\\b`, 'gi');
+        processReplacement(regex, key);
+    });
+
+    // 4. Swap Placeholders back to HTML
+    placeholders.forEach((tag, i) => {
+        html = html.replace(`%%%KW${i}%%%`, tag);
+    });
+
     return html;
 }
 
@@ -389,4 +458,23 @@ function handleKeywordClick(event, word) {
 
     if (window.kwTimer) clearTimeout(window.kwTimer);
     window.kwTimer = setTimeout(() => { popup.classList.add('hidden'); }, 10000);
+}
+
+function sortCardList(list) {
+    const order = { 'phantom': 1, 'spirit': 2, 'counter': 3, 'environment': 4 };
+    
+    return list.sort((a, b) => {
+        // 1. Sort by Form/Type (Phantom -> Spirit -> Counter)
+        const typeA = order[(a.type || "").toLowerCase()] || 99;
+        const typeB = order[(b.type || "").toLowerCase()] || 99;
+        if (typeA !== typeB) return typeA - typeB;
+
+        // 2. Sort by Level (Ascending)
+        const levelA = parseInt(a.level) || 0;
+        const levelB = parseInt(b.level) || 0;
+        if (levelA !== levelB) return levelA - levelB;
+
+        // 3. Sort by Name (Alphabetical)
+        return a.name.localeCompare(b.name);
+    });
 }

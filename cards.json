@@ -404,7 +404,7 @@
     "id": "copy_cat",
     "name": "Copy Cat",
     "type": "Counter",
-    "description": "Condition: Turn start activate this card. <br>Summon a Copy of the first Phantom card your opponent plays. <br>If they don’t play a Phantom card, send this card to the After Life.",
+    "description": "Condition: Turn Start activate this card.<br>Create a Copy of the first Phantom your opponent plays and give it Summon Binding.<br>If they don’t play a Phantom, send this card to the After Life.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -415,7 +415,7 @@
     "id": "copying_cat",
     "name": "Copying Cat",
     "type": "Phantom",
-    "description": "Flip: Summon a Copy.",
+    "description": "Flip: Create a Copy of this card.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -675,8 +675,8 @@
   {
     "id": "creation_stream",
     "name": "Creation Stream",
-    "type": "Spirit",
-    "description": "Put a Counter on this card for every card Created. This card spends tokens for AP. <br>It can only activate each AP once per turn. <br><br>1-● AP: Give a Creation Phantom 500 Attack. <br>● 2-AP: Excavate 1 card and if it is a Creation Phantom Draw it. <br>● 3-AP: Select a Creation Phantom and Search a copy of it. <br>● 4-AP: Give all face up Creation Cards Sturdy this turn. <br>● 5-AP: Select an Ally Creation Phantom and have them Activate their Creation Ability again.",
+    "type": "Counter",
+    "description": "Condition: A card is Created.<br><br>Put a Counter on this card for every card Created this Round. This card spends tokens for AP. <br>It can only activate each AP once per turn. <br><br>● 1-AP: Give a Creation Phantom 500 Attack. <br>● 2-AP: Excavate 1 card and if it is a Creation Phantom Draw it. <br>● 3-AP: Select a Creation Phantom and Search a copy of it. <br>● 4-AP: Give all face up Creation Cards Sturdy this turn.<br>● 5-AP: Select an Ally Creation Phantom and have them Activate their On Summon Creation Ability again.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -1615,6 +1615,17 @@
     "health": 1500
   },
   {
+    "id": "mutual_defeat",
+    "name": "Mutual Defeat",
+    "type": "Spirit",
+    "description": "Continuous Ability: While this card is face up on the field, for the next 3 turns damage dealt from a Direct Attack is dealt to both players at the same time.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Mutual Defeat.png"
+  },
+  {
     "id": "mutual_destruction",
     "name": "Mutual Destruction",
     "type": "Counter",
@@ -1622,17 +1633,6 @@
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
-    ],
-    "image": "Images/Cards/Mutual Destruction.png"
-  },
-  {
-    "id": "mutual_destruction",
-    "name": "Mutual Destruction",
-    "type": "Spirit",
-    "description": "Continuous Ability: While this card is face up on the field, for the next 3 turns damage dealt from a Direct Attack is dealt to both players at the same time.",
-    "archetype": "Standard",
-    "archetypes": [
-      "Standard"
     ],
     "image": "Images/Cards/Mutual Destruction.png"
   },
@@ -1673,7 +1673,7 @@
     "id": "nekomata",
     "name": "Nekomata",
     "type": "Phantom",
-    "description": "Field Ability: Condition: Breaks. Summon a 1-SP Copy without this Ability.",
+    "description": "Field Ability: Condition: Breaks. Create a 1-SP Copy without this Ability.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -2159,6 +2159,17 @@
     "level": 3,
     "attack": 500,
     "health": 1000
+  },
+  {
+    "id": "special_summon",
+    "name": "Special Summon",
+    "type": "Spirit",
+    "description": "Choose an Ally Phantom card and send it to the AL.<br>Special Summon a Phantom Card of equal or less SP and which has the same Archetype.<br>Once per Round.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Special Summon.png"
   },
   {
     "id": "spirit_destruction",

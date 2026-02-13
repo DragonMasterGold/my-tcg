@@ -84,21 +84,28 @@ body {
 }
 
 /* Zone Styles */
-.phantom { border-color: #666; }
-.spirit { border-color: #00bcd4; }
-.balance { border-color: #3f51b5; background: linear-gradient(135deg, rgba(63,81,181,0.2), rgba(233,30,99,0.2)); }
+.monster { border-color: #EDEADE; }
+.spell { border-color: #00bcd4; }
+.balance { border-color: #9c27b0; background: linear-gradient(135deg, rgba(63,81,181,0.2), rgba(233,30,99,0.2)); }
+
+
 /* Environment: Fixed dimensions, don't shrink/grow */
 .env { 
-    border-color: #9c27b0; 
+    border-color: #3f51b5; 
     width: var(--card-width); 
     height: var(--card-height); 
     flex-shrink: 0; margin: 0; 
     overflow: visible; /* Show card if it pops out */
 } 
 
-.deck-main { border-color: #ff9800; cursor: pointer; }
+/* Main Deck: Lighter Green */
+.deck-main { border-color: #2ecc71; cursor: pointer; }
+
+/* Side Deck: Rich Gold */
+.deck-side { border-color: #ffd700; cursor: pointer; }
+
+/* Extra Deck: (Red) */
 .deck-extra { border-color: #e91e63; cursor: pointer; }
-.deck-side { border-color: #009688; cursor: pointer; }
 
 .pile { border-color: #888; cursor: pointer; opacity: 0.8; }
 .pile-afterlife { background: rgba(78, 52, 46, 0.3); border-color: #8d6e63; }
@@ -106,7 +113,42 @@ body {
 .pile-oblivion { background: rgba(183, 28, 28, 0.3); border-color: #ef5350; }
 
 .label { position: absolute; bottom: 2px; font-size: 10px; width: 100%; text-align: center; background: rgba(0,0,0,0.8); z-index: 5; }
-.count { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; color: white; text-shadow: 0 0 5px black; z-index: 5; pointer-events: none; }
+
+/* 1. Fix the Numbers (Make them big, centered, and immovable) */
+.count {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px; /* Restored size */
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px black, 0 0 2px black;
+    z-index: 20 !important; /* Always on top */
+    pointer-events: none;
+    width: 100%; /* Ensures alignment context is stable */
+    text-align: center;
+}
+
+/* 2. Soften the Discard Pile Overlays */
+.pile { position: relative; }
+
+.pile::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    z-index: 10; /* Above card, below number */
+    pointer-events: none;
+    border-radius: 6px;
+    opacity: 0.3; /* Much more subtle (was 0.6) */
+}
+
+/* Keep your specific colors */
+.pile-afterlife::after { background-color: #000000; } 
+.pile-shadow::after { background-color: #8e24aa; }     
+.pile-oblivion::after { background-color: #4a0000; }
+
 
 /* === TOOLS === */
 .tools-area-right button { font-size: 18px; background: #333; border: 1px solid #555; padding: 5px; border-radius: 4px; cursor: pointer; color: white; }

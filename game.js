@@ -179,8 +179,10 @@ function setupListeners() {
 					}
 					
 					// Now perform the intended click action
-					if (type === 'deck') drawCard(owner, 'deck');
-					else openViewer(owner, type, false);
+					 if (e.target === z || z.contains(e.target)) {
+						if (type === 'deck') drawCard(owner, 'deck');
+						else openViewer(owner, type, false);
+					}
 					
 					return;
 				}
@@ -203,10 +205,6 @@ function setupListeners() {
 function handleKeys(e) {
     const k = e.key.toLowerCase();
 	
-	
-	
-
-
     if (k === 'i') { openViewer('player', 'deck', true); return; }	
 
     if (hoveredId) {
@@ -266,6 +264,23 @@ function handleKeys(e) {
 			removeCard(card);
 			if (isMultiplayer) sendAction('remove_card_absolute', { cardId: cid });
 		}
+		
+		if (k === 'p') {
+            const originalLoc = card.loc;
+            // Use the card's internal owner to determine the correct deck string
+            const targetZone = `${card.owner}-deck`; 
+
+            moveCardTo(card, 'randomdeck');
+
+            if (isMultiplayer) {
+                sendAction('move', { 
+                    cardId: card.id, 
+                    fromZone: originalLoc,
+                    toZone: targetZone, // Sends 'player-deck' or 'opponent-deck' dynamically
+                    random: true
+                });
+            }
+        }
         
         if (k === 'w') {
             let typeName = 'Phantom';
@@ -394,10 +409,15 @@ function makeCard(owner, loc, forcedType) {
         health: cardData.health || 0,
         description: cardData.description || '',
         image: cardData.image || null,
+        
+        // ADD THESE LINES:
+        archetype: cardData.archetype || "",
+        archetypes: cardData.archetypes || [], 
+        
         faceUp: true,
         rotated: false,
-		counter: 0,
-		isToken: false,
+        counter: 0,
+        isToken: false,
         loc
     };
 }
@@ -463,7 +483,8 @@ function createCardEl(data) {
 			// If it fails, we already have default showing
 			img.src = primaryImage;
 		}
-		if (data.type === 'Phantom') {
+		
+		if (data.type === 'Phantom' && data.loc !== 'pile') {
             el.insertAdjacentHTML('beforeend', `
                 <div class="level-stat" onclick="event.stopPropagation(); editStat('${data.id}', 'level')">${data.level ?? 0}</div>
                 <div class="card-stats">
@@ -492,18 +513,28 @@ function createCardEl(data) {
     el.addEventListener('mouseleave', () => { hoveredId = null; hideZoom(); });
     
     el.addEventListener('click', e => { 
-        // Stop the panel from opening if we clicked a stat box or the level circle
+        // 1. Only respond to Left Click (button 0)
+        // 2. Do NOT show info box if the card is sitting on a pile (loc is 'pile')
+        if (e.button !== 0 || data.loc === 'pile') return;
+
         if (!e.defaultPrevented && !e.target.classList.contains('stat-box') && !e.target.classList.contains('level-stat')) {
             showCardInfo(data); 
         }
     });
 
     el.addEventListener('dblclick', e => { 
+        // Do not highlight cards sitting on piles
+        if (data.loc === 'pile') return;
         e.stopPropagation(); 
         toggleHighlight(el); 
     });
 
     el.addEventListener('contextmenu', e => { 
+        // FIX: If the location is 'pile', return immediately.
+        // We do NOT call preventDefault or stopPropagation here.
+        // This allows the right-click to "pass through" to the Deck/Pile zone beneath.
+        if (data.loc === 'pile') return; 
+
         e.preventDefault(); 
         e.stopPropagation(); 
         hoveredId = data.id; 
@@ -662,18 +693,55 @@ function updateCounts(owner) {
         if (el) el.innerText = list.length;
         
         const zone = document.getElementById(`${owner}-${t}`);
-        if(zone && ['afterlife', 'shadow', 'oblivion'].includes(t)) {
+        if (zone) {
+            const existingCard = zone.querySelector('.card');
+            
+            // Check if user is currently dragging an invisible card from here
+            const isBeingDragged = existingCard && existingCard.style.opacity === '0';
+            
+            if (existingCard && !isBeingDragged) {
+                existingCard.remove();
+            }
+
+            if (isBeingDragged) return;
+
+            // Reset Opacity so the CSS overlay is visible
+            zone.style.opacity = '1';
+
             if (list.length > 0) {
-                const top = list[list.length-1];
-                let color = '#795548'; 
-                if(top.type === 'monster') color = '#d4a017';
-                if(top.type === 'spell') color = '#16a085';
-                if(top.type === 'trap') color = '#c0392b';
-                zone.style.background = color;
-                zone.style.opacity = '0.7';
+                // PILES: Render real card
+                if (['afterlife', 'shadow', 'oblivion'].includes(t)) {
+                    const topCard = list[list.length - 1];
+                    
+                    // Pass 'pile' location to hide stats
+                    const cardEl = createCardEl({ ...topCard, loc: 'pile' });
+                    
+                    // FIX: Use Absolute to prevent "pushing" the count number
+                    cardEl.style.position = 'absolute';
+                    cardEl.style.top = '0';
+                    cardEl.style.left = '0';
+                    cardEl.style.zIndex = '5'; 
+                    
+                    zone.appendChild(cardEl);
+                    zone.style.background = ''; // Clear background color
+                } 
+                // DECKS: Use background colors
+                else {
+                    const top = list[list.length-1];
+                    let color = '#795548'; 
+                    if(top.type === 'monster') color = '#d4a017';
+                    if(top.type === 'spell') color = '#16a085';
+                    if(top.type === 'trap') color = '#c0392b';
+                    
+                    zone.style.background = color;
+                    zone.style.opacity = '0.7';
+                }
             } else {
-                zone.style.background = '';
-                zone.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                // Empty state
+                if (!['afterlife', 'shadow', 'oblivion'].includes(t)) {
+                    zone.style.background = '';
+                    zone.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                }
             }
         }
     });
@@ -827,20 +895,55 @@ function triggerPulse(btnId) {
 
 function injectKeywords(text) {
     if (!text) return "";
-    // If keywords haven't loaded yet, just return the plain text
     if (!keywordRepo || Object.keys(keywordRepo).length === 0) return text;
 
     let html = text;
-    try {
-        const sortedKeys = Object.keys(keywordRepo).sort((a, b) => b.length - a.length);
-        sortedKeys.forEach(key => {
-            const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`\\b(${escapedKey})\\b`, 'gi');
-            html = html.replace(regex, `<span class="kw-trigger" onclick="handleKeywordClick(event, '$1')">$1</span>`);
+    const placeholders = []; 
+    let pIndex = 0;
+
+    // 1. Identify Special Context Keys
+    const specialKeys = ['Copy', 'Flip'];
+
+    // 2. Sort Standard Keys (Longest First), EXCLUDING the special ones
+    const standardKeys = Object.keys(keywordRepo)
+        .filter(k => !specialKeys.includes(k))
+        .sort((a, b) => b.length - a.length);
+
+    // 3. Helper to process replacements
+    const processReplacement = (regex, key) => {
+        html = html.replace(regex, (match) => {
+            placeholders.push(`<span class="kw-trigger" onclick="handleKeywordClick(event, '${key}')">${match}</span>`);
+            return `%%%KW${pIndex++}%%%`;
         });
-    } catch (err) {
-        return text; 
+    };
+
+    // --- PHASE 1: Run Special Context Rules FIRST ---
+    // This ensures "Create a Copy" is caught before "Create" can break it.
+
+    if (keywordRepo["Copy"]) {
+        // Matches: "Copy this", "Create a Copy", "Create a 1-SP Copy"
+        // (?: [\w-]+) handles words with hyphens like "1-SP"
+        processReplacement(/\b(Create a(?: [\w-]+){0,4} Copy|Copy this)\b/gi, "Copy");
     }
+
+    if (keywordRepo["Flip"]) {
+        // Matches "Flip:" (must have colon)
+        processReplacement(/\b(Flip):/g, "Flip");
+    }
+
+    // --- PHASE 2: Run Standard Keys ---
+    standardKeys.forEach(key => {
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Match whole words only
+        const regex = new RegExp(`\\b(${escapedKey})\\b`, 'gi');
+        processReplacement(regex, key);
+    });
+
+    // 4. Swap Placeholders back to HTML
+    placeholders.forEach((tag, i) => {
+        html = html.replace(`%%%KW${i}%%%`, tag);
+    });
+
     return html;
 }
 
@@ -965,9 +1068,9 @@ function openCardCtx(e, card) {
 
     // 4. Movement
     if (!inHand) addMsg('To Hand (H)', 'hand');
-    addMsg('To Top Deck', 'topdeck');
-    addMsg('To Bottom Deck', 'bottomdeck');
-    addMsg('To Deck (Random)', 'randomdeck');
+    addMsg('To Deck Top', 'topdeck');
+    addMsg('To Deck Bottom', 'bottomdeck');
+    addMsg('To Deck Random (P)', 'randomdeck');
     addSep();
 
     // 5. Counters
@@ -978,9 +1081,9 @@ function openCardCtx(e, card) {
     }
 
     // 6. Piles
-    addMsg('To Afterlife (A)', 'afterlife');
+    addMsg('To Afterlife (D)', 'afterlife');
     addMsg('To Shadow (S)', 'shadow');
-    addMsg('To Oblivion (D)', 'oblivion');
+    addMsg('To Oblivion (A)', 'oblivion');
 
     showMenu('ctx-card', e.pageX, e.pageY);
 }
@@ -1090,8 +1193,15 @@ function cardAction(act) {
         if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-deck', toBottom: true });
     }
     else if (act === 'randomdeck') {
+        const targetZone = `${card.owner}-deck`; 
         moveCardTo(card, 'randomdeck');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-deck', random: true });
+        if (isMultiplayer) {
+            sendAction('move', { 
+                cardId: card.id, 
+                toZone: targetZone, 
+                random: true 
+            });
+        }
     }
     
     // Counter Actions
@@ -1302,19 +1412,30 @@ function renderViewer() {
         el.classList.remove('face-down');
         el.draggable = false;
 
-        // FIX 1: Remove the "Highlight" listener from createCardEl by cloning the node
+        // Clone the node to strip original listeners
         const newEl = el.cloneNode(true);
         
+        // --- FIX 1: RE-ATTACH HOVER TRACKING (For Hotkeys) ---
+        newEl.onmouseenter = () => { hoveredId = c.id; };
+        newEl.onmouseleave = () => { hoveredId = null; };
+
+        // --- FIX 2: RE-ATTACH RIGHT CLICK (For Context Menu) ---
+        newEl.oncontextmenu = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            hoveredId = c.id; 
+            openCardCtx(e, c);
+        };
+
         // 1. Single Click: Show card info
         newEl.onclick = (e) => {
             e.stopPropagation();
             showCardInfo(c);
         };
 
-        // 2. Double Click: Add to hand (And prevent highlight)
+        // 2. Double Click: Add to hand
         newEl.ondblclick = (e) => {
-            e.stopPropagation(); // Stops the highlight from triggering
-            
+            e.stopPropagation(); 
             const originalList = state[viewerTarget.owner][viewerTarget.type];
             const idx = originalList.findIndex(card => card.id === c.id);
             if (idx > -1) {
@@ -1724,7 +1845,16 @@ function applyRemoteAction(action) {
         } else if (zone.dataset.type) {
             // It's a pile (Deck, Afterlife, etc)
             const pileType = zone.dataset.type;
-            state[newOwner][pileType].push(card);
+            const destList = state[newOwner][pileType];
+
+            // FIX: Handle random insertion for the opponent
+            if (payload.random) {
+                const idx = Math.floor(Math.random() * (destList.length + 1));
+                destList.splice(idx, 0, card);
+            } else {
+                destList.push(card);
+            }
+            
             updateCounts(newOwner);
         } else {
             // It's a field zone
@@ -2082,6 +2212,11 @@ function executeAction(type, payload, isRemote = false) {
             if (!mCard) break;
 
             removeCard(mCard);
+            
+            // FIX 1: Reset state when moving to piles/hand
+            mCard.rotated = false;
+            mCard.faceUp = true; 
+            
             let newOwner = targetId.includes('opponent') ? 'opponent' : 'player';
             mCard.owner = newOwner;
 
@@ -2089,9 +2224,13 @@ function executeAction(type, payload, isRemote = false) {
                 mCard.loc = 'hand';
                 state[newOwner].hand.push(mCard);
                 renderHand(newOwner);
-            } else if (targetId.includes('deck') || targetId.includes('afterlife') || targetId.includes('shadow') || targetId.includes('oblivion')) {
-                // Determine specific pile
+            } 
+            // FIX 2: Added sideDeck and extraDeck to this check
+            else if (['deck', 'sideDeck', 'extraDeck', 'afterlife', 'shadow', 'oblivion'].some(t => targetId.includes(t))) {
+                // Determine specific pile type
                 let pileType = 'deck';
+                if (targetId.includes('sideDeck')) pileType = 'sideDeck';
+                if (targetId.includes('extraDeck')) pileType = 'extraDeck';
                 if (targetId.includes('afterlife')) pileType = 'afterlife';
                 if (targetId.includes('shadow')) pileType = 'shadow';
                 if (targetId.includes('oblivion')) pileType = 'oblivion';
@@ -2103,12 +2242,16 @@ function executeAction(type, payload, isRemote = false) {
                     const idx = Math.floor(Math.random() * (destList.length + 1));
                     destList.splice(idx, 0, mCard);
                 } else {
-                    destList.push(mCard); // Normal move to top
+                    destList.push(mCard); 
                 }
                 updateCounts(newOwner);
             } else {
                 // Field Move
                 mCard.loc = 'field';
+                // Respect specific flags if provided (e.g. Set/Defense), otherwise keep defaults
+                if (payload.faceUp !== undefined) mCard.faceUp = payload.faceUp;
+                if (payload.rotated !== undefined) mCard.rotated = payload.rotated;
+                
                 state[newOwner].field.push(mCard);
                 const zone = document.getElementById(targetId);
                 if (zone) zone.appendChild(createCardEl(mCard));
