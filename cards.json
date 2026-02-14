@@ -191,6 +191,17 @@
     "image": "Images/Cards/Break Everything.png"
   },
   {
+    "id": "break_stop",
+    "name": "Break Stop",
+    "type": "Counter",
+    "description": "Condition: An Ally card is Targeted for a Break by an Ability.<br>Negate the Break.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Break Stop.png"
+  },
+  {
     "id": "brilliance_custodian",
     "name": "Brilliance Custodian",
     "type": "Phantom",
@@ -340,6 +351,17 @@
     "health": 500
   },
   {
+    "id": "clawing_shadows",
+    "name": "Clawing Shadows",
+    "type": "Counter",
+    "description": "Target a face up Phantom Card. It loses 100 Attack for every Shadow Phantom in the AL or Shadow Realm.<br><br>Banish this card when it leaves the Field.<br><br>Shadow Realm Ability: <br>Condition: This card is not Shadow Sealed.<br>Cost: Shadow Seal it. <br><br>Select a Shadow Card from the Shadow Realm to add to your hand.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow"
+    ],
+    "image": "Images/Cards/Clawing Shadows.png"
+  },
+  {
     "id": "clear_being",
     "name": "Clear Being",
     "type": "Phantom",
@@ -424,6 +446,17 @@
     "level": 2,
     "attack": 0,
     "health": 0
+  },
+  {
+    "id": "corner_trap",
+    "name": "Corner Trap",
+    "type": "Counter",
+    "description": "Condition: A Face Down Phantom Flips up.<br>\rTargeted Break that card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Corner Trap.png"
   },
   {
     "id": "corrupted_cultivation",
@@ -594,6 +627,17 @@
     "health": 1000
   },
   {
+    "id": "counter_break_counter",
+    "name": "Counter Break Counter",
+    "type": "Counter",
+    "description": "Condition: One of your set Spirit/Counter cards is Targeted for a Break by an Ability.<br>Negate that Break and if you do Break the negated card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Counter Break Counter.png"
+  },
+  {
     "id": "counter_draw",
     "name": "Counter Draw",
     "type": "Counter",
@@ -619,7 +663,7 @@
     "id": "creation_fairy",
     "name": "Creation Fairy",
     "type": "Phantom",
-    "description": "When this card is summoned, Create a level 0 Creation Sprite. <br><br>1-AP per round. <br>● AP: This card can Attack twice. <br>● AP: Unsummon a Creation Sprite and Search a copy of it.",
+    "description": "When this card is summoned, Create a level 0 Creation Sprite. <br><br>1-AP per round. <br>● AP: This card can Attack twice. <br>● AP: Unsummon an Ally Creation Sprite and Search a copy of it.",
     "archetype": "Creation",
     "archetypes": [
       "Creation",
@@ -634,21 +678,21 @@
     "id": "creation_genie",
     "name": "Creation Genie",
     "type": "Phantom",
-    "description": "When this card is summoned, Create 3 Level-1 Creation Sprite Phantoms. <br><br>3-AP per Round. <br>● AP: Break Creation Sprite then Search a copy of it. <br>● AP: Break Creation Spright then draw a card. ● AP: Break Creation Spright then Targeted Deal 1000 damage. <br>● AP: Break Creation Sprite then flip a card face down. <br>● 3-AP: Break three Creation Spright Phantoms then Targeted Break a card.",
+    "description": "When this card is summoned, Create 3 Level-1 Creation Sprite Phantoms. <br><br>3-AP per Round. <br>● AP: Break a Creation Sprite and then Search a copy of it. <br>● AP: Break a Creation Spright and then draw a card.<br><br>● AP: Break a Creation Spright and then Targeted Deal 1000 damage.<br>● AP: Break a Creation Sprite and then flip a card face down for the rest of the turn.<br><br>● AP: Break two Creation Spright Phantoms and then Targeted Break a card.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
     ],
     "image": "Images/Cards/Creation Genie.png",
     "level": 8,
-    "attack": 2500,
-    "health": 2500
+    "attack": 1000,
+    "health": 2000
   },
   {
     "id": "creation_nymph",
     "name": "Creation Nymph",
     "type": "Phantom",
-    "description": "When this card is summoned, Create a level 0 Creation Fairy Phantom. <br><br>1-AP per turn. <br>● AP: Negate an Attack. <br>● AP: Unsummon Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
+    "description": "When this card is summoned, Create a level 0 Creation Fairy Phantom. <br><br>1-AP per turn. <br>● AP: Negate an Attack. <br>● AP: Unsummon an Ally Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -687,7 +731,7 @@
     "id": "creative_burnout",
     "name": "Creative Burnout",
     "type": "Counter",
-    "description": "When a Creation card you control Breaks, instead return it to your deck and then draw a card.",
+    "description": "Condition: When a Creation card you control Breaks. Instead return it to your deck and then draw a card.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -898,6 +942,28 @@
     "image": "Images/Cards/Deck Fusion.png"
   },
   {
+    "id": "defending_growth",
+    "name": "Defending Growth",
+    "type": "Counter",
+    "description": "When a level 1 Life Phantom is Targeted for an Attack, Negate the Attack and gain LP equal to the Attacking Phantom.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Defending Growth.png"
+  },
+  {
+    "id": "defenseless",
+    "name": "Defenseless",
+    "type": "Spirit",
+    "description": "Target a Defense Position Phantom and have them changed to Attack Position. <br>If they cannot be changed to Attack Position Break that card.<br>If they are changed, apply Attack Position Sealed to them.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Defenseless.png"
+  },
+  {
     "id": "desert",
     "name": "Desert",
     "type": "Environment",
@@ -1054,6 +1120,17 @@
     "image": "Images/Cards/Divesting Shadows.png"
   },
   {
+    "id": "divination_cycle",
+    "name": "Divination Cycle",
+    "type": "Spirit",
+    "description": "Shuffle any number of cards from your hand back into your deck and draw an equal number of cards back.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Divination Cycle.png"
+  },
+  {
     "id": "divine_light",
     "name": "Divine Light",
     "type": "Spirit",
@@ -1165,6 +1242,17 @@
     "image": "Images/Cards/Endurance Test.png"
   },
   {
+    "id": "equipment_sabotage",
+    "name": "Equipment Sabotage",
+    "type": "Counter",
+    "description": "Condition: An Equip card is Equipped or has an Ability Activate.<br>Fully Negate all face up Equip Cards for the rest of this turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Equipment Sabotage.png"
+  },
+  {
     "id": "field_of_whispers",
     "name": "Field Of Whispers",
     "type": "Environment",
@@ -1260,6 +1348,17 @@
     "image": "Images/Cards/Hand Remake.png"
   },
   {
+    "id": "hand_seal",
+    "name": "Hand Seal",
+    "type": "Counter",
+    "description": "Select a card in your Opponent’s Hand and Hand Seal it for the rest of this turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Hand Seal.png"
+  },
+  {
     "id": "happy_to_be_alive",
     "name": "Happy To Be Alive",
     "type": "Counter",
@@ -1315,6 +1414,17 @@
     "image": "Images/Cards/Hoarder Counter.png"
   },
   {
+    "id": "hold_still!",
+    "name": "Hold Still!",
+    "type": "Spirit",
+    "description": "Targeted Break an Ally Phantom and then Targeted Break an Enemy Phantom.<br>Flavor: One Phantom holding another struggling Phantom from behind as a beam shoots through them.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Hold Still!.png"
+  },
+  {
     "id": "hourglass_of_time",
     "name": "Hourglass Of Time",
     "type": "Spirit",
@@ -1324,6 +1434,17 @@
       "Standard"
     ],
     "image": "Images/Cards/Hourglass Of Time.png"
+  },
+  {
+    "id": "i_didn’t_hear_no_bell",
+    "name": "I Didn’t Hear No Bell",
+    "type": "Counter",
+    "description": "Phantoms you control survive each Break they receive this turn.<br>\rEvery time they receive a Break they lose 3 Field SP.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/I Didn’t Hear No Bell.png"
   },
   {
     "id": "ice_elemental",
@@ -1385,6 +1506,17 @@
     "image": "Images/Cards/Inspiring Creativity.png"
   },
   {
+    "id": "iron_defense",
+    "name": "Iron Defense",
+    "type": "Counter",
+    "description": "Condition: An Ally face down Defense Position Phantom is Targeted for an Attack.<br>\rDouble the Targeted Phantoms Attack during this Battle.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Iron Defense.png"
+  },
+  {
     "id": "kings’_lead",
     "name": "Kings’ Lead",
     "type": "Counter",
@@ -1416,6 +1548,17 @@
       "Creation"
     ],
     "image": "Images/Cards/Last Resort Comeback.png"
+  },
+  {
+    "id": "last_strike!",
+    "name": "Last Strike!",
+    "type": "Spirit",
+    "description": "Unsummon an Ally Phantom and Targeted Deal their Attack.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Last Strike!.png"
   },
   {
     "id": "lava_elemental",
@@ -1711,6 +1854,17 @@
     "image": "Images/Cards/No Return.png"
   },
   {
+    "id": "no_support",
+    "name": "No Support",
+    "type": "Counter",
+    "description": "Condition: A Spirit or Counter Card is flipped up.<br>Targeted Break that Card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/No Support.png"
+  },
+  {
     "id": "nothing",
     "name": "Nothing",
     "type": "Phantom",
@@ -1843,6 +1997,28 @@
     "image": "Images/Cards/Preparation Draw.png"
   },
   {
+    "id": "prepared_for_anything",
+    "name": "Prepared For Anything",
+    "type": "Spirit",
+    "description": "Condition: Have 10 or more cards in your side Deck.<br>Shuffle your side deck then draw a card from it.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Prepared For Anything.png"
+  },
+  {
+    "id": "proxy_war_insurgence",
+    "name": "Proxy War Insurgence",
+    "type": "Counter",
+    "description": "Targeted Deal 500 Damage to your opponent for every card they control. <br>\rThen Targeted Deal 500 Damage to yourself for every card you control.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Proxy War Insurgence.png"
+  },
+  {
     "id": "psychopomp_of_the_dead",
     "name": "Psychopomp Of The Dead",
     "type": "Phantom",
@@ -1892,6 +2068,17 @@
       "Life"
     ],
     "image": "Images/Cards/Re-Life.png"
+  },
+  {
+    "id": "red_wire_time_bomb",
+    "name": "Red Wire Time Bomb",
+    "type": "Counter",
+    "description": "You can select any number of your cards face down in the Backrow. <br>Select this card and Flip it face down.<br>Shuffle the selected cards in the Backrow.<br><br>Your opponent can select one of their Phantoms in their Front-row and move it over by 1 to an available Front-row slot.<br><br>At the end of the turn this card Reveals itself and explodes.<br>\rDealing 500 damage for every card shuffled or moved -- to the column it is currently occupying.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Red Wire Time Bomb.png"
   },
   {
     "id": "reincarnation",
@@ -2025,6 +2212,17 @@
     "image": "Images/Cards/Self-Destruct.png"
   },
   {
+    "id": "self_destruction",
+    "name": "Self-Destruction",
+    "type": "Counter",
+    "description": "Condition: An Ally Phantoms is Targeted for an Attack.<br>Deal double the Targeted Phantom’s Attack to both Phantoms.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Self-Destruction.png"
+  },
+  {
     "id": "serving_glow",
     "name": "Serving Glow",
     "type": "Phantom",
@@ -2125,6 +2323,28 @@
     "health": 500
   },
   {
+    "id": "shot_rebound",
+    "name": "Shot Rebound",
+    "type": "Counter",
+    "description": "Condition: Take Direct Damage. <br>Deal the damage taken back to the opponent.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Shot Rebound.png"
+  },
+  {
+    "id": "sky_fall",
+    "name": "Sky Fall",
+    "type": "Counter",
+    "description": "You can place this Counter Card face down in the Environment Slot.\r<br><br>Field Ability:<br>Condition: Control an Environment Card.\r<br>Cost: Targeted Break your Environment card. Break all copies of this Counter Card in your deck or hand.<br><br>Optional: If you Break at least one other copy of this card, Targeted Break your opponent’s Environment Card, and then both players Search an Environment Card.<br><br>\r\rEnvironment Slot Ability: <br>\rCondition: Your opponent activates the Ability of an Environment.<br>Targeted Break that card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Sky Fall.png"
+  },
+  {
     "id": "smiting_light",
     "name": "Smiting Light",
     "type": "Spirit",
@@ -2134,6 +2354,17 @@
       "Light"
     ],
     "image": "Images/Cards/Smiting Light.png"
+  },
+  {
+    "id": "snake_pit",
+    "name": "Snake Pit",
+    "type": "Counter",
+    "description": "Target a Field Slot to Mark until the end of the turn.<br>Any card in that field Slot is Marked with Poisoned and will lose 500 HP every turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Snake Pit.png"
   },
   {
     "id": "song_of_healing",
@@ -2170,6 +2401,17 @@
       "Standard"
     ],
     "image": "Images/Cards/Special Summon.png"
+  },
+  {
+    "id": "spike_trap",
+    "name": "Spike Trap",
+    "type": "Counter",
+    "description": "All Slots in this Column are Marked until the end of the turn.<br>Any Phantom in the Marked slots will be dealt 500 Damage any time they take a game action.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Spike Trap.png"
   },
   {
     "id": "spirit_destruction",
@@ -2325,6 +2567,39 @@
     "health": 500
   },
   {
+    "id": "taking_shape",
+    "name": "Taking Shape",
+    "type": "Counter",
+    "description": "Condition: An Ally Creation Phantom would Break by Battle.<br>Break that Ally Phantom, Dodging the Battle, and Special Summon a Creation Phantom of equal or less SP with its Abilities Negated.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation"
+    ],
+    "image": "Images/Cards/Taking Shape.png"
+  },
+  {
+    "id": "tar_trap",
+    "name": "Tar Trap",
+    "type": "Counter",
+    "description": "Select a Slot to Mark until the end of the turn.<br>Any Phantom while in this Marked Slot loses 500 Attack and cannot Attack this turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Tar Trap.png"
+  },
+  {
+    "id": "the_burning_truth",
+    "name": "The Burning Truth",
+    "type": "Spirit",
+    "description": "Target an Enemy Face down Phantom.<br>Flip it up and Negate it’s Flip Ability.<br><br>\r\rIf you control a Light Phantom you can Targeted Deal its Attack to that Phantom.",
+    "archetype": "Light",
+    "archetypes": [
+      "Light"
+    ],
+    "image": "Images/Cards/The Burning Truth.png"
+  },
+  {
     "id": "those_who_give_life",
     "name": "Those Who Give Life",
     "type": "Phantom",
@@ -2395,6 +2670,17 @@
     "image": "Images/Cards/True Destruction.png"
   },
   {
+    "id": "unity_against_division",
+    "name": "Unity Against Division",
+    "type": "Counter",
+    "description": "Condition: An enemy Phantom declares an Attack.<br><br>Targeted Break any number of Ally Phantoms.<br><br>Your Opponent Selects the same number of their own Phantoms to Break.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Unity Against Division.png"
+  },
+  {
     "id": "vengeance_of_the_dead",
     "name": "Vengeance Of The Dead",
     "type": "Counter",
@@ -2415,6 +2701,17 @@
       "Shadow"
     ],
     "image": "Images/Cards/Vengeful Shade.png"
+  },
+  {
+    "id": "vesting_life_force",
+    "name": "Vesting Life Force",
+    "type": "Spirit",
+    "description": "Gain LP equal to the combined total Health of all Ally Life Phantoms.",
+    "archetype": "Life",
+    "archetypes": [
+      "Life"
+    ],
+    "image": "Images/Cards/Vesting Life Force.png"
   },
   {
     "id": "water_elemental",

@@ -5,6 +5,8 @@ let currentDeck = { main: [], extra: [], side: [] };
 let currentFilter = 'All';
 let currentDeckView = 'main'; // This is our active tab ('main', 'extra', or 'side')
 let keywordRepo = {};
+let spamInterval = null;
+let holdTimer = null;
 
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', loadCards);
@@ -147,54 +149,53 @@ function createCardElement(card, isPool = false) {
     cardEl.onmouseleave = () => { hoveredCard = null; };
 
     // --- INTERACTIONS ---
-    let holdTimer = null;
-    let spamInterval = null;
-    cardEl._lastInteracted = 0; // Tracking time per card element
-
     cardEl.onmousedown = (e) => {
-        if (e.button !== 0) return; // Only left click
+        // Prevent default browser behavior (especially for right-click)
+        if (e.button === 2) e.preventDefault();
         e.stopPropagation();
-
-        const now = Date.now();
-        showCardInfo(card); // Always show info instantly
 
         const triggerAction = () => {
             if (isPool) addCardToDeck(card);
             else removeCardFromDeck(card);
         };
 
-        // 1. CHAIN CLICK LOGIC (4 clicks = 3 cards)
-        // If this click happens within 400ms of the last, trigger add/remove immediately
-        if (now - cardEl._lastInteracted < 400) {
-            triggerAction();
+        // LEFT CLICK: Only show info
+        if (e.button === 0) {
+            showCardInfo(card);
+            return;
         }
-        cardEl._lastInteracted = now;
 
-        // 2. HOLD TO AUTO-REPEAT LOGIC
-        // Wait 400ms, then start adding/removing copies every 100ms
-        holdTimer = setTimeout(() => {
-            spamInterval = setInterval(triggerAction, 100);
-        }, 400);
+        // RIGHT CLICK: Trigger once + Start Hold Timer
+        if (e.button === 2) {
+            showCardInfo(card); // Also update info on right click
+            triggerAction();
+
+            // Clear any lingering timers
+            clearTimeout(holdTimer);
+            clearInterval(spamInterval);
+
+            // 3. Start repeat logic with a very short delay (200ms)
+            holdTimer = setTimeout(() => {
+                spamInterval = setInterval(triggerAction, 80); 
+            }, 170);
+        }
     };
 
+    // Global cleanup for mouse release
     const stopSpam = () => {
         clearTimeout(holdTimer);
         clearInterval(spamInterval);
     };
 
-    // Clean up timers when mouse is released or leaves the card
     cardEl.onmouseup = stopSpam;
     cardEl.onmouseleave = stopSpam;
 
-    // Prevent default context menu on right-click if you still want right-click support
+    // Necessary to prevent the actual browser menu from appearing
     cardEl.oncontextmenu = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (isPool) addCardToDeck(card);
-        else removeCardFromDeck(card);
     };
-    
-    return cardEl;
+	    return cardEl;
 }
 
 // === INFO PANEL ===
@@ -209,8 +210,9 @@ function showDefaultControls() {
         textDiv.innerHTML = `
             <strong>Controls:</strong><br>
             • Left Click to view info.<br>
+			• Right click to add or remove a card.<br>
+			• Hold Right Click to add/remove multiple cards.<br>
             • Press + or - keys to quickly add/remove cards.<br>
-            • Double Click and Holding left click will also add/remove cards.
         `;
     }
 }
@@ -253,12 +255,12 @@ function getCardCount(cardId) {
 }
 
 function addCardToDeck(card) {
-    if (getCardCount(card.id) >= 3) return; // Silent stop at 3 copies
+    if (getCardCount(card.id) >= 3) return;
 
-    // Check individual tab limits
     const limit = (currentDeckView === 'main') ? 50 : (currentDeckView === 'side' ? 15 : 5);
+    
+    // FIX: Removed alert. If full, we just exit silently.
     if (currentDeck[currentDeckView].length >= limit) {
-        alert(`${currentDeckView} deck full!`);
         return;
     }
 
@@ -277,7 +279,7 @@ function removeCardFromDeck(card) {
 function refreshUI() {
     updateDeckDisplay();
     updateDeckStats();
-    filterCards(); // Updates badges in pool
+    filterCards(); 
 }
 
 function updateDeckDisplay() {

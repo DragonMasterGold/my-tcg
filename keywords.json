@@ -19,7 +19,7 @@
   "Discarded": "Send the card to the After Life.",
   "Dodge Roll": "When activated the card avoids a Targeted action and moves to an available Field Slot next to it.<br>If there is no Available field slot this Ability does not activate.",
   "Double Attack": "This Phantom can Attack twice.",
-  "Environment Range": "Environment Range is what Players and cards an Environment's ability effects/is usable by.<br><br>When only one Player has an Environment in play both fields are in the Environment Range.<br><br>When both players have an Environment in play, only their side of the field is in their own Environment Range.",
+  "Environment Range": "The Environment Range determines what Players and cards are effected by the Environment's ability and if they can use Activate the Environment's Ability.<br><br>When only one Player has an Environment in play, both Fields and Players are in the Environment Range.<br><br>When both players have an Environment in play, only their side of the field is in their own Environment Range.",
   "Equip Card": "This card is attached to the selected card and placed in a Spirit/Counter Card Slot. It's ability is applied to the Equipped card until this card leaves the field. If the Equipped card is destroyed then this card is Discarded.",
   "Equipped": "This Ability is applied to the card equipped to by this card.",
   "Excavate": "Look at a certain number of cards from the top of your deck.<br>Usually to Draw a chosen card.",

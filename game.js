@@ -69,16 +69,22 @@ function setupListeners() {
             const kwPopup = document.getElementById('keyword-popup');
             const info = document.getElementById('card-info-panel');
             const viewer = document.getElementById('deck-viewer');
+            const mainMenu = document.getElementById('main-menu');
+            const multiplayerMenu = document.getElementById('multiplayer-menu');
 
             if (kwPopup && !kwPopup.classList.contains('hidden')) {
                 kwPopup.classList.add('hidden');
-            } 
+            }
             else if (info && !info.classList.contains('hidden')) {
                 if (typeof closeCardInfo === 'function') closeCardInfo();
-            } 
+            }
             else if (viewer && !viewer.classList.contains('hidden')) {
                 viewer.classList.add('hidden');
-            } 
+            }
+            else if (multiplayerMenu && !multiplayerMenu.classList.contains('hidden')) {
+                multiplayerMenu.classList.add('hidden');
+                if (mainMenu) mainMenu.classList.remove('hidden');
+            }
             else {
                 toggleMenu();
             }
