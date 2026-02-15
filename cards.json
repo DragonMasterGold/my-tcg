@@ -1178,7 +1178,7 @@
     "id": "dream_eater",
     "name": "Dream Eater",
     "type": "Phantom",
-    "description": "Flip: Targeted Discard.",
+    "description": "Flip: Targeted Discard. Summon Binding.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -2298,7 +2298,7 @@
     "id": "shadow_stealer",
     "name": "Shadow Stealer",
     "type": "Phantom",
-    "description": "Flip: Targeted Banish.",
+    "description": "Flip: Targeted Banish. Summon Binding.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow"
@@ -2565,6 +2565,17 @@
     "level": 3,
     "attack": 500,
     "health": 500
+  },
+  {
+    "id": "support_breaker",
+    "name": "Support Breaker",
+    "type": "Spirit",
+    "description": "Targeted Break an Enemy Backrow card.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Support Breaker.png"
   },
   {
     "id": "taking_shape",

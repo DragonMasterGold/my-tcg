@@ -211,7 +211,8 @@ body {
     justify-content: center; 
     pointer-events: auto; 
     min-height: 12vh; /* Ensures a drop target exists when empty */
-    min-width: 200px; 
+    min-width: calc(var(--card-width) * 3);
+    padding: 0 20px; 
 }
 
 /* Opponent Hand: Lowered significantly (-12vh instead of -20vh) */
@@ -234,7 +235,10 @@ body {
 .player-hand-floating {
     position: absolute;
     bottom: -3vh;
-    left: 20%; width: 60%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 80%;
     height: 15vh;
     z-index: 50;
     pointer-events: auto; /* Changed from none to allow drops when empty */
@@ -397,25 +401,130 @@ input[type=number] {
 .mt-2 { margin-top: 15px; }
 
 /* === MENUS === */
-.menu-btn { position: fixed; bottom: 20px; left: 20px; background: #2196f3; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; z-index: 500; font-size: 14px; }
+.menu-btn { position: fixed; bottom: 20px; left: 20px; background: #2196f3; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; z-index: 500; font-size: 14px; text-decoration: none; border: none; }
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 .hidden { display: none !important; }
 .menu-box { background: #222; padding: 20px; width: 300px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; text-align: center; border: 1px solid #555; }
 .menu-box button { padding: 10px; font-size: 16px; cursor: pointer; background: #444; color: white; border: none; border-radius: 4px; }
-.divider { height: 1px; background: #555; margin: 5px 0; }
 
-.ctx-menu { 
-    position: fixed; 
-    background: #333; 
-    border: 1px solid #777; 
-    z-index: 5000; 
-    min-width: 180px; 
-    box-shadow: 0 4px 10px black;
-    pointer-events: auto; /* Ensure this is here or not set to none */
+.ctx-menu {
+    position: fixed;
+    background: #222;
+    border: 1px solid #777;
+    z-index: 5000;
+    min-width: 170px;
+    box-shadow: 0 5px 15px black;
+    padding: 2px 0;
 }
-.ctx-menu div { padding: 8px 14px; cursor: pointer; font-size: 14px; color: white; }
-.ctx-menu div:hover { background: #555; }
-.sep { height: 1px; background: #555; padding: 0 !important; }
+
+/* Base items and Submenu Headers */
+.ctx-menu-item, 
+.submenu-item, 
+.ctx-menu > div:not(.submenu-container) {
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+    text-align: left !important; /* FORCED LEFT ALIGN */
+    background: #222;
+    display: block;
+    position: relative;
+    width: 100%;
+}
+
+#main-menu .divider {
+    height: 2px;
+    background: #555;
+    margin: 10px 0;
+    width: 100%;
+    display: block !important;
+}
+
+.ctx-menu-item:hover, .submenu-item:hover {
+    background: #444 !important; /* Highlights individual item only */
+}
+
+/* Submenu Arrow Indicator */
+.has-submenu::after {
+    content: '▶';
+    position: absolute;
+    right: 10px;
+    font-size: 10px;
+    color: #888;
+}
+
+.submenu-container {
+    position: relative;
+    width: 100%;
+}
+
+.submenu {
+    position: absolute;
+    display: none;
+    background: #222;
+    border: 1px solid #777;
+    min-width: 170px;
+    box-shadow: 0 5px 15px black;
+    padding: 2px 0;
+    z-index: 5001;
+}
+
+.submenu-container:hover > .submenu {
+    display: block;
+}
+
+/* Slim Separators (1px everywhere) */
+.sep {
+    height: 1px !important;
+    background: #555 !important;
+    margin: 4px 0 !important;
+    padding: 0 !important;
+    pointer-events: none;
+}
+
+/* === COUNTERS === */
+.ap-counter {
+    background: #ff9800; /* Orange */
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important; /* Forces to top-right */
+    left: auto !important;
+    width: 2.5vh;
+    height: 2.5vh;
+    font-size: 1.5vh;
+    z-index: 15;
+}
+
+.counters-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none;
+    transform: none !important; /* Crucial: removes the doubling-up offset */
+}
+
+.counter-base {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: white;
+    border: 1px solid black;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 12;
+}
+
+.token-counter { background: #4caf50; }
+.marker-counter { background: #2196f3; }
+.turncounter-counter { background: #9c27b0; }
+
+
 
 /* Viewer */
 .viewer-box { width: 80%; height: 80%; background: #1a1a1a; padding: 20px; display: flex; flex-direction: column; border-radius: 8px; border: 1px solid #444; }
@@ -441,34 +550,55 @@ input[type=number] {
     display: block; /* Ensure it's not display: none when showing */
 }
 
-/* Custom Counter Visuals */
-.counter-bubble {
+/* === NEW COUNTER VISUALS === */
+.counter-container {
     position: absolute;
-    /* Mostly center, slightly right */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Pass clicks through to the card */
+}
+
+.counters-container {
+    position: absolute;
     top: 50%;
-    left: 60%;
+    left: 50%;
     transform: translate(-50%, -50%);
-    
-    background: #add8e6; /* Light Blue */
-    color: white;
-    width: 5vh; /* 3x bigger than before */
-    height: 5vh;
+    display: flex;
+    gap: 5px;
+    z-index: 12;
+    pointer-events: none; /* Pass clicks through to the card */
+}
+
+.counter-base {
+    position: relative;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2.5vh;
     font-weight: bold;
-    border: 3px solid black; /* Black outline */
-    z-index: 25;
-    pointer-events: none;
-    /* Text Outline */
-    text-shadow: 
-        -1.5px -1.5px 0 #000,  
-         1.5px -1.5px 0 #000,
-        -1.5px  1.5px 0 #000,
-         1.5px  1.5px 0 #000;
+    color: white;
+    border: 1px solid black;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    pointer-events: auto;
+    cursor: pointer;
+    z-index: 12;
 }
+
+.ap-counter { 
+    background: #ff9800; 
+    position: absolute;
+    top: 5px; 
+    right: 5px; 
+    width: 2.5vh;
+    height: 2.5vh;
+    font-size: 1.5vh;
+}
+
+.token-counter { background: #4caf50; }
+.marker-counter { background: #2196f3; }
+.turncounter-counter { background: #9c27b0; }
 
 /* Counter position for rotated cards (Centered) */
 .card.rotated .counter-bubble {
@@ -813,4 +943,6 @@ input[type=number] {
     font-weight: bold;
     cursor: pointer;
     min-width: 80px;
+}
+
 }

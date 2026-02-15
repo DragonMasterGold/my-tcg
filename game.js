@@ -592,6 +592,67 @@ function createCardEl(data) {
         el.appendChild(c);
     }
 
+    // === COUNTERS CONTAINER ===
+    const counters = [];
+    if (data.token > 0) counters.push({ type: 'token', value: data.token });
+    if (data.marker > 0) counters.push({ type: 'marker', value: data.marker });
+    if (data.turncounter > 0) counters.push({ type: 'turncounter', value: data.turncounter });
+
+    if (counters.length > 0) {
+        const countersContainer = document.createElement('div');
+        countersContainer.className = 'counters-container';
+        // Ensure container fills the card and centers its children
+        countersContainer.style.position = 'absolute';
+        countersContainer.style.top = '0';
+        countersContainer.style.left = '0';
+        countersContainer.style.width = '100%';
+        countersContainer.style.height = '100%';
+        countersContainer.style.pointerEvents = 'none';
+        
+        counters.forEach((counter, index) => {
+            const el = document.createElement('div');
+            el.className = `counter-base ${counter.type}-counter`;
+            el.innerText = counter.value;
+            el.style.position = 'absolute';
+            
+            // Positioning Logic (Your working math)
+            if (counters.length === 1) {
+                el.style.width = '4vh'; el.style.height = '4vh'; el.style.fontSize = '2.5vh';
+                el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translate(-50%, -50%)';
+            } else if (counters.length === 2) {
+                el.style.width = '3vh'; el.style.height = '3vh'; el.style.fontSize = '2vh';
+                el.style.top = '50%'; el.style.transform = 'translate(-50%, -50%)';
+                el.style.left = index === 0 ? '35%' : '65%';
+            } else {
+                el.style.width = '2.5vh'; el.style.height = '2.5vh'; el.style.fontSize = '1.5vh';
+                if (index === 0) { el.style.left = '50%'; el.style.top = '30%'; el.style.transform = 'translateX(-50%)'; }
+                else if (index === 1) { el.style.left = '30%'; el.style.top = '65%'; el.style.transform = 'translate(-50%, -50%)'; }
+                else { el.style.left = '70%'; el.style.top = '65%'; el.style.transform = 'translate(-50%, -50%)'; }
+            }
+            
+            el.onclick = (e) => {
+                e.stopPropagation();
+                const newValue = prompt(`Set ${counter.type} count:`, counter.value);
+                if (newValue !== null && !isNaN(newValue)) cardAction(`set-${counter.type}-${parseInt(newValue)}`);
+            };
+            countersContainer.appendChild(el);
+        });
+        el.appendChild(countersContainer);
+    }
+
+    // AP counter separately (Top Right)
+    if (data.ap > 0) {
+        const apCounter = document.createElement('div');
+        apCounter.className = 'counter-base ap-counter';
+        apCounter.innerText = data.ap;
+        apCounter.onclick = (e) => {
+            e.stopPropagation();
+            const newValue = prompt(`Set AP count:`, data.ap);
+            if (newValue !== null && !isNaN(newValue)) cardAction(`set-ap-${parseInt(newValue)}`);
+        };
+        el.appendChild(apCounter);
+    }
+
     // --- EVENT LISTENERS ---
     el.addEventListener('dragstart', e => { draggedId = data.id; el.style.opacity = '0.5'; });
     el.addEventListener('dragend', () => el.style.opacity = '1');
@@ -716,6 +777,12 @@ function moveCardTo(card, destType) {
     card.faceUp = true; 
     card.rotated = false;
     card.isHighlighted = false;
+	
+	 // --- NEW: Reset All Counters ---
+    card.ap = 0;
+    card.token = 0;
+    card.turncounter = 0;
+    card.counter = 0;
 
     // --- RESET STATS ---
     // Resets dynamic changes back to original values from cards.json
@@ -1148,106 +1215,137 @@ function openCardCtx(e, card) {
 
     const addMsg = (text, action) => {
         const div = document.createElement('div');
+        div.className = 'ctx-menu-item';
         div.innerText = text;
         div.onclick = (event) => { event.stopPropagation(); cardAction(action); };
         menu.appendChild(div);
     };
+
     const addSep = () => {
         const div = document.createElement('div');
         div.className = 'sep';
         menu.appendChild(div);
     };
 
+    const addNestedMenu = (text, items) => {
+        const container = document.createElement('div');
+        container.className = 'submenu-container';
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'ctx-menu-item has-submenu';
+        titleDiv.innerText = text;
+        container.appendChild(titleDiv);
+        const submenu = document.createElement('div');
+        submenu.className = 'submenu';
+        items.forEach(item => {
+            if (!item) return;
+            if (item.isSeparator) {
+                const s = document.createElement('div'); s.className = 'sep'; submenu.appendChild(s);
+            } else {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'submenu-item';
+                menuItem.innerText = item.text;
+                menuItem.onclick = (event) => { event.stopPropagation(); cardAction(item.action); };
+                submenu.appendChild(menuItem);
+            }
+        });
+        container.appendChild(submenu);
+        menu.appendChild(container);
+        
+        container.addEventListener('mouseenter', () => {
+            const parentRect = container.getBoundingClientRect();
+            const menuRect = submenu.getBoundingClientRect();
+            submenu.style.left = (parentRect.right + menuRect.width > window.innerWidth) ? "-100%" : "100%";
+            submenu.style.top = (parentRect.top + menuRect.height > window.innerHeight) ? "auto" : "-2px";
+            if (parentRect.top + menuRect.height > window.innerHeight) submenu.style.bottom = "0";
+        });
+    };
+
     const inHand = card.loc === 'hand';
-	const onField = card.loc === 'field';
+    const onField = card.loc === 'field';
     const isMyCard = card.owner === 'player';
 	
-    // --- SECTION 1: ACTION OPTIONS ---
+    // --- SECTION 1: PRIMARY ACTIONS ---
     if (onField && card.faceUp && card.type === 'Phantom') {
-        // Battle options at top of field cards
         if (!battleState.attackerId) {
             if (!card.rotated) addMsg('Initiate Attack (B)', 'init-atk');
         } else if (!battleState.targetId) {
-            if (card.id !== battleState.attackerId) {
-                if (card.owner === 'opponent') addMsg('Target for Attack (B)', 'target-atk');
-            } else {
-                // Check if direct attack is possible
+            if (card.owner === 'opponent') addMsg('Target for Attack (B)', 'target-atk');
+            else if (card.id === battleState.attackerId) {
                 const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
-                if (oppPhantoms.length === 0 && !card.summonedThisTurn) {
-                    addMsg('Direct Attack (B)', 'direct-atk');
-                }
+                if (oppPhantoms.length === 0 && !card.summonedThisTurn) addMsg('Direct Attack (B)', 'direct-atk');
             }
             addMsg('Cancel Attack (N)', 'cancel-atk');
         } else {
             addMsg('Execute Battle (B)', 'execute-battle');
             addMsg('Cancel Attack (N)', 'cancel-atk');
         }
-    } else if ((!onField || ['deck', 'sideDeck', 'extraDeck', 'pile'].includes(card.loc)) && (isMyCard || !inHand)) {
+        addSep();
+    } else if (!onField && (isMyCard || !inHand)) {
         if (card.type === 'Phantom') {
-            addMsg('Play in Attack (W)', 'play-atk');
-            addMsg('Play in Defense', 'play-def');
+            const playOpts = [
+                { text: 'Attack (W)', action: 'play-atk' }, { text: 'Defense', action: 'play-def' },
+                { isSeparator: true },
+                { text: 'Set Attack', action: 'set-atk' }, { text: 'Set Defense', action: 'set-def' }
+            ];
+            addNestedMenu('Play', playOpts);
             addSep();
-            addMsg('Set in Attack', 'set-atk');
-            addMsg('Set in Defense', 'set-def');
-			addSep();
-            addMsg('Special Summon', 'special-atk');
-			
-        } else if (card.type === 'Spirit' || card.type === 'Counter') {
-            addMsg('Play', 'play-spirit');
-            addMsg('Set', 'set-spirit');
-        } else if (card.type === 'Environment') {
-            addMsg('Play Environment', 'play-env');
-            addMsg('Set Environment', 'set-env');
+            addNestedMenu('Special Summon', playOpts.map(o => ({...o, text: o.text ? o.text.split(' (')[0] : null, action: o.action ? 'special-'+o.action : null})));
+            addSep();
+        } else {
+            const isCounter = card.type === 'Counter';
+            addMsg(isCounter ? 'Play' : 'Play (W)', 'play-spirit');
+            addMsg(isCounter ? 'Set (W)' : 'Set', 'set-spirit');
+            addSep();
         }
     }
-	
-	   
-	addSep();
-    // Highlight
+
     addMsg(inHand && isMyCard ? 'Reveal & Highlight (E)' : 'Highlight (E)', 'highlight');
-	addSep();
-	
-	if (onField) {
-        if (card.type === 'Phantom') addMsg('Unsummon (U)', 'unsummon');
-    }
-	
-	addSep();
+    addSep();
 
-
-    // 2. State Options
-    if (!inHand) {
-        addMsg('Flip (F)', 'flip');
-        addMsg('Rotate (R)', 'rotate');
+	if (onField && card.type === 'Phantom') {
+        addMsg('Unsummon (U)', 'unsummon');
+        addSep();
     }
-	
-	addSep();
+
+    addMsg('Flip (F)', 'flip');
+    addMsg('Rotate (R)', 'rotate');
+    addSep();
     
-    // 3. Clone (Hide for Opponent Hand)
-    if (isMyCard || !inHand) {
-        addMsg('Copy/Clone (C)', 'clone');
-    }
+    if (isMyCard || !inHand) { addMsg('Copy/Clone (C)', 'clone'); addSep(); }
 	
-	// 5. Counters
-    if (card.loc === 'field') {
-        addMsg('Add Counter', 'add-counter');
-        if (card.counter > 0) addMsg('Remove Counter', 'remove-counter');
+    if (onField) {
+        addNestedMenu('Add To Card:', [
+            { text: 'Add an AP', action: 'add-ap' },
+            card.ap > 0 ? { text: 'Remove an AP', action: 'remove-ap' } : null,
+            { isSeparator: true },
+            { text: 'Add a Token', action: 'add-token' },
+            card.token > 0 ? { text: 'Remove a Token', action: 'remove-token' } : null,
+            { isSeparator: true },
+            { text: 'Add a Marker', action: 'add-marker' },
+            card.marker > 0 ? { text: 'Remove a Marker', action: 'remove-marker' } : null,
+            { isSeparator: true },
+            { text: 'Add a Turn Counter', action: 'add-turncounter' },
+            card.turncounter > 0 ? { text: 'Remove a Turn Counter', action: 'remove-turncounter' } : null,
+        ].filter(Boolean));
         addSep();
     }
 	
-    addSep();
-
-    // 4. Movement
-    if (!inHand) addMsg('To Hand (H)', 'hand');
-    addMsg('To Deck Top', 'topdeck');
-    addMsg('To Deck Bottom', 'bottomdeck');
-    addMsg('To Deck Random (P)', 'randomdeck');
-    addSep();
-
+    // Movement (Filtered to prevent leading separator)
+    const moveItems = [
+        !inHand ? { text: 'To Hand (H)', action: 'hand' } : null,
+        !inHand ? { isSeparator: true } : null,
+        { text: 'To Deck (Random) (P)', action: 'randomdeck' },
+        { text: 'To Deck Top', action: 'topdeck' },
+        { text: 'To Deck Bottom', action: 'bottomdeck' },
+        { isSeparator: true },
+        { text: 'To After Life (D)', action: 'afterlife' },
+        { text: 'To Shadow Realm (S)', action: 'shadow' },
+        { text: 'To Oblivion (A)', action: 'oblivion' }
+    ].filter(Boolean);
+    // Remove leading separator if "To Hand" was removed
+    if (moveItems[0] && moveItems[0].isSeparator) moveItems.shift();
     
-    // 6. Piles
-    addMsg('To Afterlife (D)', 'afterlife');
-    addMsg('To Shadow (S)', 'shadow');
-    addMsg('To Oblivion (A)', 'oblivion');
+    addNestedMenu('Move To:', moveItems);
 
     showMenu('ctx-card', e.pageX, e.pageY);
 }
@@ -1331,10 +1429,41 @@ function cardAction(act) {
         refreshCard(card);
         if (isMultiplayer) sendAction('rotate', { cardId: card.id, rotated: card.rotated });
     }
-    else if (act === 'highlight') toggleHighlight(document.getElementById(card.id)); 
-    else if (act === 'clone') {
-        cloneCard(card);
+    // Handle Counters
+    else if (act.startsWith('add-') || act.startsWith('remove-')) {
+        const isAdd = act.startsWith('add-');
+        const counterType = act.split('-')[1]; // ap, token, etc.
+        
+        if (!card[counterType]) {
+            card[counterType] = 0;
+        }
+
+        if (isAdd) {
+            card[counterType]++;
+        } else {
+            card[counterType]--;
+        }
+
+        refreshCard(card);
+        if (isMultiplayer) sendAction('update_counter', { cardId: card.id, counterType, value: card[counterType] });
     }
+    // Handle Set Counter actions from direct click
+    else if (act.startsWith('set-')) {
+        const parts = act.split('-');
+        const counterType = parts[1]; // ap, token, etc.
+        const newValue = parseInt(parts[2], 10); // value is passed via the action payload
+
+        if (newValue === 0) {
+            delete card[counterType];
+        } else {
+            card[counterType] = newValue;
+        }
+
+        refreshCard(card);
+        if (isMultiplayer) sendAction('update_counter', { cardId: card.id, counterType, value: card[counterType] });
+    }
+    else if (act === 'highlight') toggleHighlight(document.getElementById(card.id)); 
+
 	
 	else if (act.startsWith('play-') || act.startsWith('set-')) {
         const isSet = act.startsWith('set-');
@@ -1349,8 +1478,8 @@ function cardAction(act) {
                     cardId: card.id, 
                     toZone: el.parentElement.id, 
                     fromZone: 'hand',
-                    faceUp: card.faceUp,    // ADD THIS
-                    rotated: card.rotated   // ADD THIS
+                    faceUp: card.faceUp,   
+                    rotated: card.rotated   
                 }); 
             }
         }
@@ -1377,14 +1506,15 @@ function cardAction(act) {
     }
 
     // 3. Handle Special Summon (Bypasses cost check)
-    else if (act === 'special-atk' || act === 'special-def') {
+    else if (act.startsWith('special-')) {
         const isDef = act.endsWith('-def');
-        playCardToField(card, card.type, true, isDef); // Always face-up
+        const isSet = act.includes('-set-');
+        playCardToField(card, card.type, !isSet, isDef);
         
         if (isMultiplayer) {
             const el = document.getElementById(card.id);
             if (el && el.parentElement) {
-                sendAction('move', { cardId: card.id, toZone: el.parentElement.id, fromZone: card.loc, faceUp: true, rotated: isDef });
+                sendAction('move', { cardId: card.id, toZone: el.parentElement.id, fromZone: card.loc, faceUp: !isSet, rotated: isDef });
             }
         }
     }
@@ -1523,6 +1653,7 @@ function playCardToField(card, typeName, faceUp, rotated) {
 function openDeckCtx(e, owner, type) { viewerTarget = { owner, type }; showMenu('ctx-deck', e.pageX, e.pageY); }
 
 function showMenu(id, x, y) { 
+	hideCtx();
     const m = document.getElementById(id); 
     
     // 1. Show the menu instantly so we can measure its width/height
@@ -1539,7 +1670,7 @@ function showMenu(id, x, y) {
 
     // 3. Flip vertical if it goes off the bottom edge
     if (y + menuHeight > window.innerHeight) {
-        y = y - menuHeight;
+        y = y - menuHeight - 20; 
     }
 
     // 4. Safety: ensure it doesn't flip off the top or left edges
@@ -2654,16 +2785,17 @@ function executeAction(type, payload, isRemote = false) {
             
             const mCard = findCard(payload.cardId);
             if (!mCard) break;
-
             removeCard(mCard);
             
             // --- STATE LOGIC ---
             const isPileTarget = ['deck', 'sideDeck', 'extraDeck', 'afterlife', 'shadow', 'oblivion'].some(t => targetId.includes(t));
+			const isHandTarget = targetId.includes('hand');
 
-            if (isPileTarget) {
+            if (isPileTarget || isHandTarget) {
                 // Reset state when going into Decks or Discard Piles
                 mCard.rotated = false;
                 mCard.faceUp = true; 
+				mCard.ap = 0; mCard.token = 0; mCard.marker = 0; mCard.turncounter = 0; mCard.counter = 0;
             } else {
                 // Moving between Hand and Field: 
                 // Use payload values if they exist (from right-click menu), 
