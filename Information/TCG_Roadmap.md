@@ -7,39 +7,31 @@ What is the best things to do now for establishing the best possible foundation 
 
 
 Simulator Adjustments Wanted Easy:
-If a card Breaks in Battle, it still shows its stats and level while in the Discard Piles.
-Clicking enter while inputting a code for joining a room should input it.
-Hitting escape while in the multiplayer menu should close the multiplayer menu.
+If a card Breaks in Battle (loses its health and has a Break function applied to it), it still shows its stats and level while in the Discard Piles.
 
 
  
 Simulator Adjustments Wanted (Middling Difficulty):
 Deck Builder:
-Deck Builder’s search should be able to search and filter for Attack and Health. 
-Attack:
-Health:
-ATK:
-HP:
-Should all work.
+Simulator Adjustments Wanted (Middling Difficulty):
+Deck Builder:
+Make Deck Builder view have 5 card columns displayed, so it is displaying 5 cards.
+Make Current Deck View have 6 card columns displayed, so it is displaying 6 cards.
+Make sure the deck part of the deck builder doesn't have cards going off the screen and causing a scroll bar to appear.
 
-Make Deck Builder view have 5 card columns displayed.
-Make Current Deck View have 6 card columns displayed.
-Essentially, move over the deck view by 1 column worth.
 Also make the current selection of options: All, Phantoms, Spirits, Counters. Remain as they are, but make add a dropdown arrow button that extends the search/filter section down lower.
-Which would reveal the Environments button (and eventually the other filtering options).
+Make Environments button the same size as the other buttons.
 
  
 Simulator Adjustments Low Impact:
 The two Show hand buttons syncing the glow in multiplayer.
 The coin/dice/token buttons glow syncing in multiplayer.
-Cannot drag a card to hand if there isn’t already a card in hand.
-Activating your own set Counter/Spirit card should flip it up.
+Activating your own set Counter/Spirit card should flip it up. (Only applied to your own set face down Counter/Spirit cards.)
+
 Add custom card-back-artwork to the cards.
 
  
 Simulator Adjustments Wanted (Hard):
-Direct Attack, with calculations. (It can only be done if there is no Phantom on the opponent's field).
-(Might be good to roll this into a bigger Game Design Document. So that it is built with Functional Player Targeting for the long term).
 
 Make the Card Info box draggable or context dependent on where it will open, such as while a deck is open, or the position of the card being clicked on.
 (We need to think through a concise Design Doc for this). 
@@ -97,6 +89,8 @@ Add a Turn Counter
 (Hidden unless applicable) Remove a Turn Counter
 
 (I would also like it if each of these things that their visual can be added can be clicked on to type a new number to change the number on them directly. And when 0 is typed it would disappear again).
+These re-works should maintain the hotkey labels.
+These re-works should not break any of the functionality of the menus.
 
 
 

@@ -11,6 +11,11 @@ let holdTimer = null;
 // === INITIALIZATION ===
 window.addEventListener('DOMContentLoaded', loadCards);
 
+// Prevent browser context menu globally in the deckbuilder
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+
 async function loadCards() {
     try {
         const response = await fetch('cards.json');
@@ -49,18 +54,47 @@ function filterCards() {
 
         if (!rawTerm) return true;
 
-        // --- Structured Search (e.g., "Level: 2") ---
+        // --- Structured Search (e.g., "Level: 2" or "Atk: 500 HP: 1000") ---
         if (rawTerm.includes(':')) {
-            const parts = rawTerm.split(':');
-            const key = parts[0].trim();
-            const val = parts[1].trim();
+            // Find all key:value pairs. Supports multiple filters like "atk: 500 hp: 1000"
+            const pairs = rawTerm.match(/(\w+):\s*([^:]+?)(?=\s+\w+:|$)/g);
+            
+            if (pairs) {
+                let allMatch = true;
+                pairs.forEach(pair => {
+                    const colonIdx = pair.indexOf(':');
+                    const key = pair.substring(0, colonIdx).trim();
+                    const val = pair.substring(colonIdx + 1).trim();
 
-            if (key === 'level') return String(card.level) === val;
-            if (key === 'archetype') {
-                return (card.archetype || "").toLowerCase().includes(val) || 
-                       (card.archetypes || []).some(a => a.toLowerCase().includes(val));
+                    let match = false;
+                    if (key === 'level') match = String(card.level) === val;
+                    else if (key === 'attack' || key === 'atk') match = String(card.attack) === val;
+                    else if (key === 'health' || key === 'hp') match = String(card.health) === val;
+                    else if (key === 'archetype') {
+                        match = (card.archetype || "").toLowerCase().includes(val) || 
+                               (card.archetypes || []).some(a => a.toLowerCase().includes(val));
+                    }
+                    else if (key === 'form' || key === 'type') match = (card.type || "").toLowerCase().includes(val);
+                    else match = true; // Ignore unknown keys
+
+                    if (!match) allMatch = false;
+                });
+
+                // Also check if there's any non-structured text (e.g., "Atk: 500 Dragon")
+                const remainingText = rawTerm.replace(/(\w+):\s*([^:]+?)(?=\s+\w+:|$)/g, '').trim();
+                if (remainingText) {
+                    const searchableText = [
+                        card.name,
+                        card.type,
+                        card.description,
+                        card.archetype,
+                        ...(card.archetypes || [])
+                    ].join(' ').toLowerCase();
+                    if (!searchableText.includes(remainingText)) allMatch = false;
+                }
+
+                return allMatch;
             }
-            if (key === 'form' || key === 'type') return (card.type || "").toLowerCase().includes(val);
         }
 
         // --- General Search (Search everything at once) ---
@@ -70,8 +104,10 @@ function filterCards() {
             card.description,
             card.archetype,
             ...(card.archetypes || []),
-            `level ${card.level}`
-        ].join(' ').toLowerCase();
+            card.level !== undefined ? `level ${card.level}` : '',
+             card.attack !== undefined ? `atk ${card.attack} attack ${card.attack}` : '',
+             card.health !== undefined ? `hp ${card.health} health ${card.health}` : ''
+         ].join(' ').toLowerCase();
 
         return searchableText.includes(rawTerm);
     });

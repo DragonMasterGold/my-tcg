@@ -88,6 +88,14 @@ function setupListeners() {
             else {
                 toggleMenu();
             }
+        } else if (e.key === 'Enter') {
+            const multiplayerMenu = document.getElementById('multiplayer-menu');
+            if (multiplayerMenu && !multiplayerMenu.classList.contains('hidden')) {
+                const codeInput = document.getElementById('room-code-input');
+                if (document.activeElement === codeInput) {
+                    joinRoom();
+                }
+            }
         } else {
             // FIX: This line connects the hotkeys (F, R, W, etc.) back to the game
             handleKeys(e);
@@ -234,28 +242,26 @@ function handleKeys(e) {
     }
 
     // 2. --- DYNAMIC HOVER CHECK ---
-    // We use .closest('.card') to find the card even if hovering the name or stats
     const hoveredEl = document.querySelector('.card:hover') || 
                       document.querySelector('.card *:hover')?.closest('.card');
     
+    const hoveredOpponentSide = document.querySelector('.opponent-side:hover');
+
     if (hoveredEl) {
         const card = findCard(hoveredEl.id);
         if (!card) return;
 
-		// B - Battle Selection (Steps 1 & 2)
         if (k === 'b') {
-            if (card.type !== 'Phantom' || card.loc !== 'field') return;
-
             if (!battleState.attackerId) {
-                // Step 1: Set Attacker
-                if (!card.rotated && card.faceUp) {
+                // Step 1: Set Attacker (Must be yours)
+                if (card.owner === 'player' && !card.rotated && card.faceUp) {
                     battleState.attackerId = card.id;
                     refreshCard(card);
                     if (isMultiplayer) sendAction('battle_sync', { step: 'init', attackerId: card.id });
                 }
             } else if (!battleState.targetId) {
-                // Step 2: Set Target
-                if (card.id !== battleState.attackerId) {
+                // Step 2: Set Target (Must be opponent's)
+                if (card.owner === 'opponent' && card.id !== battleState.attackerId) {
                     battleState.targetId = card.id;
                     refreshCard(card);
                     if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
@@ -362,6 +368,32 @@ function handleKeys(e) {
         }
         return;
 	} 
+
+    if (k === 'b' && battleState.attackerId && !battleState.targetId && hoveredOpponentSide) {
+        // Step 2 Alternative: Direct Attack
+        const atkCard = findCard(battleState.attackerId);
+        if (!atkCard) return;
+
+        // Rules check
+        const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
+        if (oppPhantoms.length > 0) {
+            alert("Cannot Direct Attack while opponent has Phantoms!");
+            return;
+        }
+        if (atkCard.summonedThisTurn) {
+            alert("Phantoms cannot Direct Attack the turn they are summoned!");
+            return;
+        }
+
+        // Execute Direct Attack
+        const dmg = atkCard.health > 0 ? atkCard.attack : 0;
+        executeAction('adjust_lp', { target: 'opponent', amount: -dmg });
+        
+        // Cleanup
+        battleState = { attackerId: null, targetId: null };
+        refreshCard(atkCard);
+        return;
+    }
 
     // 3. --- ZONE ACTIONS (Hovering an empty deck/pile) ---
     else if (hoveredZone) {
@@ -675,16 +707,22 @@ function handleDrop(e) {
 }
 
 function moveCardTo(card, destType) {
+    if (!card) return;
+    const oldLoc = card.loc;
     removeCard(card);
+    
+    // Update location
+    card.loc = destType;
     card.faceUp = true; 
     card.rotated = false;
     card.isHighlighted = false;
 
     // --- RESET STATS ---
+    // Resets dynamic changes back to original values from cards.json
     if (card.type === 'Phantom') {
-        const base = allCards.find(c => c.name === card.name);
+        const base = allCards.find(c => (c.name || "").toLowerCase() === (card.name || "").toLowerCase());
         if (base) {
-            card.level = base.level ?? 0;
+            card.level = base.level ?? 1;
             card.attack = base.attack ?? 0;
             card.health = base.health ?? 0;
         }
@@ -698,15 +736,20 @@ function moveCardTo(card, destType) {
         const idx = Math.floor(Math.random() * (ownerList.deck.length + 1));
         ownerList.deck.splice(idx, 0, card);
     }
-    else ownerList[destType].push(card);
+    else {
+        if (ownerList[destType]) ownerList[destType].push(card);
+    }
     
     updateCounts(card.owner);
     if(destType === 'hand') renderHand(card.owner);
 }
 
-function playCardToField(card, type) {
+function playCardToField(card, type, faceUp = true, rotated = false) {
     removeCard(card);
     card.loc = 'field';
+    card.faceUp = faceUp;
+    card.rotated = rotated;
+    card.summonedThisTurn = true; // For Direct Attack rules
     state[card.owner].field.push(card);
     
     const prefix = card.owner;
@@ -873,6 +916,7 @@ function drawPhase() {
     // 3. Sync: Tell the opponent to do the exact same thing on their screen
     if (isMultiplayer) {
         sendAction('draw_phase_global', {});
+        sendAction('button_pulse', { button: 'draw' });
     }
 }
 
@@ -941,6 +985,9 @@ function endTurn() {
 
     // Explicitly reset ONLY the local player's SP
     resetSP('player');
+    
+    // Clear summonedThisTurn for player cards
+    state.player.field.forEach(c => c.summonedThisTurn = false);
 
     if (isMultiplayer) {
         sendAction('button_pulse', { button: 'endturn' });
@@ -1115,13 +1162,21 @@ function openCardCtx(e, card) {
 	const onField = card.loc === 'field';
     const isMyCard = card.owner === 'player';
 	
-	// --- SECTION 1: ACTION OPTIONS ---
+    // --- SECTION 1: ACTION OPTIONS ---
     if (onField && card.faceUp && card.type === 'Phantom') {
         // Battle options at top of field cards
         if (!battleState.attackerId) {
             if (!card.rotated) addMsg('Initiate Attack (B)', 'init-atk');
         } else if (!battleState.targetId) {
-            if (card.id !== battleState.attackerId) addMsg('Target for Attack (B)', 'target-atk');
+            if (card.id !== battleState.attackerId) {
+                if (card.owner === 'opponent') addMsg('Target for Attack (B)', 'target-atk');
+            } else {
+                // Check if direct attack is possible
+                const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
+                if (oppPhantoms.length === 0 && !card.summonedThisTurn) {
+                    addMsg('Direct Attack (B)', 'direct-atk');
+                }
+            }
             addMsg('Cancel Attack (N)', 'cancel-atk');
         } else {
             addMsg('Execute Battle (B)', 'execute-battle');
@@ -1203,7 +1258,34 @@ function cardAction(act) {
     const card = ctxTarget;
 	
     // --- PLAY / SET OPTIONS ---
-    if (act === 'play-atk') {
+    if (act === 'init-atk') {
+        battleState.attackerId = card.id;
+        refreshCard(card);
+        if (isMultiplayer) sendAction('battle_sync', { step: 'init', attackerId: card.id });
+    }
+    else if (act === 'target-atk') {
+        battleState.targetId = card.id;
+        refreshCard(card);
+        if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
+    }
+    else if (act === 'direct-atk') {
+        const dmg = card.health > 0 ? card.attack : 0;
+        executeAction('adjust_lp', { target: 'opponent', amount: -dmg });
+        battleState = { attackerId: null, targetId: null };
+        refreshCard(card);
+    }
+    else if (act === 'cancel-atk') {
+        const aId = battleState.attackerId;
+        const tId = battleState.targetId;
+        battleState = { attackerId: null, targetId: null };
+        if (aId) { const c = findCard(aId); if(c) refreshCard(c); }
+        if (tId) { const c = findCard(tId); if(c) refreshCard(c); }
+        if (isMultiplayer) sendAction('battle_sync', { step: 'cancel' });
+    }
+    else if (act === 'execute-battle') {
+        executeBattleLogic();
+    }
+    else if (act === 'play-atk') {
         playCardToField(card, card.type, true, false);
         if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: document.getElementById(card.id).parentElement.id, faceUp: true, rotated: false, fromZone: 'hand' });
     }
@@ -2346,7 +2428,10 @@ function applyRemoteAction(action) {
         if (zone) {
             zone.appendChild(createCardEl(token));
         }
-		triggerPulse("button[onclick*='spawnToken'][onclick*='opponent']");
+        
+        // SIMPLE FIX: Trigger pulse directly on the opponent's button when receiving the spawn
+        triggerPulse("button[onclick*='spawnToken'][onclick*='opponent']");
+        
         console.log("Token spawned by opponent in zone:", targetZoneId);
     }
 	
@@ -2616,6 +2701,7 @@ function executeAction(type, payload, isRemote = false) {
                 updateCounts(newOwner);
             } else {
                 // Field Move
+                if (mCard.loc !== 'field') mCard.summonedThisTurn = true;
                 mCard.loc = 'field';
                 state[newOwner].field.push(mCard);
                 const zone = document.getElementById(targetId);
