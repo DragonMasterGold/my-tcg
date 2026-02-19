@@ -77,7 +77,7 @@
     "id": "arbian_librarian",
     "name": "Arbian Librarian",
     "type": "Phantom",
-    "description": "Condition: Summoned. Search for a Level 2 Life card from your Main Deck.",
+    "description": "On Summon: Search a Level 2 Life Phantom.",
     "archetype": "Life",
     "archetypes": [
       "Life",
@@ -161,7 +161,7 @@
     "id": "blood_pact",
     "name": "Blood Pact",
     "type": "Spirit",
-    "description": "Take 1000 points of damage and give your opponent 1000 Life Points. Draw 1 card.",
+    "description": "Take 1000 points of damage and give your opponent 1000 Life Points. <br>Draw 1 card. <br>Once Per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -303,7 +303,7 @@
     "id": "chronic_necrotic",
     "name": "Chronic Necrotic",
     "type": "Phantom",
-    "description": "Hand Ability: If a Chaos Phantom would Break, instead Discard this card. <br><br>Field Ability: If this card defeats a Phantom in Battle, that Phantom is added to the owner Chronic Necrotic’s hand. <br><br>AL Ability: If a Phantom would be sent to the AL, instead place that card and this card onto the bottom of their owner’s deck.",
+    "description": "Hand Ability: If a Chaos Phantom would Break, then you can Discard this card and Negate that Break. <br><br>Field Ability: If this card defeats a Phantom in Battle, that Phantom is added to the owner of Chronic Necrotic’s hand. <br><br>AL Ability: If a Phantom would be sent to the AL, instead place that card and this card onto the bottom of their owner’s deck.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos",
@@ -543,7 +543,7 @@
     "id": "cosmic_redeemer",
     "name": "Cosmic Redeemer",
     "type": "Phantom",
-    "description": "Equip Card.<br>When this Card Breaks a card that card can be Equipped to this card. <br><br>1-AP. <br>● AP: Discard a Card Equipped to this card. Gain 1-SP. <br>● AP: Discard two Cards Equipped to this card. Draw a card. <br>● AP: Discard three Cards Equipped to this card. Target a card to Break.",
+    "description": "Equip Card.<br>When this Card Breaks a card that card can be Equipped to this card. <br><br>1-AP. <br>● AP: Discard a Card Equipped to this card. Gain 1-SP. <br>● AP: Discard two Cards Equipped to this card. Draw a card. <br>● AP: Discard three Cards Equipped to this card. Targeted Break.",
     "archetype": "Cosmic",
     "archetypes": [
       "Cosmic"
@@ -652,7 +652,7 @@
     "id": "coup_detat",
     "name": "Coup D'etat",
     "type": "Spirit",
-    "description": "Discard 2 cards from your hand and draw 3. <br>If your hand has no cards to Discard, draw 5 cards and then Discard 3.",
+    "description": "Discard 2 cards from your hand and draw 3. <br>If your hand has no cards to Discard, draw 5 cards and then Discard 3.<br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -660,10 +660,25 @@
     "image": "Images/Cards/Coup D'etat.png"
   },
   {
+    "id": "creation_dragon",
+    "name": "Creation Dragon",
+    "type": "Phantom",
+    "description": "On Summon: Create a 2-SP Copy of each of these Cards: Creation Genie, Creation Nymph, Creation Fairy, Creation Sprite.<br>And then set this Card's level to 2.<br><br>Gain the Stats of any card Unsummoned by this card's Ability.<br>Piercing. Berserker.<br><br>3-AP.<br>● AP: Unsummon one of the Phantoms listed on this card and then Search any Deck for a copy of it.<br>● AP: Unsummon one of the Phantoms listed on this card and is currently in your AL to then add it back to your hand.<br>● AP: Unsummon one of the Phantoms listed on this card and then Draw a card.",
+    "archetype": "Creation",
+    "archetypes": [
+      "Creation",
+      "Dragon"
+    ],
+    "image": "Images/Cards/Creation Dragon.png",
+    "level": 8,
+    "attack": 0,
+    "health": 0
+  },
+  {
     "id": "creation_fairy",
     "name": "Creation Fairy",
     "type": "Phantom",
-    "description": "When this card is summoned, Create a level 0 Creation Sprite. <br><br>1-AP per round. <br>● AP: This card can Attack twice. <br>● AP: Unsummon an Ally Creation Sprite and Search a copy of it.",
+    "description": "On Summon: Create a level 0 Creation Sprite.<br><br>1-AP per round. <br>● AP: This card can Attack twice.<br>● AP: Unsummon an Ally Creation Sprite and Search a copy of it.",
     "archetype": "Creation",
     "archetypes": [
       "Creation",
@@ -706,7 +721,7 @@
     "id": "creation_sprite",
     "name": "Creation Sprite",
     "type": "Phantom",
-    "description": "When summoned Create a 0-SP Copy.",
+    "description": "On Summon: Create a 0-SP Copy.<br>Unsummon an Ally Creation Sprite and Search a copy of it.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -775,7 +790,7 @@
     "id": "crossroads",
     "name": "Crossroads",
     "type": "Spirit",
-    "description": "Instant Play On Draw: Look at the top zero-to-three cards of your deck. <br>Choose one to draw and place the other(s) on the bottom of your deck. <br>Pay 1000 for each card revealed. Skip your next draw phase.",
+    "description": "Instant Play On Draw: Look at the top zero-to-three cards of your deck. <br>Choose one to draw and place the other(s) on the bottom of your deck. <br>Pay 1000 for each card revealed. <br>Skip your next draw phase.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -826,7 +841,7 @@
     "id": "cycle",
     "name": "Cycle",
     "type": "Spirit",
-    "description": "Draw a card. Once per turn.",
+    "description": "Draw a card.<br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -923,7 +938,7 @@
     "id": "deck_flip!",
     "name": "Deck Flip!",
     "type": "Spirit",
-    "description": "Both Players flip their Decks upside down for the remainder of the duel. <br>If the card revealed by the flip is a Chaos card draw it. <br>All other Deck related Abilities are applied the same as before.",
+    "description": "Both Players flip their Decks upside down for the remainder of the duel. <br>If the card revealed by the flip is a Chaos card draw it.<br>And if the next card is also a Chaos Card draw it as well.<br>All other Deck related Abilities are applied the same as before.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos"
@@ -1340,7 +1355,7 @@
     "id": "hand_remake",
     "name": "Hand Remake",
     "type": "Spirit",
-    "description": "Cost: Reduce your current SP to zero. <br>Place all the cards in your hand onto the bottom of your deck. <br>Draw the same number of cards back. <br>Pay 500 LP for each card drawn. <br>Once per duel.",
+    "description": "Place all the cards in your hand onto the bottom of your deck. <br>And if you do Draw the same number of cards back.<br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -1428,7 +1443,7 @@
     "id": "hourglass_of_time",
     "name": "Hourglass Of Time",
     "type": "Spirit",
-    "description": "Draw 2 cards. <br>Lose your next 2 draw phases.<br>Lose half your life points. <br>You cannot attack the turn this card is activated.",
+    "description": "Draw 2 cards. <br>Lose your next 2 draw phases.<br>Lose half your life points. <br>You cannot attack the turn this card is activated.<br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -1520,7 +1535,7 @@
     "id": "kings’_lead",
     "name": "Kings’ Lead",
     "type": "Counter",
-    "description": "When your opponent activates a Spirit/Counter Card that would destroy a Phantom(s) on the field: Pay 2000 LP to Negate the activation, then destroy it. <br>Once per Round.",
+    "description": "When your opponent activates a Spirit/Counter Card that would Break a Phantom(s) on the field: Pay 2000 LP to Negate the activation, then Break it. <br>Once per Round.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -1690,6 +1705,20 @@
     "image": "Images/Cards/Lighting Elemental.png",
     "level": 5,
     "attack": 1500,
+    "health": 1000
+  },
+  {
+    "id": "lil_spirit_swapper",
+    "name": "Lil' Spirit Swapper",
+    "type": "Phantom",
+    "description": "Spirit cards your Opponent Activates that would affect them are applied to you instead.",
+    "archetype": "Chaos",
+    "archetypes": [
+      "Chaos"
+    ],
+    "image": "Images/Cards/Lil' Spirit Swapper.png",
+    "level": 4,
+    "attack": 1000,
     "health": 1000
   },
   {
@@ -2445,7 +2474,7 @@
       "Chaos"
     ],
     "image": "Images/Cards/Spirit Swapper.png",
-    "level": 4,
+    "level": 10,
     "attack": 1000,
     "health": 1000
   },
@@ -2501,7 +2530,7 @@
     "id": "summoner_overdrive",
     "name": "Summoner Overdrive",
     "type": "Spirit",
-    "description": "Condition: This card cannot be activated the same turn the player Unsummons. <br>Gain 4-SP. <br>You cannot gain any SP your next turn. <br>Any card summoned this turn after activating this card is discarded at Turn end. <br>Lose 2000 LP your next turn. <br>Once per turn.",
+    "description": "Condition: This card cannot be activated the same turn the player Unsummons. <br><br>Gain 4-SP. <br>You cannot gain any SP your next turn. <br><br>Any card summoned this turn after activating this card is discarded at Turn end. <br>Lose 2000 LP your next turn. <br><br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -2512,7 +2541,7 @@
     "id": "summoner’s_draw",
     "name": "Summoner’s Draw",
     "type": "Spirit",
-    "description": "Pay 4-SP and draw 2 cards.",
+    "description": "Pay 4-SP and draw 2 cards.<br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -2523,7 +2552,7 @@
     "id": "summoners’_pact",
     "name": "Summoners’ Pact",
     "type": "Spirit",
-    "description": "Lose 2000 LP. Gain 2-SP. <br>Your opponent gains 4-SP their next turn. Once per turn.",
+    "description": "Cost: Lose 2000 LP.<br>Gain 2-SP. <br><br>Your opponent gains 4-SP their next turn. <br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
