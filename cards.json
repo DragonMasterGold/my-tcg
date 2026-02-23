@@ -219,7 +219,7 @@
     "id": "budding_rascal",
     "name": "Budding Rascal",
     "type": "Phantom",
-    "description": "Condition: Have an Ally level 2 or lower Life Phantom. Special Summon this card. It’s Field level becomes zero.",
+    "description": "Condition: Have an Ally level 2 or lower Life Phantom. <br>Special Summon this card. <br>It’s Field level becomes zero.",
     "archetype": "Life",
     "archetypes": [
       "Life",
@@ -670,7 +670,7 @@
       "Dragon"
     ],
     "image": "Images/Cards/Creation Dragon.png",
-    "level": 8,
+    "level": 10,
     "attack": 0,
     "health": 0
   },
@@ -816,7 +816,7 @@
     "id": "curious_spright",
     "name": "Curious Spright",
     "type": "Phantom",
-    "description": "Pay 1000-to-3000 LP. Excavate 1 card for every 1000 LP paid. You may Draw 1 Excavated Life Phantom.",
+    "description": "Pay 1000-to-3000 LP.<br>Excavate 1 card for every 1000 LP paid.<br>You may Draw 1 Excavated Life Phantom.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -896,7 +896,7 @@
     "id": "deathly_apparition",
     "name": "Deathly Apparition",
     "type": "Phantom",
-    "description": "Hand & Field Ability: If a Death Phantom card is targeted for Battle, Discard this card and increase that card by 500 Attack. <br>AL Ability: Once Per Duel you can Special Summon this card and it gains Summon Binding. Immune to Targeted Break.",
+    "description": "Immune to Targeted Break.<br><br>Hand & Field Ability: If a Death Phantom card is targeted for Battle, Discard this card and increase that card by 500 Attack. <br><br>AL Ability: Once Per Duel you can Special Summon this card. <br>If you do it gains Summon Binding.",
     "archetype": "Death",
     "archetypes": [
       "Death"
@@ -1004,7 +1004,7 @@
     "id": "destruction_forager",
     "name": "Destruction Forager",
     "type": "Phantom",
-    "description": "Summon Binding. Break Impowering: Gain 1 SP.",
+    "description": "Summon Binding.<br>Break Impowering: Gain 1 SP.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1074,7 +1074,7 @@
     "id": "destruction_trapper",
     "name": "Destruction Trapper",
     "type": "Phantom",
-    "description": "Flip: Targeted Destroy. Summon Binding.",
+    "description": "Flip: Targeted Destroy.<br>Summon Binding.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1193,7 +1193,7 @@
     "id": "dream_eater",
     "name": "Dream Eater",
     "type": "Phantom",
-    "description": "Flip: Targeted Discard. Summon Binding.",
+    "description": "Flip: Targeted Discard.<br>Summon Binding.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -1304,8 +1304,8 @@
     ],
     "image": "Images/Cards/Flicker Shade.png",
     "level": 1,
-    "attack": 0,
-    "health": 500
+    "attack": 200,
+    "health": 200
   },
   {
     "id": "forgotten_statuary_hall",
@@ -1339,6 +1339,17 @@
       "Standard"
     ],
     "image": "Images/Cards/Gracious Deal.png"
+  },
+  {
+    "id": "greed_pacer",
+    "name": "Greed Pacer",
+    "type": "Counter",
+    "description": "Condition: Your opponent draws a card outside of the Draw Phase.<br>\rDraw 2.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Greed Pacer.png"
   },
   {
     "id": "guiding_light",
@@ -1490,7 +1501,7 @@
   {
     "id": "imbuing_life",
     "name": "Imbuing Life",
-    "type": "Environment",
+    "type": "Spirit",
     "description": "Give every Ally Life Phantom 500 Health.",
     "archetype": "Life",
     "archetypes": [
@@ -1594,20 +1605,34 @@
     "id": "law_of_death",
     "name": "Law Of Death",
     "type": "Counter",
-    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their AL. <br>Negate the activation. <br>If you control a Cosmic Phantom, that card in their AL becomes AL Sealed.",
-    "archetype": "Cosmic",
+    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their AL. <br>Negate the activation. <br><br>If you control a Cosmic Phantom, that card in their AL becomes AL Sealed.",
+    "archetype": "Law",
     "archetypes": [
+      "Law",
       "Cosmic"
     ],
     "image": "Images/Cards/Law Of Death.png"
   },
   {
+    "id": "law_of_oblivion",
+    "name": "Law Of Oblivion",
+    "type": "Counter",
+    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Oblivion. <br>Negate the activation.<br><br>If you control a Cosmic Phantom, that card in their Oblivion becomes Oblivion Sealed.",
+    "archetype": "Law",
+    "archetypes": [
+      "Law",
+      "Cosmic"
+    ],
+    "image": "Images/Cards/Law Of Oblivion.png"
+  },
+  {
     "id": "law_of_shadow",
     "name": "Law Of Shadow",
     "type": "Counter",
-    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Shadow Realm. <br>Negate the activation. <br>If you control a Cosmic Phantom, that card in their Shadow Realm becomes Shadow Sealed.",
-    "archetype": "Cosmic",
+    "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Shadow Realm. <br>Negate the activation. <br><br>If you control a Cosmic Phantom, that card in their Shadow Realm becomes Shadow Sealed.",
+    "archetype": "Law",
     "archetypes": [
+      "Law",
       "Cosmic"
     ],
     "image": "Images/Cards/Law Of Shadow.png"
@@ -1631,7 +1656,7 @@
     "id": "life_fairy",
     "name": "Life Fairy",
     "type": "Phantom",
-    "description": "Condition: A Life card is Targeted for Attack and would Break by the following Battle. You can Redirect the Attack to this card. <br>Summoner Damage from this Attack is instead turned into LP.",
+    "description": "Condition: A Life card is Targeted for Attack and would Break by the following Battle. <br>You can Redirect the Attack to this card.<br>Summoner Damage from this Attack is instead turned into LP.",
     "archetype": "Life",
     "archetypes": [
       "Life",
@@ -1657,7 +1682,7 @@
     "id": "lifeful_wildflower",
     "name": "Lifeful Wildflower",
     "type": "Phantom",
-    "description": "This card can take the Battle for another Level 2 or lower Life Phantom. <br>Summoner Battle Damage is turned into LP.",
+    "description": "This card can take the Battle for another Level 2 or lower Life Phantom.<br>Summoner Battle Damage is turned into LP.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -2186,7 +2211,7 @@
     "id": "sarpanch_ayah",
     "name": "Sarpanch Ayah",
     "type": "Phantom",
-    "description": "While your LP is higher than your opponent's, all Ally Life Phantoms gain 500 Attack. <br>Your opponent cannot Target level 1-3 Life Phantoms for Attack. <br>Condition: You gain LP. Once per turn Special Summon a Level 1 Life Phantom from the AL.",
+    "description": "While your LP is higher than your opponent's, all Ally Life Phantoms gain 500 Attack. <br>Your opponent cannot Target level 1-3 Life Phantoms for Attack.<br><br>Condition: You gain LP.<br>Once per turn Special Summon a Level 1 Life Phantom from the AL.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -2280,7 +2305,7 @@
     "id": "shadow_blink",
     "name": "Shadow Blink",
     "type": "Counter",
-    "description": "Choose one face up Shadow Phantom you control, Banish it until this turn is over.",
+    "description": "Choose one an Ally Shadow Phantom, Banish it until this turn is over.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow"
@@ -2327,7 +2352,7 @@
     "id": "shadow_stealer",
     "name": "Shadow Stealer",
     "type": "Phantom",
-    "description": "Flip: Targeted Banish. Summon Binding.",
+    "description": "Flip: Targeted Banish.<br>Summon Binding.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow"
@@ -2410,7 +2435,7 @@
     "id": "speaker_to_life",
     "name": "Speaker To Life",
     "type": "Phantom",
-    "description": "Select a level 1 Life Phantom in the AL and Resurrect it. Once Per Summon.",
+    "description": "Select a level 1 Life Phantom in the AL and Resurrect it.<br>Once Per Summon.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -2421,10 +2446,21 @@
     "health": 1000
   },
   {
+    "id": "special_rank_1",
+    "name": "Special Rank-1",
+    "type": "Spirit",
+    "description": "Choose an Ally Phantom card and send it to the AL.<br>\rSpecial Summon an Archetype Rank-1 Phantom -- of equal or less SP.<br><br>Once per turn.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Special Rank-1.png"
+  },
+  {
     "id": "special_summon",
     "name": "Special Summon",
     "type": "Spirit",
-    "description": "Choose an Ally Phantom card and send it to the AL.<br>Special Summon a Phantom Card of equal or less SP and which has the same Archetype.<br>Once per Round.",
+    "description": "Choose an Ally Phantom card and send it to the AL.<br>Special Summon a Phantom of equal or less SP -- and which has the same Archetype.<br><br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -2607,6 +2643,17 @@
     "image": "Images/Cards/Support Breaker.png"
   },
   {
+    "id": "support_target_locked",
+    "name": "Support Target Locked",
+    "type": "Counter",
+    "description": "Condition: Have a Spirit/Counter activated in the same row as this card.<br>Negate the activation.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Support Target Locked.png"
+  },
+  {
     "id": "taking_shape",
     "name": "Taking Shape",
     "type": "Counter",
@@ -2643,7 +2690,7 @@
     "id": "those_who_give_life",
     "name": "Those Who Give Life",
     "type": "Phantom",
-    "description": "While your LP is higher than your opponent's: <br>You may Select Life Phantoms in the AL and pay 1000 LP per SP they have and then Special Summon them. <br>This card gains 500 Stats for every 1000 LP paid. <br><br>While your LP is lower than your opponent's: <br>Damage dealt to this card is instead directly dealt to the owning Player. <br>This Card cannot be Targeted by Abilities. This card cannot target a Phantom for Attack. <br>Direct Attack Damage by this Card is not delt, the owner gains LP equal to this card’s Attack.",
+    "description": "While your LP is higher than your opponent's: <br>You may Select Life Phantoms in the AL and pay 1000 LP per SP they have and then Special Summon them. <br>This card gains 500 Stats for every 1000 LP paid. <br><br>While your LP is equal to or lower than your opponent's: <br>Damage dealt to this card is instead directly dealt to the owning Player. <br>This Card cannot be Targeted by Abilities. This card cannot target a Phantom for Attack. <br>Direct Attack Damage by this Card is not delt, the owner gains LP equal to this card’s Attack.",
     "archetype": "Life",
     "archetypes": [
       "Life",

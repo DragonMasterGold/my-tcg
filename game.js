@@ -427,7 +427,8 @@ function closeAllModals() {
 	document.getElementById('card-info-panel').classList.add('hidden');
 }
 
-function startGame() {
+// NEW: Added 'isRemote' so we don't get stuck in an infinite loop
+function startGame(isRemote = false) {
     document.querySelectorAll('.card').forEach(c => c.remove());
     
     ['player', 'opponent'].forEach(p => {
@@ -458,6 +459,11 @@ function startGame() {
     if (!isMultiplayer) draw(5, 'opponent');
     updateStats();
     closeAllModals();
+
+    // NEW: If I clicked the button, tell the opponent to do this too
+    if (!isRemote && isMultiplayer) {
+        sendAction('game_start_global', {});
+    }
 }
 
 function resetGame() {
@@ -1999,11 +2005,12 @@ function loadDeckFile() {
         reader.onload = evt => {
             try {
                 const deckData = JSON.parse(evt.target.result);
+                const timestamp = Date.now(); // NEW: Get a unique time number
                 
-                // Convert to full card objects
+                // Convert to full card objects with UNIQUE IDs
                 state.player.deck = (deckData.main || []).map(c => ({
                     ...c,
-                    id: `c-${++idCounter}`,
+                    id: `c-${++idCounter}-${timestamp}`,
                     owner: 'player',
                     loc: 'deck',
                     faceUp: true,
@@ -2012,7 +2019,7 @@ function loadDeckFile() {
                 
                 state.player.sideDeck = (deckData.side || []).map(c => ({
                     ...c,
-                    id: `c-${++idCounter}`,
+                    id: `c-${++idCounter}-${timestamp}`,
                     owner: 'player',
                     loc: 'sideDeck',
                     faceUp: true,
@@ -2021,7 +2028,7 @@ function loadDeckFile() {
                 
                 state.player.extraDeck = (deckData.extra || []).map(c => ({
                     ...c,
-                    id: `c-${++idCounter}`,
+                    id: `c-${++idCounter}-${timestamp}`,
                     owner: 'player',
                     loc: 'extraDeck',
                     faceUp: true,
@@ -2341,6 +2348,13 @@ function applyRemoteAction(action) {
 		if (payload.fromZone) {
 			card.loc = payload.fromZone; // Set correct location before removing
 		}
+		
+		if (type === 'game_start_global') {
+				// Run the start game function, but tell it 'true' so it knows 
+				// it came from the network and doesn't bounce the signal back.
+				startGame(true); 
+				return;
+			}
 		
 
         // 1. Remove it from wherever it currently is (using our new smarter function)

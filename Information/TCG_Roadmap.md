@@ -7,28 +7,38 @@ What is the best things to do now for establishing the best possible foundation 
 
 
 Simulator Adjustments Wanted Easy:
-If a card Breaks in Battle (loses its health and has a Break function applied to it), it still shows its stats and level while in the Discard Piles.
+If a card Breaks in Battle, it still shows its stats and level while in the Discard Piles.
 
 
  
 Simulator Adjustments Wanted (Middling Difficulty):
-Deck Builder:
-Simulator Adjustments Wanted (Middling Difficulty):
-Deck Builder:
-Make Deck Builder view have 5 card columns displayed, so it is displaying 5 cards.
-Make Current Deck View have 6 card columns displayed, so it is displaying 6 cards.
-Make sure the deck part of the deck builder doesn't have cards going off the screen and causing a scroll bar to appear.
+- / + hotkeys working on hover over various items to add or subtract from them. Level/AP/Tokens/Markers/Counters gain one and lose one if hotkey is pressed on them. Phantom Attack and Health gain 100 and lose 100 if hotkey is pressed on them.
 
-Also make the current selection of options: All, Phantoms, Spirits, Counters. Remain as they are, but make add a dropdown arrow button that extends the search/filter section down lower.
-Make Environments button the same size as the other buttons.
+Pressing B on a Phantom that has Initiated attack, while the player is able to direct attack, should initiate the direct attack, with a second press of B confirming it.
+
+Make sure old decks load in updated versions of cards. (How exactly would be the best way to do this?)
+(Though I do like being able to easily play with older card versions and letting people easily add custom cards to their deck. Though maybe this is too easy for that and we just need a different way to play with customized cards).
+
+Deck Builder:
+Implement search working with A: Archetype Name being functional.
+Along with Set: # working to search by set.
+
+Update Deck Builder how to use section to include Archetype searches.
+
+Have the current number of cards being displayed in the Deck Builder displayed somewhere.
+Looking like:
+Cards: (#)
+
+
 
  
 Simulator Adjustments Low Impact:
 The two Show hand buttons syncing the glow in multiplayer.
 The coin/dice/token buttons glow syncing in multiplayer.
-Activating your own set Counter/Spirit card should flip it up. (Only applied to your own set face down Counter/Spirit cards.)
-
+Activating your own set Counter/Spirit card should flip it up.
 Add custom card-back-artwork to the cards.
+
+Settings menu replaced with a Controls menu. (Which has a simple pop up that displays the hotkeys and controls).
 
  
 Simulator Adjustments Wanted (Hard):
@@ -44,57 +54,8 @@ Sometimes a card just doesn’t get synced quite right?
 
  
 Simulator Stage 2 Adjustments:
-Right Click Menu Re-Work:
-Have the right click menus have the function to click a menu option to open a net of options to the side.
-
-Such as:
-
-Move To:
-(Clicking on it to open another set of menu options to the side. Which would have all the move options:)
-
-To Hand
-<Break>
-To Deck (Random)
-To Deck Top
-To Deck Bottom
-<Break>
-To After Life
-To Shadow Realm
-To Oblivion
-
-Phantoms can have sub menus for Play options.
-Attack.
-Defense.
-<Break>
-Set Attack
-Set Defense
-
-Special Summon would fetch the same set of options.
-
-Spirits/Counters/Environments wouldn't need this nesting since they only get 2 choices.
 
 
-And I think a menu option for Add To Card:
-
-Add an AP
-(Hidden unless applicable) an AP.
-<Break>
-Add a Token
-(Hidden unless applicable) Remove a Token
-<Break>
-Add a Marker.
-(Hidden unless applicable) Remove a Marker
-<Break>
-Add a Turn Counter
-(Hidden unless applicable) Remove a Turn Counter
-
-(I would also like it if each of these things that their visual can be added can be clicked on to type a new number to change the number on them directly. And when 0 is typed it would disappear again).
-These re-works should maintain the hotkey labels.
-These re-works should not break any of the functionality of the menus.
-
-
-
- 
 Further Keyword Automations:
 [We will need a really well developed Design Doc for all of this. To structure how to get Keyword Abilities, Targeting, Ability Menus, and Specific Card Abilities / Code functioning in the best way possible and have the foundations built correctly from the beginning. Making it clear in the Design Doc what the whole eventual game play structure will look like and function, with specified long term goals. While explaining we are just building out the basic foundation for now.]
 Find / put together a list of more keywords that can easily be automated.
@@ -102,7 +63,7 @@ Find / put together a list of more keywords that can easily be automated.
 Figure out further logic for automating Keywords.
 
 
-In game pop up boxes:
+In game pop up boxes / menus:
 We will importantly need Diegetic pop up boxes in game, rather than a browser pop up. For inputting information, informing information to the player, and to eventually have a yes/no mechanical pop up option. (Potentially also for utilizing Abilities).
 
  
@@ -127,6 +88,11 @@ Ability Points / AP automatically being tracked with a visual display (that has 
 Could we also set up smart logic through this as well? Such as “Discard this card and Gain 1 SP.”
 “Do this to do this” logic being dynamically achieved somehow?
 Like setting up the understanding for Discarding (or at least Discarding for cost) and the understanding for the positive (like draw a card or gain an SP) and just dynamically combine them.
+
+Activate button added to menus. E hotkey moved to Activate. Activate does the highlight.
+(Highlight stays as an option. Or maybe we change it to be Target or something instead? Nah, we still need a way to quickly communicate about cards, that aren’t related to a specific mechanic.)
+We need to work out how to most intuitively and seamlessly handle activating an ability, then targeting a card for it to be applied to.
+
 
  
 Simulator High Impact Adjustments:
@@ -220,3 +186,28 @@ I could have a monthly sub place where players get access to the latest updates 
 I could set up art commissions as a reward tier, or a purchasable item. Where for a certain $ amount a user can commission art to be made for a card.
 This could either/or be used to help fund the art of the game.
 And/or be used for people to commission Alternate artwork for the cards to be added into the game.
+
+
+Release Development:
+These notes are mostly brain storming and more long term road map ideas on how to go about an official Early Access Release.
+
+Add login in and server information saving to the game.
+I could sell the ability to play. 
+(You need like a unique ID key or something that becomes attached to your account. Then you need to login to that account to play. Not locked in to be figured out more later).
+
+I could sell sets of cards.
+Where an account could only deck build and (somehow figure out) load a deck with cards they own on that account.
+
+I could have a monthly sub place where players get access to the latest updates and card sets.
+(Perhaps coded/set up and integrated in a way that they only maintain access to everything while subbed?)
+
+I could set up art commissions as a reward tier, or a purchasable item. Where for a certain $ amount a user can commission art to be made for a card.
+This could either/or be used to help fund the art of the game.
+And/or be used for people to commission Alternate artwork for the cards to be added into the game.
+
+KS Rewards Idea:
+Perhaps some rewards could be in game cosmetics?
+Like card sleeves.
+Alt Art on cards.
+More icon art.
+

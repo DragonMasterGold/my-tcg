@@ -18,7 +18,9 @@
   "Discard": "Send the card to the After Life.",
   "Discard Impowering": "When this card is Discarded the attached Ability can be activated.",
   "Discarded": "Send the card to the After Life.",
-  "Dodge Roll": "When activated the card avoids a Targeted action and moves to an available Field Slot next to it.<br>If there is no Available field slot this Ability does not activate.",
+  "Dodge": "When a Game Action (Ability, Attack, Battle) goes off but is avoided by the card.",
+  "Dodge Roll": "Can be activated in response to a Game Action (Ability or Attack) that would effect this card or its current Card Slot. This card must move to an available adjacent card Slot for this Ability to be activated. Dodge the Game Action.",
+  "Dodger": "Can be activated in response to a game Action (Ability or Attack) that would either Target, Break, or effect this card –– and that activated action is avoided.",
   "Double Attack": "This Phantom can Attack twice.",
   "Environment Range": "The Environment Range determines what Players and cards are effected by the Environment's ability and if they can use Activate the Environment's Ability.<br><br>When only one Player has an Environment in play, both Fields and Players are in the Environment Range.<br><br>When both players have an Environment in play, only their side of the field is in their own Environment Range.",
   "Equip Card": "This card is attached to the selected card and placed in a Spirit/Counter Card Slot. It's ability is applied to the Equipped card until this card leaves the field. If the Equipped card is destroyed then this card is Discarded.",
@@ -39,6 +41,7 @@
   "Sealed": "The card is locked into the location that it is Sealed in.<br>It cannot be taken out of that location or otherwise interacted with -- without specifically an Ability that interacts with Sealed cards.",
   "Search": "Find a card from the designated deck to add to select. Most often drawing a card from the main deck.",
   "Shadow Realm Ability": "This Ability can only be activated while this Card is in the Shadow Realm.",
+  "Shadow Step": "If this card is Targeted, you can Banish this card and Dodge.<br><br>At the Start of the next turn, Unbanish this card.<br>All damage and conditions on this card are still applied to it.<br><br>Once per card summon.",
   "Shielded": "The first damage this card would take is negated. <br>This only applied once per Shielded application. Often meaning once per summon.",
   "Stat Swap": "Swap the current Attack and Health of a Phantom.",
   "Stats": "Both the Attack and Health of a Phantom.",
@@ -49,6 +52,7 @@
   "Summoner Damage": "Any damage that is applied to the Summoner as a result of Attacks or Battle.",
   "Target": "This card Targets a Card for the ability to be applied to.",
   "Targeted": "This card Targets a Card for the ability to be applied to.",
+  "Targeted Dodge Roll": "Can be activated in response to this card or it’s Card Slot being Targeted. This card must move to an available adjacent card Slot for this Ability to be activated. Dodge the Targeted Action.",
   "Token": "A card treated as a Phantom.<br>If details are not given for a token, it is to be treated as a Level 0 Phantom without an Ability, 0-Stats, and no Archetype.",
   "Unsummon": "On your turn, send your own Ally Phantom to the AY and gain the Summoning Points of that card's current Field SP/Level back.<br>You cannot Unsummon a card the turn it has Battled."
 }
