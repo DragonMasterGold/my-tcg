@@ -54,23 +54,23 @@ function filterCards() {
 
         if (!rawTerm) return true;
 
-        // --- Structured Search (e.g., "Level: 2" or "Atk: 500 HP: 1000") ---
+        // --- Structured Search (e.g., "Lvl: 2" or "Atk: 500 HP: 1000") ---
         if (rawTerm.includes(':')) {
-            // Find all key:value pairs. Supports multiple filters like "atk: 500 hp: 1000"
             const pairs = rawTerm.match(/(\w+):\s*([^:]+?)(?=\s+\w+:|$)/g);
             
             if (pairs) {
                 let allMatch = true;
                 pairs.forEach(pair => {
                     const colonIdx = pair.indexOf(':');
-                    const key = pair.substring(0, colonIdx).trim();
+                    const key = pair.substring(0, colonIdx).trim().toLowerCase(); // Forced lowercase for safety
                     const val = pair.substring(colonIdx + 1).trim();
 
                     let match = false;
-                    if (key === 'level') match = String(card.level) === val;
+                    if (key === 'level' || key === 'lvl') match = String(card.level) === val;
                     else if (key === 'attack' || key === 'atk') match = String(card.attack) === val;
                     else if (key === 'health' || key === 'hp') match = String(card.health) === val;
-                    else if (key === 'archetype') {
+                    else if (key === 'set') match = (card.set || "").toLowerCase().includes(val);
+                    else if (key === 'archetype' || key === 'a') {
                         match = (card.archetype || "").toLowerCase().includes(val) || 
                                (card.archetypes || []).some(a => a.toLowerCase().includes(val));
                     }
@@ -80,13 +80,14 @@ function filterCards() {
                     if (!match) allMatch = false;
                 });
 
-                // Also check if there's any non-structured text (e.g., "Atk: 500 Dragon")
+                // Also check if there's any non-structured text left over
                 const remainingText = rawTerm.replace(/(\w+):\s*([^:]+?)(?=\s+\w+:|$)/g, '').trim();
                 if (remainingText) {
                     const searchableText = [
                         card.name,
                         card.type,
                         card.description,
+                        card.set,
                         card.archetype,
                         ...(card.archetypes || [])
                     ].join(' ').toLowerCase();
@@ -102,15 +103,30 @@ function filterCards() {
             card.name,
             card.type,
             card.description,
+            card.set,
             card.archetype,
             ...(card.archetypes || []),
-            card.level !== undefined ? `level ${card.level}` : '',
-             card.attack !== undefined ? `atk ${card.attack} attack ${card.attack}` : '',
-             card.health !== undefined ? `hp ${card.health} health ${card.health}` : ''
-         ].join(' ').toLowerCase();
+            card.level !== undefined ? `level ${card.level} lvl ${card.level}` : '',
+            card.attack !== undefined ? `atk ${card.attack} attack ${card.attack}` : '',
+            card.health !== undefined ? `hp ${card.health} health ${card.health}` : ''
+        ].join(' ').toLowerCase();
 
         return searchableText.includes(rawTerm);
     });
+
+    // --- DISPLAY POOL COUNT DYNAMICALLY ---
+    let countDisplay = document.getElementById('pool-count-display');
+    if (!countDisplay) {
+        countDisplay = document.createElement('div');
+        countDisplay.id = 'pool-count-display';
+        countDisplay.style.fontWeight = 'bold';
+        countDisplay.style.paddingBottom = '10px';
+        countDisplay.style.textAlign = 'center';
+        countDisplay.style.width = '100%';
+        countDisplay.style.color = '#ddd'; // Slight off-white to match most dark UI themes
+        cardPool.parentNode.insertBefore(countDisplay, cardPool);
+    }
+    countDisplay.innerText = `Cards: (${filtered.length})`;
 
     // Apply the sorting rules before displaying
     sortCardList(filtered).forEach(card => {
@@ -246,9 +262,17 @@ function showDefaultControls() {
         textDiv.innerHTML = `
             <strong>Controls:</strong><br>
             • Left Click to view info.<br>
-			• Right click to add or remove a card.<br>
-			• Hold Right Click to add/remove multiple cards.<br>
-            • Press + or - keys to quickly add/remove cards.<br>
+            • Right click to add or remove a card.<br>
+            • Hold Right Click to add/remove multiple cards.<br>
+            • Press + or - keys to quickly add/remove cards.<br><br>
+            
+            <strong>Search Filters:</strong><br>
+            You can search by Archetype, Level, Attack, Health, and Set by typing any of those into the Search by with a : after. <br>
+			A: Works for Archetypes. <br>
+			Atk: – HP: – Lvl: – All also work. <br>
+			<br>
+
+            <em>Example:</em> <code> A: Creation Lvl: 4 </code><br><br>
         `;
     }
 }
@@ -380,7 +404,18 @@ function loadDeck(event) {
     reader.onload = (e) => {
         try {
             const data = JSON.parse(e.target.result);
-            currentDeck = { main: data.main || [], extra: data.extra || [], side: data.side || [] };
+
+            // Helper to auto-update official cards while preserving custom cards
+            const processCard = (c) => {
+                const officialCard = allCards.find(dbCard => (dbCard.name || "").toLowerCase() === (c.name || "").toLowerCase());
+                return officialCard ? officialCard : c;
+            };
+
+            currentDeck = { 
+                main: (data.main || []).map(processCard), 
+                extra: (data.extra || []).map(processCard), 
+                side: (data.side || []).map(processCard) 
+            };
             refreshUI();
         } catch (err) {
             alert('Invalid Deck File');

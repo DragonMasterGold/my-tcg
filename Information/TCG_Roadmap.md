@@ -1,29 +1,48 @@
 My TCG Vibe Coding Road Map:
 
-Bigger Macro Overview Things To Figure Out:
-Is this current development method the best way to be going about this? Is JavaScript and such the best language and thing to be using here?
-Are there things that will need to be re-worked eventually? Code re-written? Things re-built? If so? What? When? Where? How?
-What is the best things to do now for establishing the best possible foundation for this game development in the long term?
-
 
 Simulator Adjustments Wanted Easy:
-If a card Breaks in Battle, it still shows its stats and level while in the Discard Piles.
+Direct Attack is not syncing for the opponent. (The Attack sees the Life Points go down. But the player being Attacked / not doing the action does not see the Life Points change).
+Also Direct Attacking does not turn off the Attack glow for the other player viewing the action.
+
+Pressing B on a Phantom that has Initiated attack, while the player is able to direct attack, should initiate the direct attack, with a second press of B confirming it.
+Pressing the B hotkey on the Phantom / Initiating a Direct Attack should Highlight the Attacking Phantom with the same highlight as a Phantom being Targeted for an Attack. To help visually denote the Direct Attack is coming.
+
+If a card Breaks in Battle, it still shows its stats and level while in the Discard Piles (in the After Life).
+
+Cards that are rotated or flipped when sent to the discard piles are not being synced properly for the opponent. The opponent sees them as still being rotated or flipped while in the Discard pile. (The player doing the action sees things correctly.)
+
+
+For some reason you cannot properly view and see the cards in the opponent’s discard piles. You should be able to open any of the opponent’s Discard Piles and see all the cards in them.
+
+
 
 
  
 Simulator Adjustments Wanted (Middling Difficulty):
+
 - / + hotkeys working on hover over various items to add or subtract from them. Level/AP/Tokens/Markers/Counters gain one and lose one if hotkey is pressed on them. Phantom Attack and Health gain 100 and lose 100 if hotkey is pressed on them.
 
-Pressing B on a Phantom that has Initiated attack, while the player is able to direct attack, should initiate the direct attack, with a second press of B confirming it.
+Make sure old decks load in updated versions of cards. 
+Currently saving a deck (in the deck builder) saves it as a .json file with all the card’s current info.
+So when they are loaded it is just loading cards based on the saved json.
+How exactly would be the best way to go about changing/fixing this? So updated cards are what is loaded in?
+(Though I do like being able to easily play with older card versions and letting people easily add custom cards to their deck. Though maybe the json file is too easy as a method for that and we just need a different way to play with customized cards).
 
-Make sure old decks load in updated versions of cards. (How exactly would be the best way to do this?)
-(Though I do like being able to easily play with older card versions and letting people easily add custom cards to their deck. Though maybe this is too easy for that and we just need a different way to play with customized cards).
+Start new game should be syncing for both players.
+
+When a card starts in a particular player’s deck, even if control shifts during the game to the other player, when that card leaves the field to basically anywhere, it should be going to the original player’s discard piles or deck.
+
 
 Deck Builder:
 Implement search working with A: Archetype Name being functional.
 Along with Set: # working to search by set.
+And Lvl: working for Level too.
 
-Update Deck Builder how to use section to include Archetype searches.
+Update Deck Builder how to use section to include Archetype searches info.
+You can search by Archetype, Level, Attack, Health, and Set by typing any of those into the Search by with a : after.
+A: also works for Archetypes.
+Atk: – HP: – Lvl: – All also work.
 
 Have the current number of cards being displayed in the Deck Builder displayed somewhere.
 Looking like:
@@ -31,8 +50,10 @@ Cards: (#)
 
 
 
+
  
 Simulator Adjustments Low Impact:
+
 The two Show hand buttons syncing the glow in multiplayer.
 The coin/dice/token buttons glow syncing in multiplayer.
 Activating your own set Counter/Spirit card should flip it up.
@@ -49,8 +70,8 @@ Make the Card Info box draggable or context dependent on where it will open, suc
 
 
 Simulator Adjustments Unsure On Fixes:
-Hands are going out of sync in multiplayer still.
-Sometimes a card just doesn’t get synced quite right?
+Hands are going out of sync in multiplayer still. (Needs play-testing to figure out the cause).
+Sometimes a card just doesn’t get synced quite right? (Needs play-testing to figure out the cause).
 
  
 Simulator Stage 2 Adjustments:

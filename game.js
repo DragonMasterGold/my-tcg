@@ -234,22 +234,69 @@ function handleKeys(e) {
     if (k === 'i') { openViewer('player', 'deck', true); return; }	
 
     // STEP 3: Execute Battle (Global Check)
-    // If both IDs are already set, pressing B executes immediately regardless of hover.
-    // This fixes the "3rd click" lag.
+    // If both IDs are set, pressing B executes. If it targets itself, it's a Direct Attack.
     if (k === 'b' && battleState.attackerId && battleState.targetId) {
-        executeBattleLogic();
+        if (battleState.attackerId === battleState.targetId) {
+            executeDirectAttack(battleState.attackerId);
+        } else {
+            executeBattleLogic();
+        }
         return;
     }
 
-    // 2. --- DYNAMIC HOVER CHECK ---
+     // 2. --- DYNAMIC HOVER CHECK ---
     const hoveredEl = document.querySelector('.card:hover') || 
                       document.querySelector('.card *:hover')?.closest('.card');
     
-    const hoveredOpponentSide = document.querySelector('.opponent-side:hover');
-
     if (hoveredEl) {
         const card = findCard(hoveredEl.id);
         if (!card) return;
+
+        // --- NEW: Hover Stat Adjustments (+ / -) ---
+        if (k === '+' || k === '=' || k === '-' || k === '_') {
+            const sign = (k === '+' || k === '=') ? 1 : -1;
+            
+            // Find the deepest element currently being hovered
+            const hoveredNodes = document.querySelectorAll(':hover');
+            const deepestHover = hoveredNodes[hoveredNodes.length - 1];
+
+            if (deepestHover) {
+                let statToChange = null;
+                let amount = 1 * sign; // Default to 1
+
+                if (deepestHover.classList.contains('atk')) { statToChange = 'attack'; amount = 100 * sign; }
+                else if (deepestHover.classList.contains('hp')) { statToChange = 'health'; amount = 100 * sign; }
+                else if (deepestHover.classList.contains('level-stat')) { statToChange = 'level'; }
+                else if (deepestHover.classList.contains('ap-counter')) { statToChange = 'ap'; }
+                else if (deepestHover.classList.contains('token-counter')) { statToChange = 'token'; }
+                else if (deepestHover.classList.contains('marker-counter')) { statToChange = 'marker'; }
+                else if (deepestHover.classList.contains('turncounter-counter')) { statToChange = 'turncounter'; }
+                else if (deepestHover.classList.contains('counter-bubble')) { statToChange = 'counter'; }
+
+                if (statToChange) {
+                    // Apply math, preventing stats from dropping below zero
+                    card[statToChange] = Math.max(0, (card[statToChange] || 0) + amount);
+                    refreshCard(card);
+                    
+                    if (isMultiplayer) {
+                        sendAction('edit_stat', { cardId: card.id, stat: statToChange, value: card[statToChange] });
+                    }
+                    
+                    // If the Info Panel is currently open and viewing this card, update it live!
+                    const infoPanel = document.getElementById('card-info-panel');
+                    const infoName = document.getElementById('card-info-name');
+                    if (!infoPanel.classList.contains('hidden') && infoName && infoName.innerText === card.name) {
+                        showCardInfo(card);
+                    }
+                    
+                    // NEW: Auto-Break if Health reaches 0 outside of battle
+                    if (statToChange === 'health' && card.health <= 0 && card.loc === 'field') {
+                        applyBreak(card);
+                    }
+                    return; // Action completed, stop processing other hotkeys
+                }
+            }
+        }
 
         if (k === 'b') {
             if (!battleState.attackerId) {
@@ -260,8 +307,24 @@ function handleKeys(e) {
                     if (isMultiplayer) sendAction('battle_sync', { step: 'init', attackerId: card.id });
                 }
             } else if (!battleState.targetId) {
-                // Step 2: Set Target (Must be opponent's)
+                // Step 2: Set Target (Opponent's card)
                 if (card.owner === 'opponent' && card.id !== battleState.attackerId) {
+                    battleState.targetId = card.id;
+                    refreshCard(card);
+                    if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
+                } 
+                // Step 2 Alternative: Initiate Direct Attack (Pressing B on your attacking card)
+                else if (card.owner === 'player' && card.id === battleState.attackerId) {
+                    const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
+                    if (oppPhantoms.length > 0) {
+                        alert("Cannot Direct Attack while opponent has Phantoms!");
+                        return;
+                    }
+                    if (card.summonedThisTurn) {
+                        alert("Phantoms cannot Direct Attack the turn they are summoned!");
+                        return;
+                    }
+                    // Target itself to trigger the target glow indicating a Direct Attack is locked in
                     battleState.targetId = card.id;
                     refreshCard(card);
                     if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
@@ -283,42 +346,30 @@ function handleKeys(e) {
 			if (isMultiplayer) sendAction('rotate', { cardId: card.id, rotated: card.rotated });
 		}
 		// D - Afterlife
-		if (k === 'd') {
-			moveCardTo(card, 'afterlife');
-			if (isMultiplayer) sendAction('move', { 
-				cardId: card.id, 
-				fromZone: card.loc === 'field' ? 'field' : 'hand',
-				toZone: `${card.owner}-afterlife`,
-				owner: card.owner 
-			});
-		}
+        if (k === 'd') {
+            const originalLoc = card.loc;
+            moveCardTo(card, 'afterlife');
+            if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-afterlife`, owner: card.owner });
+        }
         // S - Shadow
-		if (k === 's') {
-			const originalLoc = card.loc;
-			moveCardTo(card, 'shadow');
-			if (isMultiplayer) sendAction('move', { 
-				cardId: card.id, 
-				fromZone: originalLoc,
-				toZone: `${card.owner}-shadow`, 
-				owner: card.owner 
-			});
-		}
+        if (k === 's') {
+            const originalLoc = card.loc;
+            moveCardTo(card, 'shadow');
+            if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-shadow`, owner: card.owner });
+        }
         // A - Oblivion
-		if (k === 'a') {
-			const originalLoc = card.loc;
-			moveCardTo(card, 'oblivion');
-			if (isMultiplayer) sendAction('move', { 
-				cardId: card.id, 
-				fromZone: originalLoc,
-				toZone: `${card.owner}-oblivion`, 
-				owner: card.owner 
-			});
-		}
+        if (k === 'a') {
+            const originalLoc = card.loc;
+            moveCardTo(card, 'oblivion');
+            if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-oblivion`, owner: card.owner });
+        }
         // H - Hand
-		if (k === 'h') {
-			moveCardTo(card, 'hand');
-			if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: `${card.owner}-hand`, owner: card.owner });
-		}      
+        if (k === 'h') {
+            const originalLoc = card.loc;
+            moveCardTo(card, 'hand');
+            if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-hand`, owner: card.owner });
+        }
+		
         // C - Clone
         if (k === 'c') cloneCard(card);
         // E - Highlight
@@ -427,22 +478,23 @@ function closeAllModals() {
 	document.getElementById('card-info-panel').classList.add('hidden');
 }
 
-// NEW: Added 'isRemote' so we don't get stuck in an infinite loop
+// Added 'isRemote' so we don't get stuck in an infinite loop
 function startGame(isRemote = false) {
     document.querySelectorAll('.card').forEach(c => c.remove());
     
     ['player', 'opponent'].forEach(p => {
-        // Return cards from field/hand/piles back to deck
-        const allCards = [...state[p].hand, ...state[p].field, ...state[p].afterlife, ...state[p].shadow, ...state[p].oblivion];
-        allCards.forEach(card => {
-            card.faceUp = true;
-            card.rotated = false;
-            card.loc = 'deck';
-        });
-        state[p].deck.push(...allCards);
+        // Gather literally every card on this player's side
+        const allCards = [
+            ...state[p].hand, ...state[p].field, ...state[p].afterlife, 
+            ...state[p].shadow, ...state[p].oblivion, ...state[p].deck, 
+            ...state[p].sideDeck, ...state[p].extraDeck
+        ];
         
-        // Clear zones
+        // Clear all zones completely
         state[p].hand = [];
+        state[p].deck = [];
+        state[p].sideDeck = [];
+        state[p].extraDeck = [];
         state[p].afterlife = [];
         state[p].shadow = [];
         state[p].oblivion = [];
@@ -451,22 +503,44 @@ function startGame(isRemote = false) {
         state[p].sp = 4;
         if (p === 'opponent') state[p].handVisible = false;
         
-        shuffle(state[p].deck);
+        // Return cards to their specific original decks
+        allCards.forEach(card => {
+            card.faceUp = true;
+            card.rotated = false;
+            card.loc = card.originalZone || 'deck'; 
+            card.owner = card.originalOwner || p;
+            
+            if (card.loc === 'sideDeck') state[p].sideDeck.push(card);
+            else if (card.loc === 'extraDeck') state[p].extraDeck.push(card);
+            else state[p].deck.push(card); 
+        });
+        
+        // IMPORTANT: Only shuffle YOUR OWN deck to prevent RNG desyncs.
+        if (p === 'player') {
+            shuffle(state[p].deck);
+        }
         updateCounts(p);
     });
     
-    draw(5, 'player');
-    if (!isMultiplayer) draw(5, 'opponent');
     updateStats();
     closeAllModals();
 
-    // NEW: If I clicked the button, tell the opponent to do this too
-    if (!isRemote && isMultiplayer) {
-        sendAction('game_start_global', {});
+    // 1. Tell opponent to run this exact same clean reset
+    if (!isRemote && isMultiplayer) sendAction('game_start_global', {});
+
+    // 2. Draw 5 cards for YOURSELF. The draw() function automatically 
+    // syncs these draws to the opponent so they can see your hand.
+    draw(5, 'player');
+    
+    // 3. If playing offline/solo, simulate the opponent drawing too
+    if (!isMultiplayer) {
+        shuffle(state.opponent.deck);
+        draw(5, 'opponent');
     }
 }
 
-function resetGame() {
+
+function resetGame(isRemote = false) {
     document.querySelectorAll('.card').forEach(c => c.remove());
     ['player', 'opponent'].forEach(p => {
         state[p] = { lp: 10000, sp: 4, hand: [], deck: [], sideDeck: [], extraDeck: [], afterlife: [], shadow: [], oblivion: [], field: [] };
@@ -475,6 +549,8 @@ function resetGame() {
     });
     updateStats();
     document.getElementById('end-turn-btn').classList.remove('pulsing');
+    
+    if (!isRemote && isMultiplayer) sendAction('game_reset_global', {});
 }
 
 function initDeck(owner) {
@@ -494,6 +570,8 @@ function makeCard(owner, loc, forcedType) {
     return {
         id: `c-${idCounter}`,
         owner,
+		originalOwner: owner,
+		originalZone: loc,
         name: cardData.name,
         type: cardData.type || 'Phantom',
         level: cardData.level || 1,
@@ -777,6 +855,14 @@ function moveCardTo(card, destType) {
     if (!card) return;
     const oldLoc = card.loc;
     removeCard(card);
+	
+	 // Safety: If originalOwner is missing (from older loaded decks), set it to the current owner
+    if (!card.originalOwner) card.originalOwner = card.owner;
+
+    // Restore original ownership when leaving the field
+    if (['hand', 'topdeck', 'bottomdeck', 'randomdeck', 'afterlife', 'shadow', 'oblivion'].includes(destType)) {
+        card.owner = card.originalOwner;
+    }
     
     // Update location
     card.loc = destType;
@@ -1182,13 +1268,20 @@ function handleKeywordClick(event, word) {
 
 function refreshCard(card) {
     const old = document.getElementById(card.id);
-    if(old) old.replaceWith(createCardEl(card));
+    if (old) {
+        // Preserve pile visualization (hide stats) if it's currently sitting on a pile zone
+        const parent = old.parentElement;
+        const isPileZone = parent && parent.classList.contains('zone') && ['afterlife', 'shadow', 'oblivion'].includes(parent.dataset.type);
+        
+        const renderData = isPileZone ? { ...card, loc: 'pile' } : card;
+        old.replaceWith(createCardEl(renderData));
+    }
 }
 
 function cloneCard(card) {
     idCounter++;
     const newId = `c-${idCounter}-${Date.now()}`;
-    const newCard = { ...card, id: newId };
+    const newCard = { ...card, id: newId, originalOwner: card.originalOwner || card.owner };
     
     let parentZoneId = null;
 
@@ -1275,14 +1368,21 @@ function openCardCtx(e, card) {
         if (!battleState.attackerId) {
             if (!card.rotated) addMsg('Initiate Attack (B)', 'init-atk');
         } else if (!battleState.targetId) {
-            if (card.owner === 'opponent') addMsg('Target for Attack (B)', 'target-atk');
-            else if (card.id === battleState.attackerId) {
+            if (card.owner === 'opponent') {
+                addMsg('Target for Attack (B)', 'target-atk');
+            } else if (card.id === battleState.attackerId) {
                 const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
-                if (oppPhantoms.length === 0 && !card.summonedThisTurn) addMsg('Direct Attack (B)', 'direct-atk');
+                if (oppPhantoms.length === 0 && !card.summonedThisTurn) {
+                    addMsg('Initiate Direct Attack (B)', 'init-direct-atk');
+                }
             }
             addMsg('Cancel Attack (N)', 'cancel-atk');
         } else {
-            addMsg('Execute Battle (B)', 'execute-battle');
+            if (battleState.attackerId === battleState.targetId && card.id === battleState.attackerId) {
+                addMsg('Execute Direct Attack (B)', 'execute-direct-atk');
+            } else {
+                addMsg('Execute Battle (B)', 'execute-battle');
+            }
             addMsg('Cancel Attack (N)', 'cancel-atk');
         }
         addSep();
@@ -1372,11 +1472,13 @@ function cardAction(act) {
         refreshCard(card);
         if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
     }
-    else if (act === 'direct-atk') {
-        const dmg = card.health > 0 ? card.attack : 0;
-        executeAction('adjust_lp', { target: 'opponent', amount: -dmg });
-        battleState = { attackerId: null, targetId: null };
+    else if (act === 'init-direct-atk') {
+        battleState.targetId = card.id; // Self-target to get the glow
         refreshCard(card);
+        if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
+    }
+    else if (act === 'execute-direct-atk' || act === 'direct-atk') {
+        executeDirectAttack(battleState.attackerId || card.id);
     }
     else if (act === 'cancel-atk') {
         const aId = battleState.attackerId;
@@ -1451,7 +1553,8 @@ function cardAction(act) {
         }
 
         refreshCard(card);
-        if (isMultiplayer) sendAction('update_counter', { cardId: card.id, counterType, value: card[counterType] });
+        // FIX: Changed from 'update_counter' to 'edit_stat' so the receiver understands it
+        if (isMultiplayer) sendAction('edit_stat', { cardId: card.id, stat: counterType, value: card[counterType] });
     }
     // Handle Set Counter actions from direct click
     else if (act.startsWith('set-')) {
@@ -1466,7 +1569,8 @@ function cardAction(act) {
         }
 
         refreshCard(card);
-        if (isMultiplayer) sendAction('update_counter', { cardId: card.id, counterType, value: card[counterType] });
+        // FIX: Changed from 'update_counter' to 'edit_stat'
+        if (isMultiplayer) sendAction('edit_stat', { cardId: card.id, stat: counterType, value: card[counterType] });
     }
     else if (act === 'highlight') toggleHighlight(document.getElementById(card.id)); 
 
@@ -1527,38 +1631,45 @@ function cardAction(act) {
     
     // --- MOVEMENT TO PILES ---
     else if (act === 'hand') {
+        const originalLoc = card.loc;
         moveCardTo(card, 'hand');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-hand' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-hand` });
     }
     else if (act === 'afterlife') {
+        const originalLoc = card.loc;
         moveCardTo(card, 'afterlife');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-afterlife' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-afterlife` });
     }
     else if (act === 'shadow') {
+        const originalLoc = card.loc;
         moveCardTo(card, 'shadow');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-shadow' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-shadow` });
     }
     else if (act === 'oblivion') {
+        const originalLoc = card.loc;
         moveCardTo(card, 'oblivion');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-oblivion' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-oblivion` });
     }
 
     // --- MOVEMENT TO DECK ---
     else if (act === 'topdeck') {
+        const originalLoc = card.loc;
         moveCardTo(card, 'topdeck');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-deck' });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-deck` });
     }
     else if (act === 'bottomdeck') {
+        const originalLoc = card.loc;
         moveCardTo(card, 'bottomdeck');
-        if (isMultiplayer) sendAction('move', { cardId: card.id, toZone: 'player-deck', toBottom: true });
+        if (isMultiplayer) sendAction('move', { cardId: card.id, fromZone: originalLoc, toZone: `${card.owner}-deck`, toBottom: true });
     }
     else if (act === 'randomdeck') {
-        const targetZone = `${card.owner}-deck`; 
+        const originalLoc = card.loc;
         moveCardTo(card, 'randomdeck');
         if (isMultiplayer) {
             sendAction('move', { 
                 cardId: card.id, 
-                toZone: targetZone, 
+                fromZone: originalLoc,
+                toZone: `${card.owner}-deck`, 
                 random: true 
             });
         }
@@ -1991,6 +2102,11 @@ function editStat(cardId, stat) {
         showCardInfo(card);
         refreshCard(card);
         if (isMultiplayer) sendAction('edit_stat', { cardId, stat, value: card[stat] });
+        
+        // Auto-Break if Health reaches 0 outside of battle
+        if (stat === 'health' && card.health <= 0 && card.loc === 'field') {
+            applyBreak(card);
+        }
     }
 }
 
@@ -2005,46 +2121,52 @@ function loadDeckFile() {
         reader.onload = evt => {
             try {
                 const deckData = JSON.parse(evt.target.result);
-                const timestamp = Date.now(); // NEW: Get a unique time number
-                
-                // Convert to full card objects with UNIQUE IDs
-                state.player.deck = (deckData.main || []).map(c => ({
-                    ...c,
-                    id: `c-${++idCounter}-${timestamp}`,
-                    owner: 'player',
-                    loc: 'deck',
-                    faceUp: true,
-                    rotated: false
-                }));
-                
-                state.player.sideDeck = (deckData.side || []).map(c => ({
-                    ...c,
-                    id: `c-${++idCounter}-${timestamp}`,
-                    owner: 'player',
-                    loc: 'sideDeck',
-                    faceUp: true,
-                    rotated: false
-                }));
-                
-                state.player.extraDeck = (deckData.extra || []).map(c => ({
-                    ...c,
-                    id: `c-${++idCounter}-${timestamp}`,
-                    owner: 'player',
-                    loc: 'extraDeck',
-                    faceUp: true,
-                    rotated: false
-                }));
+                const timestamp = Date.now(); 
+
+                // 1. WIPE LOCAL PLAYER'S STATE COMPLETELY
+                document.querySelectorAll('.card').forEach(el => {
+                    const card = findCard(el.id);
+                    if (card && card.owner === 'player') el.remove();
+                });
+
+                state.player = { lp: 10000, sp: 4, hand: [], deck: [], sideDeck: [], extraDeck: [], afterlife: [], shadow: [], oblivion: [], field: [] };
+                updateStats();
+
+                // 2. Helper to check for updated official cards, or fallback to custom
+                const processCard = (c, loc) => {
+                    const officialCard = allCards.find(dbCard => (dbCard.name || "").toLowerCase() === (c.name || "").toLowerCase());
+                    const cardDataToUse = officialCard ? officialCard : c;
+
+                    return {
+                        ...cardDataToUse,
+                        id: `c-${++idCounter}-${timestamp}`,
+                        owner: 'player',
+                        originalOwner: 'player',
+                        originalZone: loc, // Tracker for Start New Game sorting
+                        loc: loc,
+                        faceUp: true,
+                        rotated: false
+                    };
+                };
+
+                // 3. Load the new cards in
+                state.player.deck = (deckData.main || []).map(c => processCard(c, 'deck'));
+                state.player.sideDeck = (deckData.side || []).map(c => processCard(c, 'sideDeck'));
+                state.player.extraDeck = (deckData.extra || []).map(c => processCard(c, 'extraDeck'));
                 
                 shuffle(state.player.deck);
-				if (isMultiplayer) {
+                updateCounts('player');
+                
+                // 4. Send the new deck to the opponent
+                if (isMultiplayer) {
                     sendAction('load_deck', {
                         main: state.player.deck,
                         side: state.player.sideDeck,
                         extra: state.player.extraDeck
                     });
                 }
-                updateCounts('player');
-                alert('Deck loaded! Click "Resume Game" to play.');
+                
+                alert('Deck loaded! Click "Start New Game" to draw your hand.');
             } catch (err) {
                 alert('Invalid deck file!');
                 console.error(err);
@@ -2063,6 +2185,7 @@ function spawnToken(owner) {
     const token = {
         id: tokenId,
         owner: owner,
+		originalOwner: owner,
         name: 'Token',
         type: 'Phantom',
         level: 0,
@@ -2165,6 +2288,25 @@ function sendAction(type, payload) {
     }
     console.log('Emitting action to server');
     socket.emit('action', { roomCode, type, payload });
+}
+
+function executeDirectAttack(cardId) {
+    const atkCard = findCard(cardId);
+    if (!atkCard) return;
+
+    // Apply damage locally
+    const dmg = atkCard.health > 0 ? atkCard.attack : 0;
+    executeAction('adjust_lp', { target: 'opponent', amount: -dmg });
+    
+    // Sync the exact LP to opponent & cancel the battle visual state
+    if (isMultiplayer) {
+        sendAction('lp', { player: 'opponent', value: state.opponent.lp });
+        sendAction('battle_sync', { step: 'cancel' });
+    }
+
+    // Cleanup local state
+    battleState = { attackerId: null, targetId: null };
+    refreshCard(atkCard);
 }
 
 function executeBattleLogic() {
@@ -2317,6 +2459,17 @@ function unsummonPhantom(card) {
 function applyRemoteAction(action) {
     console.log('applyRemoteAction called:', action);
     const { type, payload } = action;
+	
+	// --- GLOBAL RESET CATCHERS ---
+    // These must be at the very top so they fire instantly and exit.
+    if (type === 'game_start_global') {
+        startGame(true); 
+        return;
+    }
+    if (type === 'game_reset_global') {
+        resetGame(true); 
+        return;
+    }
     
     if (type === 'move') {
         const card = findCard(payload.cardId);
@@ -2350,9 +2503,11 @@ function applyRemoteAction(action) {
 		}
 		
 		if (type === 'game_start_global') {
-				// Run the start game function, but tell it 'true' so it knows 
-				// it came from the network and doesn't bounce the signal back.
 				startGame(true); 
+				return;
+			}
+			if (type === 'game_reset_global') {
+				resetGame(true); 
 				return;
 			}
 		
@@ -2373,6 +2528,25 @@ function applyRemoteAction(action) {
         // 3. Determine the NEW owner relative to the local screen
         const newOwner = targetId.includes('player') ? 'player' : 'opponent';
         card.owner = newOwner; // Update the card's internal owner
+
+        // --- NEW: Reset state entirely if moving to Piles or Hand ---
+        const isPileTarget = ['deck', 'sideDeck', 'extraDeck', 'afterlife', 'shadow', 'oblivion'].some(t => targetId.includes(t));
+        if (isPileTarget || targetId.includes('hand')) {
+            card.faceUp = true;
+            card.rotated = false;
+            card.isHighlighted = false;
+            card.ap = 0; card.token = 0; card.turncounter = 0; card.counter = 0; card.marker = 0;
+            
+            // Reset base stats for Phantoms back to default
+            if (card.type === 'Phantom') {
+                const base = allCards.find(c => (c.name || "").toLowerCase() === (card.name || "").toLowerCase());
+                if (base) {
+                    card.level = base.level ?? 1;
+                    card.attack = base.attack ?? 0;
+                    card.health = base.health ?? 0;
+                }
+            }
+        }
 
         // 4. Place the card in the correct list
         if (zone.classList.contains('hand-area')) {
@@ -2483,6 +2657,7 @@ function applyRemoteAction(action) {
     if (type === 'clone_sync') {
         const newCard = payload.cardData;
         newCard.owner = flipZoneId(newCard.owner);
+		if (newCard.originalOwner) newCard.originalOwner = flipZoneId(newCard.originalOwner);
         
         if (payload.toZone) {
             const zoneId = flipZoneId(payload.toZone);
@@ -2563,6 +2738,7 @@ function applyRemoteAction(action) {
 
         // 1. Perspective Flip: Their 'player' is our 'opponent'
         token.owner = flipZoneId(token.owner);
+        if (token.originalOwner) token.originalOwner = flipZoneId(token.originalOwner); // FIX
         const targetZoneId = flipZoneId(originalZoneId);
 
         // 2. Update State memory
@@ -2657,11 +2833,22 @@ function applyRemoteAction(action) {
         return;
     }
 	if (type === 'load_deck') {
-    state.opponent.deck = payload.main.map(c => ({...c, owner: 'opponent'}));
-    state.opponent.sideDeck = payload.side.map(c => ({...c, owner: 'opponent'}));
-    state.opponent.extraDeck = payload.extra.map(c => ({...c, owner: 'opponent'}));
-    updateCounts('opponent');
-    alert('Opponent loaded new deck');
+        // Wipe all traces of the opponent's previous cards from the screen
+        document.querySelectorAll('.card').forEach(el => {
+            const card = findCard(el.id);
+            if (card && card.owner === 'opponent') el.remove();
+        });
+
+        // Reset the opponent's state memory completely
+        state.opponent = { lp: 10000, sp: 4, hand: [], deck: [], sideDeck: [], extraDeck: [], afterlife: [], shadow: [], oblivion: [], field: [], handVisible: state.opponent.handVisible };
+        updateStats();
+
+        // Load the new cards into the fresh memory
+        state.opponent.deck = payload.main.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent', originalZone: 'deck'}));
+        state.opponent.sideDeck = payload.side.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent', originalZone: 'sideDeck'}));
+        state.opponent.extraDeck = payload.extra.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent', originalZone: 'extraDeck'}));
+        updateCounts('opponent');
+        alert('Opponent loaded a new deck! Their board and LP were reset.');
 	}
 }
 
@@ -2717,12 +2904,12 @@ function setupSocketListeners() {
     });
 	
 	socket.on('receive_deck_ids', (deckData) => {
-		state.player.deck = deckData.opponent.deck.map(c => ({...c, owner: 'player'}));
-		state.player.sideDeck = deckData.opponent.sideDeck.map(c => ({...c, owner: 'player'}));
-		state.player.extraDeck = deckData.opponent.extraDeck.map(c => ({...c, owner: 'player'}));
-		state.opponent.deck = deckData.player.deck.map(c => ({...c, owner: 'opponent'}));
-		state.opponent.sideDeck = deckData.player.sideDeck.map(c => ({...c, owner: 'opponent'}));
-		state.opponent.extraDeck = deckData.player.extraDeck.map(c => ({...c, owner: 'opponent'}));
+		state.player.deck = deckData.opponent.deck.map(c => ({...c, owner: 'player', originalOwner: 'player'}));
+		state.player.sideDeck = deckData.opponent.sideDeck.map(c => ({...c, owner: 'player', originalOwner: 'player'}));
+		state.player.extraDeck = deckData.opponent.extraDeck.map(c => ({...c, owner: 'player', originalOwner: 'player'}));
+		state.opponent.deck = deckData.player.deck.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent'}));
+		state.opponent.sideDeck = deckData.player.sideDeck.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent'}));
+		state.opponent.extraDeck = deckData.player.extraDeck.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent'}));
 		updateCounts('player');
 		updateCounts('opponent');
 		startGame(); // NOW start
@@ -2806,10 +2993,20 @@ function executeAction(type, payload, isRemote = false) {
 			const isHandTarget = targetId.includes('hand');
 
             if (isPileTarget || isHandTarget) {
+                // Safety: If originalOwner is missing, set to current
+                if (!mCard.originalOwner) mCard.originalOwner = mCard.owner;
+                
+                // Restore original ownership
+                mCard.owner = mCard.originalOwner;
+                
+                // Force targetId to match the correct original owner's zone
+                const pileName = targetId.includes('-') ? targetId.split('-')[1] : targetId;
+                targetId = `${mCard.owner}-${pileName}`;
+
                 // Reset state when going into Decks or Discard Piles
                 mCard.rotated = false;
                 mCard.faceUp = true; 
-				mCard.ap = 0; mCard.token = 0; mCard.marker = 0; mCard.turncounter = 0; mCard.counter = 0;
+                mCard.ap = 0; mCard.token = 0; mCard.marker = 0; mCard.turncounter = 0; mCard.counter = 0;
             } else {
                 // Moving between Hand and Field: 
                 // Use payload values if they exist (from right-click menu), 
