@@ -25,7 +25,7 @@
     "id": "air_elemental",
     "name": "Air Elemental",
     "type": "Phantom",
-    "description": "Field Ability: Targeted Dodge Roll.<br>Balance Ability: This card can Attack Directly.",
+    "description": "Field Ability: Targeted Dodge Roll.<br><br>Balance Ability: This card can Attack Directly. Rush.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
@@ -125,7 +125,7 @@
     "id": "balancing_of_elements",
     "name": "Balancing Of Elements",
     "type": "Counter",
-    "description": "Condition: An Ally Elemental is Targeted for an Attack. <br><br>Field Ability: Redirect that attack to another Ally Elemental. Then flip this card back down. Once per turn. <br><br>Balance Slot Ability: Redirect that attack to this card. If this card Breaks from an attack, Break the attacking card.",
+    "description": "Condition: An Ally Elemental is Targeted for an Attack. <br><br>Field Ability: <br>Redirect that attack to another Ally Elemental. Then flip this card back down. Once per turn.<br><br>Balance Slot Ability: <br>Redirect that attack to this card. <br>If this card Breaks from an attack, Break the attacking card.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental"
@@ -304,7 +304,7 @@
     "id": "chronic_necrotic",
     "name": "Chronic Necrotic",
     "type": "Phantom",
-    "description": "Hand Ability: If a Chaos Phantom would Break, then you can Discard this card and Negate that Break. <br><br>Field Ability: If this card defeats a Phantom in Battle, that Phantom is added to the owner of Chronic Necrotic’s hand. <br><br>AL Ability: If a Phantom would be sent to the AL, instead place that card and this card onto the bottom of their owner’s deck.",
+    "description": "Hand Ability: If A Chaos or Death card defeats a Phantom in Battle, you can Discard this card and add that Phantom to your hand.<br><br>Field Ability: If a Chaos or Death Phantom would Break, then you can Discard this card and Negate that Break. <br><br>AL Ability: If a Phantom would be sent to the AL, instead place that card and this card onto the bottom of their owner’s deck.",
     "archetype": "Chaos",
     "archetypes": [
       "Chaos",
@@ -355,7 +355,7 @@
     "id": "clawing_shadows",
     "name": "Clawing Shadows",
     "type": "Counter",
-    "description": "Target a face up Phantom Card. It loses 100 Attack for every Shadow Phantom in the AL or Shadow Realm.<br><br>Banish this card when it leaves the Field.<br><br>Shadow Realm Ability: <br>Condition: This card is not Shadow Sealed.<br>Cost: Shadow Seal it. <br><br>Select a Shadow Card from the Shadow Realm to add to your hand.",
+    "description": "Target a face up Phantom Card. <br>It loses 200 Attack for every Shadow Phantom on the field -- and in the AL, or Shadow Realm.<br><br>Banish this card when it leaves the Field.<br><br>Shadow Realm Ability: <br>Cost: Shadow Seal this card.<br><br>Select a Shadow Card from the Shadow Realm to add to your hand.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow"
@@ -523,7 +523,7 @@
     "id": "cosmic_control",
     "name": "Cosmic Control",
     "type": "Spirit",
-    "description": "Condition: Have a Cosmic card in either hand, field, or AL.<br>Target a level 4 or lower Enemy Phantom to Equip to, then pay summoning points equal to the Target's SP, and then take control of that Phantom.",
+    "description": "Condition: Possess a Cosmic card.<br><br>Target a level 4 or lower Enemy Phantom to Equip to, then pay summoning points equal to the Target's SP, and then take control of that Phantom.",
     "archetype": "Cosmic",
     "archetypes": [
       "Cosmic"
@@ -709,7 +709,7 @@
     "id": "creation_nymph",
     "name": "Creation Nymph",
     "type": "Phantom",
-    "description": "When this card is summoned, Create a level 0 Creation Fairy Phantom. <br><br>1-AP per turn. <br>● AP: Negate an Attack. <br>● AP: Unsummon an Ally Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
+    "description": "On Summon: Create a level 0 Creation Fairy Phantom. <br><br>1-AP per turn. <br>● AP: Negate an Attack. <br>● AP: Unsummon an Ally Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -803,11 +803,13 @@
     "id": "crystal_elemental",
     "name": "Crystal Elemental",
     "type": "Phantom",
-    "description": "Field Ability: Targeted Dodge Roll. <br>Balance Ability: Sturdy. You can Attack Directly. <br>Once Per Round When an Ally card Activates an Ability in the Balance Slot, you can Targeted Break a Spirit Card.",
+    "description": "Fragile.<br><br>Field Ability: Targeted Dodge Roll.<br><br>Balance Ability: Sturdy. You can Attack Directly.<br><br>Once Per Round: <br>When an Ally card Activates an Ability in the Balance Slot, you can Targeted Break a Spirit Card.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Earth, Air, Crystal"
+      "Earth",
+      "Air",
+      "Crystal"
     ],
     "image": "Images/Cards/Crystal Elemental.png",
     "level": 4,
@@ -860,6 +862,21 @@
       "Shadow"
     ],
     "image": "Images/Cards/Dark Veiling Cloak.png"
+  },
+  {
+    "id": "darkness",
+    "name": "Darkness",
+    "type": "Phantom",
+    "description": "Stealth. Shadow Step.<br><br>On Summon:<br>Your opponent chooses a card from their hand or Field to Shadow Seal.<br><br>Once per turn: <br>You can Summon a Shadow Phantom from the Shadow Realm, or Set a Shadow Trap.<br><br>1-AP:<br>● AP: You can Flip up an Ally Shadow Phantom -- and then Flip them back down.<br>● AP: You can Flip up and then Activate a Shadow Trap -- then flip it back down.<br>● AP: You can select an Ally Shadow card to Shadow Step.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow",
+      "Sealer"
+    ],
+    "image": "Images/Cards/Darkness.png",
+    "level": 8,
+    "attack": 1000,
+    "health": 1000
   },
   {
     "id": "deadly_bargain",
@@ -928,7 +945,7 @@
     "id": "deathly_shadow",
     "name": "Deathly Shadow",
     "type": "Phantom",
-    "description": "Fragile. <br>Hand & Field Ability: Discard this card.<br>AL Ability: Equip to a Death or Shadow Phantom. <br><br>Equipped Ability: <br>If the Equipped card would Break you can Banish this card and Negate the Break.",
+    "description": "Fragile.<br><br>Hand & Field Ability: Discard this card.<br><br>AL Ability: Equip to a Death or Shadow Phantom. <br><br>Equipped Ability: <br>If the Equipped card would Break you can Banish this card and Negate the Break. <br>The Phantom then gains Summon Binding.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -1053,21 +1070,21 @@
     "id": "destruction_predator",
     "name": "Destruction Predator",
     "type": "Phantom",
-    "description": "Breaker. Destructive. Break a card from your hand or field, then Targeted Break a card. Destructive Surge: Gain 1-SP.",
+    "description": "Breaker. Destructive. Rush.<br><br>Break a card from your hand or field, then Targeted Break a Face Down card.<br>Every time this card Breaks a Phantom in Battle, Destroy the top card of your opponent’s deck.<br><br>Destructive Surge: Gain 1-SP.<br>Break Impowering: Gain 1-SP.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
     ],
     "image": "Images/Cards/Destruction Predator.png",
     "level": 8,
-    "attack": 2000,
+    "attack": 1000,
     "health": 1500
   },
   {
     "id": "destruction_ravager",
     "name": "Destruction Ravager",
     "type": "Phantom",
-    "description": "Breaker. Destructive. <br>This card gains an additional Attack for every Enemy Phantom. <br>Every time this card Breaks a Phantom in Battle, Destroy the top card of your opponent’s deck. <br>This card can initiate a Direct Attack the turn it is Summoned. <br>Break Impowering: Draw. Destructive Surge: Draw.",
+    "description": "Breaker. Destructive. Berserker. Rush.<br><br>Break a card from your hand or field, then Targeted Break a card.<br>Every time this card Breaks a Phantom in Battle, Destroy the top card of your opponent’s deck.<br><br>Break Impowering: Draw. <br>Destructive Surge: Draw.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1075,7 +1092,7 @@
     "image": "Images/Cards/Destruction Ravager.png",
     "level": 10,
     "attack": 2000,
-    "health": 2000
+    "health": 1500
   },
   {
     "id": "destruction_scavenger",
@@ -1196,7 +1213,7 @@
     "id": "divine_light",
     "name": "Divine Light",
     "type": "Spirit",
-    "description": "Targeted Deal 500 Damage to an Enemy. Or give 500 Health to an Ally Light Card.",
+    "description": "Targeted Deal 500 Damage to an Enemy.<br>Or Give 500 Health to an Ally Light Card.",
     "archetype": "Light",
     "archetypes": [
       "Light"
@@ -1256,7 +1273,7 @@
     "id": "earth_elemental",
     "name": "Earth Elemental",
     "type": "Phantom",
-    "description": "Field Ability: Sturdy. <br>Balance Ability: This card’s Attack is equal to its health while in Defense Position.",
+    "description": "Field Ability: Sturdy.<br><br>Balance Ability: <br>On Summon: This card gains 500 Health.<br>This card’s Attack is equal to its health while in Defense Position.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
@@ -1265,13 +1282,13 @@
     "image": "Images/Cards/Earth Elemental.png",
     "level": 3,
     "attack": 0,
-    "health": 1000
+    "health": 500
   },
   {
     "id": "elemental_totem",
     "name": "Elemental Totem",
     "type": "Phantom",
-    "description": "Select one of the Four Elements. This card gains that Archetype Branch. <br>Other cards with the same Architype as this Card’s Archetype-Branches gain 500 attack.",
+    "description": "Select one of the Four Elements. <br>This card gains that Archetype Branch.<br><br>Other cards with the same Architype as this Card’s Archetype-Branches gain 500 attack.<br><br>Once per turn you can change this card's Archetype Branch.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
@@ -1366,6 +1383,24 @@
       "Standard"
     ],
     "image": "Images/Cards/Forgotten Statuary Hall.png"
+  },
+  {
+    "id": "four_elements_master",
+    "name": "Four Elements Master",
+    "type": "Phantom",
+    "description": "You can activate each of these Abilities Once per duel:<br>● Targeted Bounce a card.<br>● Flip a card face down for the rest of the turn.<br>● If an Ability would Break this card Negate that Ability.<br>● Targeted Deal 1000 Damage.<br><br>If this card Breaks place it onto the bottom of the deck.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Air",
+      "Water",
+      "Earth",
+      "Fire"
+    ],
+    "image": "Images/Cards/Four Elements Master.png",
+    "level": 10,
+    "attack": 2000,
+    "health": 2500
   },
   {
     "id": "fusion_kit",
@@ -1526,11 +1561,13 @@
     "id": "ice_elemental",
     "name": "Ice Elemental",
     "type": "Phantom",
-    "description": "Sturdy. <br>Balance Ability: Once per round: When a card would be flipped up, you can flip it back down for the rest of the turn.",
+    "description": "Sturdy.<br><br>Balance Ability: <br>Once per round: When a card would be flipped up, you can flip it back down for the rest of the turn.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Water, Earth, Ice"
+      "Water",
+      "Earth",
+      "Ice"
     ],
     "image": "Images/Cards/Ice Elemental.png",
     "level": 5,
@@ -1563,7 +1600,7 @@
     "id": "imposed_deduction",
     "name": "Imposed Deduction",
     "type": "Spirit",
-    "description": "Your opponent declares a Phantom Level from 1 to 4. <br>Draw cards from the top of your Deck until you draw a Phantom between Level 1-4.<br><br>If that Phantom is the same Level as the one declared by your opponent, Discard all drawn cards. <br>If not, Summon the drawn Phantom and then Discard the remaining cards.",
+    "description": "Your opponent declares a Phantom Level from 1 to 4. <br>Draw cards from the top of your Deck until you draw a Phantom between Level 1-4.<br><br>If that Phantom is the same Level as the one declared by your opponent, Discard all drawn cards. <br>If not, Summon the drawn Phantom and then Discard the remaining cards.<br><br>The summoned Phantom gains Summon Binding.<br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -1640,11 +1677,13 @@
     "id": "lava_elemental",
     "name": "Lava Elemental",
     "type": "Phantom",
-    "description": "On Summon: Targeted Deal 500 damage. <br>When this card Battles, cards on either side of the Battled Card take 500 damage. <br>Sturdy.",
+    "description": "Sturdy.<br><br>On Summon: Targeted Deal 500 damage.<br><br>When this card Initiates Battle, cards on either side of the Battled Card take 500 damage.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Fire, Earth, Lava"
+      "Fire",
+      "Earth",
+      "Lava"
     ],
     "image": "Images/Cards/Lava Elemental.png",
     "level": 7,
@@ -1656,10 +1695,10 @@
     "name": "Law Of Death",
     "type": "Counter",
     "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their AL. <br>Negate the activation. <br><br>If you control a Cosmic Phantom, that card in their AL becomes AL Sealed.",
-    "archetype": "Law",
+    "archetype": "Cosmic",
     "archetypes": [
-      "Law",
-      "Cosmic"
+      "Cosmic",
+      "Law"
     ],
     "image": "Images/Cards/Law Of Death.png"
   },
@@ -1668,10 +1707,10 @@
     "name": "Law Of Oblivion",
     "type": "Counter",
     "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Oblivion. <br>Negate the activation.<br><br>If you control a Cosmic Phantom, that card in their Oblivion becomes Oblivion Sealed.",
-    "archetype": "Law",
+    "archetype": "Cosmic",
     "archetypes": [
-      "Law",
-      "Cosmic"
+      "Cosmic",
+      "Law"
     ],
     "image": "Images/Cards/Law Of Oblivion.png"
   },
@@ -1680,10 +1719,10 @@
     "name": "Law Of Shadow",
     "type": "Counter",
     "description": "Condition: Your opponent tries to summon from or activate an Ability of a card in their Shadow Realm. <br>Negate the activation. <br><br>If you control a Cosmic Phantom, that card in their Shadow Realm becomes Shadow Sealed.",
-    "archetype": "Law",
+    "archetype": "Cosmic",
     "archetypes": [
-      "Law",
-      "Cosmic"
+      "Cosmic",
+      "Law"
     ],
     "image": "Images/Cards/Law Of Shadow.png"
   },
@@ -1770,11 +1809,13 @@
     "id": "lightning_elemental",
     "name": "Lightning Elemental",
     "type": "Phantom",
-    "description": "When this card Battles, it’s Attack is also delt to the enemy Player. <br>When this card Breaks, it’s Attack is delt to the owning Player’s LP.",
+    "description": "When this card Battles, it’s Attack is also delt to the enemy Player.<br><br>Break Impowering: This card's Attack is delt to the owning Player’s LP.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Fire, Air, Lightning"
+      "Fire",
+      "Air",
+      "Lightning"
     ],
     "image": "Images/Cards/Lightning Elemental.png",
     "level": 5,
@@ -1813,7 +1854,7 @@
     "id": "memories_of_four_elements",
     "name": "Memories Of Four Elements",
     "type": "Spirit",
-    "description": "Condition: Have at least one Phantom Card for each of the Four Elements in your AL. <br>Select 1-4 Elemental Phantom cards in your AL of 4 or less SP. <br>Create 4 Token Copies of the selected cards.",
+    "description": "Condition: Have at least one Phantom Card for each of the Four Elements in your AL. <br><br>Select 1-4 Elemental Phantom cards in your AL of 4 or less SP.<br><br>Create 4 Token Copies of the selected cards with 0-SP and 500 Stats.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental"
@@ -1830,6 +1871,21 @@
       "Chaos"
     ],
     "image": "Images/Cards/Messing Up The Balance.png"
+  },
+  {
+    "id": "mirroring_shadow",
+    "name": "Mirroring Shadow",
+    "type": "Phantom",
+    "description": "On Summon: Target a Phantom. Copy it's current Stats, Conditions, and Ability Text.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow",
+      "Unknown"
+    ],
+    "image": "Images/Cards/Mirroring Shadow.png",
+    "level": 4,
+    "attack": 0,
+    "health": 0
   },
   {
     "id": "mirthful_luminescence",
@@ -1853,7 +1909,9 @@
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Air, Water, Mist"
+      "Air",
+      "Water",
+      "Mist"
     ],
     "image": "Images/Cards/Mist Elemental.png",
     "level": 3,
@@ -1971,7 +2029,7 @@
     "id": "nothing",
     "name": "Nothing",
     "type": "Phantom",
-    "description": "On Summon: All cards on the field are Banished.<br>For every card Banished this way add a counter to this card.<br><br>While this card has Counters it has Summon Binding. <br>This card loses one Counter every turn.<br><br>You can Shadow Seal any number of the top cards from your Deck up to the number of Counters on this card, then remove an equal number of counters. <br><br>For every Counter this card loses deal 500 damage to both Players. <br>Shadow Seal this card when it leaves the field.",
+    "description": "On Summon: All cards on the field are Banished.<br><br>For every card Banished this way add a counter to this card.<br>This card loses a Field SP for every counter added to it.<br><br>While this card has Counters it has Summon Binding.<br>This card loses one Counter every turn.<br><br>You can Shadow Seal any number of the top cards from your Deck up to the number of Counters on this card, then remove an equal number of counters. <br>For every counter removed this way, reduce this card's Field SP by 1.<br><br>For every Counter this card loses deal 500 damage to both Players. <br><br>This card cannot be Targeted. <br>This card is Immune to Break.<br><br>Shadow Seal this card when it leaves the field.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow",
@@ -2030,7 +2088,7 @@
     "id": "other_worldly_guardian",
     "name": "Other Worldly Guardian",
     "type": "Phantom",
-    "description": "Hand & Field Ability:<br>If an Ally Death Phantom would Break, Discard this card and Negate that Break. <br><br>AL Ability: <br>Condition: An Ally Death Phantom engages in Battle.<br>Cost: After Life Seal this card.<br>Give it 500 Attack.",
+    "description": "Blocker.<br><br>Field Ability:<br>If an Ally Death Phantom would Break, Discard this card and Negate that Break. <br><br>AL Ability: <br>Condition: An Ally Death Phantom engages in Battle.<br>Cost: After Life Seal this card.<br>Give it 500 Attack.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -2126,7 +2184,7 @@
     "id": "psychopomp_of_the_dead",
     "name": "Psychopomp Of The Dead",
     "type": "Phantom",
-    "description": "On Summon: You can select a Level 4 or lower Death card from your AL to Special Resurrect.<br>Give it Summon Binding.<br><br>Once per round: You can select a card in your opponent’s AL to Banish. <br><br>When this card Breaks a card it is sent to the bottom of the owner’s deck.<br>If this card Breaks by a Card Ability that card is Discarded and After Life Sealed.<br><br>AL Ability: 1-AP per duel. <br>● AP: After Life Seal two pairs of cards in your AL up to four sets and receive SP for each pair that is After Life Sealed. <br>● AP: After Life Seal 8 Cards in your AL then Resurrect this card.",
+    "description": "On Summon: You can select a Level 4 or lower Death card from your AL to Special Resurrect.<br>Give it Summon Binding.<br><br>Once per round: You can select a card in your opponent’s AL to Banish. <br><br>When this card Breaks a card it is sent to the bottom of the owner’s deck.<br>If this card Breaks by a Card Ability that card is Discarded and After Life Sealed.<br><br>AL Ability: 1-AP per duel. <br>● AP: After Life Seal two pairs of cards in your AL up to four sets -- and then receive SP for each pair that is After Life Sealed. <br>● AP: After Life Seal 8 Phantoms in your AL then Resurrect this card.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -2134,8 +2192,8 @@
     ],
     "image": "Images/Cards/Psychopomp Of The Dead.png",
     "level": 8,
-    "attack": 2000,
-    "health": 2000
+    "attack": 1000,
+    "health": 1500
   },
   {
     "id": "quixotic_axolotl",
@@ -2262,7 +2320,8 @@
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Wanderer"
+      "Wanderer",
+      "Earth"
     ],
     "image": "Images/Cards/Sand Ambler.png",
     "level": 3,
@@ -2324,7 +2383,7 @@
     "id": "seeking_balance",
     "name": "Seeking Balance",
     "type": "Spirit",
-    "description": "You can only use one of this card’s Abilities per Turn. <br>Field Ability: Draw 1-2 Copies of this Card. <br><br>Balance Ability: If you play one copy of this card you can select move An Ally card to one of your open Balance Slots (including this Card’s slot). <br>And then if you do you can move an Enemy card to one of your opponent’s available Balance Slots.<br><br>If you play a copy of this card in both Balance Slots you can select two Ally Elemental Phantoms of 4 or less SP and which have different Architype Branches. <br>You can then Special Summon a Phantom which has a combined SP equal to or less than the selected cards total, and that has Archetype Branches which contain all Branches of the two select cards.<br><br>If you Special Summon a card this way, discard the selected Phantoms.",
+    "description": "You can only use one of this card’s Abilities per Turn.<br>Field Ability: Draw 1-to-2 Copies of this Card. <br><br>Balance Ability: <br>If you play one copy of this card you can select move An Ally card to one of your open Balance Slots (including this Card’s slot). <br>And then if you do you can move an Enemy card to one of your opponent’s available Balance Slots.<br><br>If you play a copy of this card in both Balance Slots -- you can select two or more Ally Elemental Phantoms from your field which have different Archetype Branches.<br>(Both copies of Seeking Balance are then sent to the AL upon activating this Ability).<br><br>You can then Special Summon a Phantom which has a combined SP equal to or less than the selected cards total, and that has Archetype Branches which contain at least one Branch of each of the select cards.<br><br>If you Special Summon a card this way, discard the selected Phantoms.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental"
@@ -2393,7 +2452,7 @@
     "id": "shadow_eater",
     "name": "Shadow Eater",
     "type": "Phantom",
-    "description": "This card gains the Attack of any card it Breaks.",
+    "description": "Double Attack. Shielded.<br>This card gains the Attack of any card it Breaks.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow",
@@ -2499,6 +2558,24 @@
       "Standard"
     ],
     "image": "Images/Cards/Snake Pit.png"
+  },
+  {
+    "id": "snow_elemental",
+    "name": "Snow Elemental",
+    "type": "Phantom",
+    "description": "Attack Position Ability:<br>Rush. This card can attack Directly.<br><br>Defense Position Ability:<br>Damage dealt to this Card’s Health in Battle is also dealt to the Battler.<br><br>Field Ability:<br>You can reduce this card's Health by a thousand and increase it's Attack by 1000 for the rest of this turn.<br><br>Balance Ability: <br>Once per round: Negate the activation of a Spirit Card and then Bounce it for the rest of the turn.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Air",
+      "Water",
+      "Earth",
+      "Snow"
+    ],
+    "image": "Images/Cards/Snow Elemental.png",
+    "level": 6,
+    "attack": 500,
+    "health": 2000
   },
   {
     "id": "song_of_healing",
@@ -2620,11 +2697,13 @@
     "id": "steam_elemental",
     "name": "Steam Elemental",
     "type": "Phantom",
-    "description": "Field Summon: Targeted Deal 500 damage. When this card Breaks, Search another copy of it. <br><br>Balance Summon: This card loses 1000 attack. Targeted Deal this card’s Attack. <br>Damage dealt to this Card’s Health in Battle is also dealt to the Battler.",
+    "description": "Attack Position Ability: <br>When this card Breaks, Search another copy of it. <br><br>Defense Position Ability: <br>Damage dealt to this Card’s Health in Battle is also dealt to the Battler.<br><br>Field Summon: <br>Targeted Deal 500 damage. <br><br>Balance Summon: <br>This card loses 1000 attack. <br>Targeted Deal this card’s Attack.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
-      "Water, Fire, Steam"
+      "Water",
+      "Fire",
+      "Steam"
     ],
     "image": "Images/Cards/Steam Elemental.png",
     "level": 6,
@@ -2885,7 +2964,7 @@
     "id": "water_elemental",
     "name": "Water Elemental",
     "type": "Phantom",
-    "description": "Field Ability: When this card Breaks, Search another copy of it. <br>Balance Ability: Damage dealt to this Card’s Health in Battle is also dealt to the Battler.",
+    "description": "Attack Position Ability: <br>When this card Breaks, Search another copy of it. <br><br>Defense Position Ability: <br>Damage dealt to this Card’s Health in Battle is also dealt to the Battler.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",

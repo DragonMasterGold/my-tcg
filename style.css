@@ -945,4 +945,121 @@ input[type=number] {
     min-width: 80px;
 }
 
+
+
+/* --- ABILITY SYSTEM VISUALS --- */
+.ability-source {
+    box-shadow: 0 0 15px 5px #9b59b6 !important; /* Purple Glow */
+    border-color: #9b59b6 !important;
+}
+
+.ability-target {
+    box-shadow: 0 0 15px 5px #e67e22 !important; /* Orange Glow */
+    border-color: #e67e22 !important;
+}
+
+/* --- DIEGETIC UI MODAL (UPGRADED) --- */
+#custom-ui-modal {
+    background: rgba(0,0,0,0.85); /* Darken background overlay */
+}
+
+.custom-ui-container {
+    background: linear-gradient(135deg, #1a1a24, #121212);
+    border: 2px solid #9b59b6;
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    display: flex;
+    gap: 20px;
+    min-width: 500px;
+    max-width: 800px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(155, 89, 182, 0.4);
+}
+
+.custom-ui-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#custom-ui-image {
+    position: relative !important;
+    width: 20vh;
+    height: 28vh;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    border-radius: 8px;
+    transform: none !important;
+}
+
+.custom-ui-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#custom-ui-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #9b59b6;
+    padding-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+#custom-ui-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    max-height: 50vh;
+    padding-right: 5px;
+}
+
+.custom-ui-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 15px;
+    background: #2c3e50;
+    color: white;
+    border: 1px solid #555;
+    border-left: 4px solid #9b59b6;
+    cursor: pointer;
+    font-size: 15px;
+    border-radius: 4px;
+    transition: 0.2s;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.custom-ui-btn:hover {
+    background: #34495e;
+    border-left-color: #e67e22;
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.3);
+}
+
+.btn-tag {
+    background: rgba(0,0,0,0.5);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #e67e22;
+    font-weight: bold;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.custom-ui-cancel {
+    background: #4a1c1c;
+    border-left-color: #e74c3c;
+    margin-top: auto; /* Pushes to bottom */
+    text-align: center;
+    justify-content: center;
+}
+
+.custom-ui-cancel:hover {
+    background: #602020;
+    border-left-color: #ff5252;
 }

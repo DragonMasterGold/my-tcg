@@ -2,6 +2,7 @@ let allCards = [];
 let cardImages = {};
 let keywordRepo = {};
 let battleState = { attackerId: null, targetId: null };
+let abilityState = { sourceId: null, targetId: null, type: null, step: 'idle' };
 let autoSP = true;
 
 async function loadCardDatabase() {
@@ -71,8 +72,12 @@ function setupListeners() {
             const viewer = document.getElementById('deck-viewer');
             const mainMenu = document.getElementById('main-menu');
             const multiplayerMenu = document.getElementById('multiplayer-menu');
+            const customUi = document.getElementById('custom-ui-modal');
 
-            if (kwPopup && !kwPopup.classList.contains('hidden')) {
+            if (customUi && !customUi.classList.contains('hidden')) {
+                if (typeof cancelAbility === 'function') cancelAbility();
+            }
+            else if (kwPopup && !kwPopup.classList.contains('hidden')) {
                 kwPopup.classList.add('hidden');
             }
             else if (info && !info.classList.contains('hidden')) {
@@ -220,6 +225,10 @@ function setupListeners() {
 
 function handleKeys(e) {
     const k = e.key.toLowerCase();
+	if (k === 'escape') {
+        cancelAbility();
+        return;
+    }
 	
 	// 1. --- GLOBAL HOTKEYS ---
     if (k === 'n') {
@@ -229,6 +238,9 @@ function handleKeys(e) {
         if (aId) { const c = findCard(aId); if(c) refreshCard(c); }
         if (tId) { const c = findCard(tId); if(c) refreshCard(c); }
         if (isMultiplayer) sendAction('battle_sync', { step: 'cancel' });
+        
+        // Cancel Ability State with N ---
+        cancelAbility();
         return;
     }
     if (k === 'i') { openViewer('player', 'deck', true); return; }	
@@ -288,11 +300,6 @@ function handleKeys(e) {
                     if (!infoPanel.classList.contains('hidden') && infoName && infoName.innerText === card.name) {
                         showCardInfo(card);
                     }
-                    
-                    // NEW: Auto-Break if Health reaches 0 outside of battle
-                    if (statToChange === 'health' && card.health <= 0 && card.loc === 'field') {
-                        applyBreak(card);
-                    }
                     return; // Action completed, stop processing other hotkeys
                 }
             }
@@ -345,6 +352,27 @@ function handleKeys(e) {
 			refreshCard(card);
 			if (isMultiplayer) sendAction('rotate', { cardId: card.id, rotated: card.rotated });
 		}
+		
+		// V - ABILITY HOTKEY
+        if (k === 'v') {
+            if (abilityState.step === 'idle' && card.owner === 'player') {
+                // Step 1: Open Menu
+                openAbilityMenu(card);
+            } 
+            else if (abilityState.step === 'targeting' && card.id !== abilityState.sourceId) {
+                // Step 2: Set Target
+                abilityState.targetId = card.id;
+                abilityState.step = 'confirm';
+                refreshCard(card);
+                if (isMultiplayer) sendAction('ability_sync', abilityState);
+            }
+            else if (abilityState.step === 'confirm' && card.id === abilityState.targetId) {
+                // Step 3: Execute Action (Pressing V on the target again confirms it)
+                executeAbility();
+            }
+            return;
+        }
+		
 		// D - Afterlife
         if (k === 'd') {
             const originalLoc = card.loc;
@@ -602,6 +630,8 @@ function createCardEl(data) {
 	
 	if (data.id === battleState.attackerId) el.classList.add('battle-attacker');
 	if (data.id === battleState.targetId) el.classList.add('battle-target');
+	if (data.id === abilityState.sourceId) el.classList.add('ability-source');
+	if (data.id === abilityState.targetId) el.classList.add('ability-target');
     
 	const oldEl = document.getElementById(data.id);
 	if (data.isHighlighted) el.classList.add('highlighted');
@@ -1266,6 +1296,366 @@ function handleKeywordClick(event, word) {
     }, 10000); // Increased to 10s so people have time to read
 }
 
+// --- ABILITY & TARGETING SYSTEM ---
+
+// 1. The Parser: Reads card text and generates actionable buttons
+function analyzeCardAbilities(card) {
+    const desc = card.description || "";
+    let parsedAbilities =[];
+    let abilityId = 0;
+
+    const addAbility = (text, type, reqTarget, val = null, extra = null) => {
+        parsedAbilities.push({ id: abilityId++, text, type, reqTarget, value: val, extra });
+    };
+
+    // Split text by line breaks, bullet points, OR a period followed by a space
+    const chunks = desc.split(/(?=<br>|●|\.\s)/); 
+
+    chunks.forEach((chunk) => {
+        // Clean HTML tags and remove leading periods/spaces caused by the split
+        let text = chunk.replace(/<[^>]*>?/gm, '').replace(/^\.\s*/, '').trim(); 
+        if (!text) return;
+
+        // --- VISIBILITY FILTERING ---
+        if (card.loc === 'hand') {
+            // In hand: ONLY show hand abilities
+            const isHandAbility = /Hand Ability/i.test(text) || /Hand & Field Ability/i.test(text) || /\bCycle\b/i.test(text);
+            if (!isHandAbility) return;
+        } else if (card.loc === 'field') {
+            // On field: HIDE hand-only abilities
+            const isHandOnly = (/Hand Ability/i.test(text) && !/Hand & Field Ability/i.test(text)) || /\bCycle\b/i.test(text);
+            if (isHandOnly) return;
+        }
+
+        let type = null; let reqTarget = false; let val = null; let extra = null;
+
+        if (/Unsummon/i.test(text) && !/Targeted/i.test(text)) return; 
+        if (/Discard/i.test(text) && !/Targeted Discard/i.test(text)) return;
+
+        // Smart Matchers
+        if (/Targeted Break a face down/i.test(text)) { type = 'break_facedown'; reqTarget = true; }
+        else if (/Targeted Break/i.test(text)) { type = 'break'; reqTarget = true; }
+        else if (/Targeted Discard/i.test(text)) { type = 'discard'; reqTarget = true; }
+        else if (/Targeted Banish/i.test(text)) { type = 'banish'; reqTarget = true; }
+        else if (/Targeted Destroy/i.test(text)) { type = 'destroy'; reqTarget = true; }
+        else if (/Targeted Bounce/i.test(text)) { type = 'bounce'; reqTarget = true; }
+        else if (/Targeted Deal (\d+)/i.test(text)) { type = 'damage'; reqTarget = true; val = parseInt(text.match(/Targeted Deal (\d+)/i)[1]); }
+        else if (/Targeted Deal/i.test(text)) { type = 'damage_dynamic'; reqTarget = true; }
+        
+        // Advanced Stat Matcher: Catches "Give 500 Attack", "Increase Attack by 500", "Loses 1000 Stat Points"
+        else if (/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce)/i.test(text)) {
+            let amount = 0;
+            let statStr = "";
+            
+            // Pattern A: Number comes BEFORE Stat ("Give 500 Attack")
+            const matchNumFirst = text.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(\d+)[^\w]*(Health|HP|Attack|ATK|Stats?)/i);
+            // Pattern B: Stat comes BEFORE Number ("Increase Attack by 500")
+            const matchStatFirst = text.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(Health|HP|Attack|ATK|Stats?)[^\d]*(\d+)/i);
+
+            if (matchNumFirst) {
+                amount = parseInt(matchNumFirst[1]);
+                statStr = matchNumFirst[2].toLowerCase();
+            } else if (matchStatFirst) {
+                statStr = matchStatFirst[1].toLowerCase();
+                amount = parseInt(matchStatFirst[2]);
+            }
+
+            if (amount > 0 && statStr) {
+                const isDecrease = /Decrease|Lose|Reduce/i.test(text);
+                const finalAmount = isDecrease ? -amount : amount;
+                
+                if (statStr.includes('health') || statStr.includes('hp')) {
+                    type = 'heal'; reqTarget = true; val = finalAmount;
+                } else if (statStr.includes('attack') || statStr.includes('atk')) {
+                    type = 'buff_attack'; reqTarget = true; val = finalAmount;
+                } else if (statStr.includes('stat')) {
+                    type = 'buff_stats'; reqTarget = true; val = finalAmount;
+                }
+            }
+        }
+        
+        // Fallbacks (Wrapped in !type so cycle doesn't accidentally overwrite a stat check)
+        if (!type) {
+            if (/\bCycle\b/i.test(text)) { type = 'cycle'; reqTarget = false; }
+            else if (/Summon Binding/i.test(text)) { type = 'summon_binding'; reqTarget = true; }
+            else if (/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i.test(text)) { 
+                type = 'spawn'; 
+                const spawnMatch = text.match(/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i);
+                if (spawnMatch) {
+                    extra = spawnMatch[1].trim();
+                    if (extra.toLowerCase().includes("copy")) type = null; 
+                }
+            }
+            else if (/Draw/i.test(text)) { type = 'draw'; }
+        }
+
+        if (type) addAbility(text, type, reqTarget, val, extra);
+    });
+
+    return parsedAbilities;
+}
+
+// 2. The Menu: Populates the UI with parsed abilities
+let currentParsedAbilities =[];
+
+function openAbilityMenu(card) {
+    if (!card) return;
+    const desc = (card.description || "").toLowerCase();
+    const hasHandAbility = desc.includes('hand ability') || desc.includes('hand & field ability') || /\bcycle\b/.test(desc);
+    
+    // Block if not on field, UNLESS it's in hand and has a valid hand ability
+    if (card.loc !== 'field' && !(card.loc === 'hand' && hasHandAbility)) return;
+    
+    // If activating from hand, automatically flip it face-up to reveal it to the opponent!
+    if (card.loc === 'hand' && isMultiplayer && !card.faceUp) {
+        card.faceUp = true;
+        refreshCard(card);
+        sendAction('flip', { cardId: card.id, faceUp: true }); 
+    }
+    
+    try {
+        currentParsedAbilities = analyzeCardAbilities(card);
+    } catch (err) {
+        console.error("Ability Parser Error:", err);
+        currentParsedAbilities =[];
+    }
+
+    abilityState = { sourceId: card.id, targetId: null, type: null, step: 'menu', activeAbility: null };
+    
+    // SMART BYPASS: If no automatable abilities exist, skip menu and jump straight to generic targeting
+    if (currentParsedAbilities.length === 0) {
+        abilityState.type = 'generic_target';
+        abilityState.step = 'targeting';
+        abilityState.activeAbility = { id: 999, type: 'generic_target', reqTarget: true };
+        refreshCard(card);
+        if (isMultiplayer) sendAction('ability_sync', abilityState);
+        return;
+    }
+    
+    const modal = document.getElementById('custom-ui-modal');
+    const content = document.getElementById('custom-ui-content');
+    const imageContainer = document.getElementById('custom-ui-image');
+    const titleEl = document.getElementById('custom-ui-title');
+    
+    if (titleEl) titleEl.innerText = `${card.name}`;
+    
+    if (imageContainer) {
+        imageContainer.innerHTML = '';
+        const visualClone = createCardEl({...card, id: card.id + '-ui-clone', loc: 'hand'}); 
+        visualClone.style.position = 'static';
+        visualClone.style.width = '100%'; 
+        visualClone.style.height = '100%';
+        visualClone.style.pointerEvents = 'none'; 
+        imageContainer.appendChild(visualClone);
+    }
+    
+    content.innerHTML = '';
+    currentParsedAbilities.forEach(ability => {
+        const tag = ability.reqTarget ? `<span class="btn-tag">Requires Target</span>` : '';
+        content.innerHTML += `
+            <button class="custom-ui-btn" onclick="selectAbility(${ability.id})">
+                <span>${ability.text}</span>
+                ${tag}
+            </button>
+        `;
+    });
+    
+    content.innerHTML += `<button class="custom-ui-btn custom-ui-cancel" onclick="cancelAbility()">Cancel</button>`;
+    modal.classList.remove('hidden');
+}
+
+function selectAbility(abilityId) {
+    const ability = currentParsedAbilities.find(a => a.id === abilityId);
+    if (!ability) return;
+
+    const modal = document.getElementById('custom-ui-modal');
+    modal.classList.add('hidden');
+    
+    abilityState.activeAbility = ability;
+    abilityState.type = ability.type;
+
+    if (ability.reqTarget) {
+        // Enter targeting mode!
+        abilityState.step = 'targeting';
+        const sourceCard = findCard(abilityState.sourceId);
+        if (sourceCard) refreshCard(sourceCard);
+        if (isMultiplayer) sendAction('ability_sync', abilityState);
+    } else {
+        // Doesn't need a target, execute immediately!
+        executeAbility();
+    }
+}
+
+function cancelAbility() {
+    const modal = document.getElementById('custom-ui-modal');
+    if (modal) modal.classList.add('hidden');
+    
+    const sId = abilityState.sourceId;
+    const tId = abilityState.targetId;
+    abilityState = { sourceId: null, targetId: null, type: null, step: 'idle', activeAbility: null };
+    currentParsedAbilities =[];
+    
+    if (sId) refreshCard(findCard(sId));
+    if (tId) refreshCard(findCard(tId));
+    
+    if (isMultiplayer) sendAction('ability_sync', abilityState);
+}
+
+// 3. The Executor: Runs the logic based on the smart parser
+function executeAbility() {
+    const sourceCard = findCard(abilityState.sourceId);
+    const targetCard = findCard(abilityState.targetId);
+    const ability = abilityState.activeAbility;
+    if (!ability) return;
+
+    // Helper for pile/hand movements to keep logic clean and synced perfectly
+    const performMove = (tCard, dest) => {
+        const originalLoc = tCard.loc;
+        moveCardTo(tCard, dest);
+        if (isMultiplayer) sendAction('move', { cardId: tCard.id, fromZone: originalLoc, toZone: `${tCard.owner}-${dest}` });
+    };
+
+    // --- SMART LOGIC ROUTING ---
+    if (ability.type === 'damage' && targetCard) {
+        targetCard.health -= ability.value;
+        if (targetCard.health <= 0) applyBreak(targetCard);
+        refreshCard(targetCard);
+        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+    }
+    else if (ability.type === 'damage_dynamic' && targetCard) {
+        const dmg = prompt("Enter Damage Amount:", "500");
+        if (dmg !== null) {
+            targetCard.health -= (parseInt(dmg) || 0);
+            if (targetCard.health <= 0) applyBreak(targetCard);
+            refreshCard(targetCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+        }
+    }
+    else if (ability.type === 'heal' && targetCard) {
+        targetCard.health = (targetCard.health || 0) + ability.value;
+        refreshCard(targetCard);
+        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+    }
+    else if (ability.type === 'buff_attack' && targetCard) {
+        targetCard.attack = Math.max(0, (targetCard.attack || 0) + ability.value);
+        refreshCard(targetCard);
+        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+    }
+    else if (ability.type === 'buff_stats' && targetCard) {
+        targetCard.attack = Math.max(0, (targetCard.attack || 0) + ability.value);
+        targetCard.health = Math.max(0, (targetCard.health || 0) + ability.value);
+        refreshCard(targetCard);
+        if (isMultiplayer) {
+            sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+            sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+        }
+    }
+    else if (ability.type === 'cycle') {
+        if (state[sourceCard.owner].sp < 1) {
+            alert("Not enough Summoning Points to Cycle!");
+            cancelAbility();
+            return;
+        }
+        
+        // 1. Pay Cost
+        state[sourceCard.owner].sp -= 1;
+        updateStats();
+        if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.owner, stat: 'sp', value: state[sourceCard.owner].sp });
+
+        // 2. Shuffle back
+        performMove(sourceCard, 'randomdeck');
+        
+        // 3. Draw
+        draw(1, sourceCard.owner);
+    }
+    else if (ability.type === 'break' && targetCard) {
+        applyBreak(targetCard, sourceCard);
+    }
+    else if (ability.type === 'break_facedown' && targetCard) {
+        if (!targetCard.faceUp) {
+            applyBreak(targetCard, sourceCard);
+        } else {
+            alert("The Targeted card is not Face Down!");
+        }
+    }
+    else if (ability.type === 'discard' && targetCard) {
+        performMove(targetCard, 'afterlife');
+    }
+    else if (ability.type === 'banish' && targetCard) {
+        performMove(targetCard, 'shadow');
+    }
+    else if (ability.type === 'destroy' && targetCard) {
+        performMove(targetCard, 'oblivion');
+    }
+    else if (ability.type === 'bounce' && targetCard) {
+        performMove(targetCard, 'hand');
+    }
+    else if (ability.type === 'summon_binding' && targetCard) {
+        targetCard.summonBinding = true;
+        alert(`${targetCard.name} is now Bound and cannot be Unsummoned!`);
+        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'summonBinding', value: true });
+    }
+    else if (ability.type === 'spawn') {
+        let nameToSpawn = ability.extra;
+        
+        // If the parser didn't extract a name (or failed), fallback to manual prompt
+        if (!nameToSpawn) {
+            const promptResult = prompt("Enter Card Name to Spawn:", "");
+            if (promptResult === null) return; // Cancelled
+            nameToSpawn = promptResult.trim();
+        }
+
+        if (nameToSpawn === "" || nameToSpawn.toLowerCase() === "token") {
+            spawnToken(sourceCard.owner);
+        } else {
+            const dbCard = allCards.find(c => (c.name || "").toLowerCase() === nameToSpawn.toLowerCase());
+            if (dbCard) {
+                const newCard = {
+                    ...dbCard, id: `c-${++idCounter}-${Date.now()}`,
+                    owner: sourceCard.owner, originalOwner: sourceCard.owner, originalZone: 'deck', loc: 'field',
+                    faceUp: true, rotated: false
+                };
+                
+                const pfx = sourceCard.owner;
+                let targetZone = null;
+                const priorityIds =[
+                    `${pfx}-monster-2`, `${pfx}-monster-1`, `${pfx}-monster-3`,
+                    `${pfx}-balance-1`, `${pfx}-balance-2`
+                ];
+                
+                for (let id of priorityIds) {
+                    const z = document.getElementById(id);
+                    if (z && z.children.length === 0) { targetZone = z; break; }
+                }
+
+                if (targetZone) {
+                    state[sourceCard.owner].field.push(newCard);
+                    targetZone.appendChild(createCardEl(newCard));
+                    if (isMultiplayer) sendAction('spawn_token', { tokenData: newCard, zoneId: targetZone.id });
+                } else {
+                    alert("No space on the field to spawn!");
+                }
+            } else {
+                alert(`Could not automatically find a card named "${nameToSpawn}" in the database. Try spawning manually.`);
+            }
+        }
+    }
+    else if (ability.type === 'draw') {
+        drawCard(sourceCard.owner);
+    }
+    else if (ability.type === 'generic_target' && targetCard) {
+        // Ping visual cue for complex manual resolutions
+        const tEl = document.getElementById(targetCard.id);
+        if (tEl) {
+            tEl.classList.add('golden-pulse');
+            setTimeout(() => tEl.classList.remove('golden-pulse'), 500);
+        }
+    }
+
+    // Cleanup and Sync
+    cancelAbility();
+}
+
 function refreshCard(card) {
     const old = document.getElementById(card.id);
     if (old) {
@@ -1386,6 +1776,7 @@ function openCardCtx(e, card) {
             addMsg('Cancel Attack (N)', 'cancel-atk');
         }
         addSep();
+		if (isMyCard) addMsg('Activate Ability (V)', 'activate-ability');
     } else if (!onField && (isMyCard || !inHand)) {
         if (card.type === 'Phantom') {
             const playOpts = [
@@ -1490,6 +1881,9 @@ function cardAction(act) {
     }
     else if (act === 'execute-battle') {
         executeBattleLogic();
+    }
+	else if (act === 'activate-ability') {
+        openAbilityMenu(card);
     }
     else if (act === 'play-atk') {
         playCardToField(card, card.type, true, false);
@@ -1597,6 +1991,11 @@ function cardAction(act) {
 	
 	// 1. Handle Unsummon (This fixes the menu button doing nothing)
     if (act === 'unsummon') {
+		// Passive check for Summon Binding
+        if (card.summonBinding || (card.description && card.description.toLowerCase().includes('summon binding'))) {
+            alert(`${card.name} is Bound and cannot be Unsummoned!`);
+            return;
+        }
         unsummonPhantom(card);
     }
 
@@ -2102,11 +2501,6 @@ function editStat(cardId, stat) {
         showCardInfo(card);
         refreshCard(card);
         if (isMultiplayer) sendAction('edit_stat', { cardId, stat, value: card[stat] });
-        
-        // Auto-Break if Health reaches 0 outside of battle
-        if (stat === 'health' && card.health <= 0 && card.loc === 'field') {
-            applyBreak(card);
-        }
     }
 }
 
@@ -2319,7 +2713,7 @@ function executeBattleLogic() {
 
     // Detect Keywords
     const atkHasBreaker = atkCard.description.includes("Breaker");
-    const atkHasBounce = atkCard.description.includes("Bounce");
+    const atkHasBouncer = atkCard.description.includes("Bouncer");
     const atkHasDestructive = atkCard.description.includes("Destructive");
 
     // 0 Health Rule: Phantoms with 0 Health deal no damage
@@ -2352,8 +2746,8 @@ function executeBattleLogic() {
         applyBreak(defCard, atkCard);
     }
 
-    // 2. Check for Bounce (If target is still on field after potential Break/Sturdy)
-    if (atkHasBounce && defCard.loc === 'field') {
+    // 2. Check for Bouncer (If target is still on field after potential Break/Sturdy)
+    if (atkHasBouncer && defCard.loc === 'field') {
         moveCardTo(defCard, 'hand');
         if (isMultiplayer) sendAction('move', { cardId: defCard.id, toZone: `${defCard.owner}-hand` });
     }
@@ -2573,6 +2967,20 @@ function applyRemoteAction(action) {
             state[newOwner].field.push(card);
             zone.appendChild(createCardEl(card));
         }
+    }
+	
+	
+	if (type === 'ability_sync') {
+        const oldState = { ...abilityState };
+        abilityState = payload;
+        
+        // Refresh involved cards to add/remove glows
+        if (oldState.sourceId && oldState.sourceId !== abilityState.sourceId) refreshCard(findCard(oldState.sourceId));
+        if (oldState.targetId && oldState.targetId !== abilityState.targetId) refreshCard(findCard(oldState.targetId));
+        
+        if (abilityState.sourceId) refreshCard(findCard(abilityState.sourceId));
+        if (abilityState.targetId) refreshCard(findCard(abilityState.targetId));
+        return;
     }
 
     
