@@ -4,6 +4,17 @@ let keywordRepo = {};
 let battleState = { attackerId: null, targetId: null };
 let abilityState = { sourceId: null, targetId: null, type: null, step: 'idle' };
 let autoSP = true;
+let autoDraw = true;
+let hostGoesFirst = true;
+
+function toggleAutoDraw() {
+    autoDraw = !autoDraw;
+    const btn = document.getElementById('auto-draw-toggle');
+    if (btn) {
+        btn.classList.toggle('active-blue', autoDraw);
+        btn.innerText = autoDraw ? "Auto Draw" : "Auto Draw";
+    }
+}
 
 async function loadCardDatabase() {
     try {
@@ -186,6 +197,7 @@ function setupListeners() {
 					if (card) {
 						// Put the spawned card back into the deck state
 						removeCard(card);
+                        card.loc = type; // Reset loc back to deck/sideDeck so it doesn't think it's on the field!
 						state[owner][type].push(card);
 						updateCounts(owner);
 
@@ -306,8 +318,9 @@ function handleKeys(e) {
         }
 
         if (k === 'b') {
+            if (card.type !== 'Phantom') return;
+
             if (!battleState.attackerId) {
-                // Step 1: Set Attacker (Must be yours)
                 if (card.owner === 'player' && !card.rotated && card.faceUp) {
                     battleState.attackerId = card.id;
                     refreshCard(card);
@@ -316,22 +329,29 @@ function handleKeys(e) {
             } else if (!battleState.targetId) {
                 // Step 2: Set Target (Opponent's card)
                 if (card.owner === 'opponent' && card.id !== battleState.attackerId) {
+                    // --- TAUNTER CHECK ---
+                    const taunters = state.opponent.field.filter(c => c.type === 'Phantom' && c.faceUp && (c.description || "").includes('Taunter'));
+                    if (taunters.length > 0 && !(card.description || "").includes('Taunter')) {
+                        alert("You must target a Phantom with Taunter!");
+                        return;
+                    }
                     battleState.targetId = card.id;
                     refreshCard(card);
                     if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
                 } 
-                // Step 2 Alternative: Initiate Direct Attack (Pressing B on your attacking card)
+                // Step 2 Alternative: Initiate Direct Attack
                 else if (card.owner === 'player' && card.id === battleState.attackerId) {
                     const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
                     if (oppPhantoms.length > 0) {
                         alert("Cannot Direct Attack while opponent has Phantoms!");
                         return;
                     }
-                    if (card.summonedThisTurn) {
-                        alert("Phantoms cannot Direct Attack the turn they are summoned!");
+                    // --- RUSH CHECK ---
+                    const hasRush = (card.description || "").includes('Rush');
+                    if (card.summonedThisTurn && !hasRush) {
+                        alert("Phantoms cannot Direct Attack the turn they are summoned unless they have Rush!");
                         return;
                     }
-                    // Target itself to trigger the target glow indicating a Direct Attack is locked in
                     battleState.targetId = card.id;
                     refreshCard(card);
                     if (isMultiplayer) sendAction('battle_sync', { step: 'target', targetId: card.id });
@@ -356,11 +376,14 @@ function handleKeys(e) {
 		// V - ABILITY HOTKEY
         if (k === 'v') {
             if (abilityState.step === 'idle' && card.owner === 'player') {
-                // Step 1: Open Menu
-                openAbilityMenu(card);
+                // Step 1: Open Menu (Allow Field, Hand, and Piles)
+                const validLocs =['field', 'hand', 'afterlife', 'shadow', 'oblivion'];
+                if (validLocs.includes(card.loc)) {
+                    openAbilityMenu(card);
+                }
             } 
-            else if (abilityState.step === 'targeting' && card.id !== abilityState.sourceId) {
-                // Step 2: Set Target
+            else if (abilityState.step === 'targeting') {
+                // Step 2: Set Target (Removed restriction so cards can target themselves)
                 abilityState.targetId = card.id;
                 abilityState.step = 'confirm';
                 refreshCard(card);
@@ -550,6 +573,16 @@ function startGame(isRemote = false) {
         updateCounts(p);
     });
     
+	globalTurn = 1;
+    currentRound = 1;
+    
+    // --- FIRST OR SECOND LOGIC ---
+    if (!isRemote) {
+        hostGoesFirst = confirm("Do you want to go First?\n(OK = First, Cancel = Second)");
+        if (isMultiplayer) sendAction('set_first', { hostGoesFirst });
+    }
+
+    updateTurnVisuals();
     updateStats();
     closeAllModals();
 
@@ -924,6 +957,7 @@ function moveCardTo(card, destType) {
     else if (destType === 'randomdeck') {
         const idx = Math.floor(Math.random() * (ownerList.deck.length + 1));
         ownerList.deck.splice(idx, 0, card);
+        card.loc = 'deck'; // FIX: Ensure the engine knows it's actually sitting in the deck!
     }
     else {
         if (ownerList[destType]) ownerList[destType].push(card);
@@ -1096,16 +1130,17 @@ function drawPhase() {
         setTimeout(() => btn.classList.remove('pulsing-purple'), 1000);
     }
 
-    // 1. Draw for YOU (Local)
+    // 1. Draw 1 card for YOURSELF. (The draw function automatically syncs this to the opponent)
     draw(1, 'player');
 
-    // 2. Draw for the OPPONENT (Local/Solo fix)
-    draw(1, 'opponent');
-
-    // 3. Sync: Tell the opponent to do the exact same thing on their screen
+    // 2. Handle the Opponent's side
     if (isMultiplayer) {
+        // Tell the opponent to click their own internal draw button and draw 1 card for themselves
         sendAction('draw_phase_global', {});
         sendAction('button_pulse', { button: 'draw' });
+    } else {
+        // If playing offline/solo, just draw 1 for the opponent directly
+        draw(1, 'opponent');
     }
 }
 
@@ -1165,21 +1200,83 @@ function resetSP(p) {
     if (isMultiplayer) sendAction('sp', { player: p, value: state[p].sp });
 }
 
+let currentRound = 1;
+let globalTurn = 1; // 1 = P1, 2 = P2, 3 = P1, 4 = P2, etc.
+
+function updateTurnVisuals() {
+    const oppLight = document.getElementById('opp-turn-light');
+    const p1Light = document.getElementById('player-turn-light');
+    const rText = document.getElementById('round-display');
+    const tText = document.getElementById('turn-display');
+    
+    if (rText) rText.innerText = `Round: ${currentRound}`;
+    if (tText) tText.innerText = `Turn: ${globalTurn}`;
+
+    // If host goes first, they are Odd turns. If they go second, they are Even turns!
+    const isHostTurn = hostGoesFirst ? (globalTurn % 2 !== 0) : (globalTurn % 2 === 0);
+    
+    // Upgraded LED glowing effect
+    const activeGlow = 'inset 0 0 5px rgba(255,255,255,0.5), 0 0 15px ';
+    const inactiveGlow = 'inset 0 3px 5px rgba(0,0,0,0.6)';
+    
+    if (myRole === 'host' || !isMultiplayer) {
+        p1Light.style.background = isHostTurn ? '#2ecc71' : '#333';
+        p1Light.style.boxShadow = isHostTurn ? activeGlow + '#2ecc71' : inactiveGlow;
+        oppLight.style.background = !isHostTurn ? '#e74c3c' : '#333';
+        oppLight.style.boxShadow = !isHostTurn ? activeGlow + '#e74c3c' : inactiveGlow;
+    } else {
+        p1Light.style.background = !isHostTurn ? '#2ecc71' : '#333';
+        p1Light.style.boxShadow = !isHostTurn ? activeGlow + '#2ecc71' : inactiveGlow;
+        oppLight.style.background = isHostTurn ? '#e74c3c' : '#333';
+        oppLight.style.boxShadow = isHostTurn ? activeGlow + '#e74c3c' : inactiveGlow;
+    }
+}
+
 function endTurn() {
     const btn = document.getElementById('end-turn-btn');
     if (btn) {
         btn.classList.add('pulsing');
-        setTimeout(() => btn.classList.remove('pulsing'), 3000);
+        setTimeout(() => btn.classList.remove('pulsing'), 1000);
     }
 
-    // Explicitly reset ONLY the local player's SP
+    // Advance the global turn tracker
+    globalTurn++;
+    
+    // If it is now an odd turn, a full round (2 turns) has completed.
+    if (globalTurn % 2 !== 0) {
+        currentRound++;
+    }
+
+    updateTurnVisuals();
+
+    // Reset YOUR SP
     resetSP('player');
     
-    // Clear summonedThisTurn for player cards
+    // Reset summoning sickness for YOUR cards
     state.player.field.forEach(c => c.summonedThisTurn = false);
+
+    // --- AP RESET LOGIC ---
+    ['player', 'opponent'].forEach(p => {
+        state[p].field.forEach(c => {
+            if (c.maxAP !== undefined) {
+                c.ap = c.maxAP; // Replenish the actual tracker
+                refreshCard(c); // Refresh visuals
+            }
+        });
+    });
 
     if (isMultiplayer) {
         sendAction('button_pulse', { button: 'endturn' });
+        sendAction('end_turn_sync', { round: currentRound, turns: globalTurn });
+    }
+
+    // --- AUTO DRAW LOGIC ---
+    // The middle of the round is always when Turn 1 ends and Turn 2 begins (Even number)
+    if (autoDraw && globalTurn % 2 === 0) {
+        // Only the host forces the global draw to prevent duplicate sync loops!
+        if (!isMultiplayer || myRole === 'host') {
+            setTimeout(() => drawPhase(), 50);
+        }
     }
 }
 
@@ -1304,93 +1401,202 @@ function analyzeCardAbilities(card) {
     let parsedAbilities =[];
     let abilityId = 0;
 
-    const addAbility = (text, type, reqTarget, val = null, extra = null) => {
-        parsedAbilities.push({ id: abilityId++, text, type, reqTarget, value: val, extra });
+    const addAbility = (text, sequence, reqTarget, cost = null) => {
+        parsedAbilities.push({ id: abilityId++, text, sequence, reqTarget, cost });
     };
 
-    // Split text by line breaks, bullet points, OR a period followed by a space
-    const chunks = desc.split(/(?=<br>|●|\.\s)/); 
+    // --- STRICT CHUNKING ---
+    const chunks =[];
+    const rawChunks = desc.split(/(?=●)/); 
+    rawChunks.forEach(rc => {
+        if (rc.trim().startsWith('●')) {
+            chunks.push(rc.trim()); // Keep AP bullet points intact
+        } else {
+            // Split everything else strictly by linebreaks OR periods!
+            rc.split(/(?=<br>|\.\s)/).forEach(sub => {
+                let cleaned = sub.replace(/<[^>]*>?/gm, ' ').replace(/^\.\s*/, '').trim();
+                if (cleaned) chunks.push(cleaned);
+            });
+        }
+    });
+    
+    let activeContext = 'field'; 
 
     chunks.forEach((chunk) => {
-        // Clean HTML tags and remove leading periods/spaces caused by the split
-        let text = chunk.replace(/<[^>]*>?/gm, '').replace(/^\.\s*/, '').trim(); 
-        if (!text) return;
+        let displayText = chunk;
 
-        // --- VISIBILITY FILTERING ---
+        // 1. Detect Context Headers
+        if (/Hand Ability:/i.test(displayText)) activeContext = 'hand';
+        else if (/Hand & Field Ability:/i.test(displayText)) activeContext = 'hand_field';
+        else if (/AL Ability:/i.test(displayText) || /Discard Impowering:/i.test(displayText) || /Break Impowering:/i.test(displayText)) activeContext = 'afterlife';
+        else if (/Shadow Realm Ability:/i.test(displayText)) activeContext = 'shadow';
+        else if (/Oblivion Ability:/i.test(displayText)) activeContext = 'oblivion';
+        else if (/Field Ability:/i.test(displayText) || /Balance Ability:/i.test(displayText) || /On Summon:/i.test(displayText) || /Flip:/i.test(displayText) || /^\d+[- ]?AP/i.test(displayText)) activeContext = 'field';
+
+        // 2. Identify inherent traits of this exact sentence
+        const isCycle = /\bCycle\b/i.test(displayText);
+        const isEquip = /Equip Card/i.test(displayText);
+
+        // 3. Strict Visibility Matrix
+        let isVisible = false;
         if (card.loc === 'hand') {
-            // In hand: ONLY show hand abilities
-            const isHandAbility = /Hand Ability/i.test(text) || /Hand & Field Ability/i.test(text) || /\bCycle\b/i.test(text);
-            if (!isHandAbility) return;
+            if (activeContext === 'hand' || activeContext === 'hand_field' || isCycle || isEquip) isVisible = true;
         } else if (card.loc === 'field') {
-            // On field: HIDE hand-only abilities
-            const isHandOnly = (/Hand Ability/i.test(text) && !/Hand & Field Ability/i.test(text)) || /\bCycle\b/i.test(text);
-            if (isHandOnly) return;
+            if (activeContext === 'field' || activeContext === 'hand_field') isVisible = true;
+            if (isCycle || isEquip) isVisible = false; // Strictly override
+        } else {
+            if (activeContext === card.loc) isVisible = true;
         }
 
-        let type = null; let reqTarget = false; let val = null; let extra = null;
-
-        if (/Unsummon/i.test(text) && !/Targeted/i.test(text)) return; 
-        if (/Discard/i.test(text) && !/Targeted Discard/i.test(text)) return;
-
-        // Smart Matchers
-        if (/Targeted Break a face down/i.test(text)) { type = 'break_facedown'; reqTarget = true; }
-        else if (/Targeted Break/i.test(text)) { type = 'break'; reqTarget = true; }
-        else if (/Targeted Discard/i.test(text)) { type = 'discard'; reqTarget = true; }
-        else if (/Targeted Banish/i.test(text)) { type = 'banish'; reqTarget = true; }
-        else if (/Targeted Destroy/i.test(text)) { type = 'destroy'; reqTarget = true; }
-        else if (/Targeted Bounce/i.test(text)) { type = 'bounce'; reqTarget = true; }
-        else if (/Targeted Deal (\d+)/i.test(text)) { type = 'damage'; reqTarget = true; val = parseInt(text.match(/Targeted Deal (\d+)/i)[1]); }
-        else if (/Targeted Deal/i.test(text)) { type = 'damage_dynamic'; reqTarget = true; }
+        if (!isVisible) return; 
         
-        // Advanced Stat Matcher: Catches "Give 500 Attack", "Increase Attack by 500", "Loses 1000 Stat Points"
-        else if (/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce)/i.test(text)) {
-            let amount = 0;
-            let statStr = "";
+        // 4. Immunity Blocker (If it's just describing an immunity, stop parsing it!)
+        if (/Immune/i.test(displayText)) return;
+
+        // 5. EXTRACT AP COST (Only AP remains a hardcoded 'cost', everything else becomes a sequence step)
+        let cost = null;
+        if (/●\s*AP/i.test(chunk)) cost = { use_ap: true };
+
+        // Instead of stripping costs into alerts, we just strip the word "Cost:" so the sequence engine reads the action!
+        let effectText = displayText.replace(/Cost:\s*/gi, '').replace(/●\s*AP:?/i, '').trim();
+
+        if (!effectText) return;
+
+        // --- HELPER TO PARSE INDIVIDUAL STEPS ---
+        const parseStep = (str) => {
+            let t = null; let rTarget = false; let v = null; let e = null;
+
+            // SP / AP / Level Modifiers
+            if (/(?:Gain|Add|Get)\s*(\d+)[-\s]*SP/i.test(str)) { t = 'sp_change'; v = parseInt(str.match(/(?:Gain|Add|Get)\s*(\d+)[-\s]*SP/i)[1]); }
+            else if (/(?:Lose|Subtract)\s*(\d+)[-\s]*SP/i.test(str)) { t = 'sp_change'; v = -parseInt(str.match(/(?:Lose|Subtract)\s*(\d+)[-\s]*SP/i)[1]); }
+            else if (/(?:Gain|Add|Get)\s*(\d+)\s*AP/i.test(str)) { t = 'ap_change'; v = parseInt(str.match(/(?:Gain|Add|Get)\s*(\d+)\s*AP/i)[1]); }
+            else if (/(?:Lose|Decrease|Reduce|Subtract)\s*(\d+)\s*Levels?/i.test(str)) { t = 'level_change'; v = -parseInt(str.match(/(?:Lose|Decrease|Reduce|Subtract)\s*(\d+)\s*Levels?/i)[1]); }
+            else if (/(?:Gain|Add|Increase)\s*(\d+)\s*Levels?/i.test(str)) { t = 'level_change'; v = parseInt(str.match(/(?:Gain|Add|Increase)\s*(\d+)\s*Levels?/i)[1]); }
+
+            // Standard Actions
+            else if (/Targeted Break a (?:face down|facedown)/i.test(str)) { t = 'break_facedown'; rTarget = true; }
+            else if (/Targeted Break a (?:face down|facedown)/i.test(str)) { t = 'break_facedown'; rTarget = true; }
+            else if (/Targeted Break a (Spirit\/Counter|Spirit or Counter|Spirit|Counter)/i.test(str)) { 
+                t = 'break_backrow'; rTarget = true; 
+                const match = str.match(/Targeted Break a (Spirit\/Counter|Spirit or Counter|Spirit|Counter)/i)[1].toLowerCase();
+                e = (match.includes('spirit') && match.includes('counter')) ? 'both' : match; 
+            }
+            else if (/(?:Targeted Break|Break a(?:nother)? (?:card|Phantom))/i.test(str)) { t = 'break'; rTarget = true; }
+            else if (/(?:Targeted Discard|Discard a(?:nother)? (?:card|Phantom))/i.test(str)) { t = 'discard'; rTarget = true; }
+            else if (/Targeted Banish/i.test(str)) { t = 'banish'; rTarget = true; }
+            else if (/Targeted Destroy/i.test(str)) { t = 'destroy'; rTarget = true; }
+            else if (/Targeted Bounce/i.test(str)) { t = 'bounce'; rTarget = true; }
+            else if (/Targeted Deal (\d+)/i.test(str)) { t = 'damage'; rTarget = true; v = parseInt(str.match(/Targeted Deal (\d+)/i)[1]); }
+            else if (/Targeted Deal/i.test(str)) { t = 'damage_dynamic'; rTarget = true; }
             
-            // Pattern A: Number comes BEFORE Stat ("Give 500 Attack")
-            const matchNumFirst = text.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(\d+)[^\w]*(Health|HP|Attack|ATK|Stats?)/i);
-            // Pattern B: Stat comes BEFORE Number ("Increase Attack by 500")
-            const matchStatFirst = text.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(Health|HP|Attack|ATK|Stats?)[^\d]*(\d+)/i);
+            else if (/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(Health|HP|Attack|ATK|Stats?)/i.test(str)) {
+                let amt = null; let statStr = "";
+                const matchNum = str.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(\d+)[^\w]*(Health|HP|Attack|ATK|Stats?)/i);
+                const matchStat = str.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(Health|HP|Attack|ATK|Stats?)[^\d]*(\d+)/i);
+                const matchNoNum = str.match(/(?:Give|Gain|Restore|Recover|Increase|Decrease|Lose|Reduce).*?(Health|HP|Attack|ATK|Stats?)/i);
 
-            if (matchNumFirst) {
-                amount = parseInt(matchNumFirst[1]);
-                statStr = matchNumFirst[2].toLowerCase();
-            } else if (matchStatFirst) {
-                statStr = matchStatFirst[1].toLowerCase();
-                amount = parseInt(matchStatFirst[2]);
-            }
+                if (matchNum) { amt = parseInt(matchNum[1]); statStr = matchNum[2].toLowerCase(); } 
+                else if (matchStat) { statStr = matchStat[1].toLowerCase(); amt = parseInt(matchStat[2]); } 
+                else if (matchNoNum) { statStr = matchNoNum[1].toLowerCase(); }
 
-            if (amount > 0 && statStr) {
-                const isDecrease = /Decrease|Lose|Reduce/i.test(text);
-                const finalAmount = isDecrease ? -amount : amount;
-                
-                if (statStr.includes('health') || statStr.includes('hp')) {
-                    type = 'heal'; reqTarget = true; val = finalAmount;
-                } else if (statStr.includes('attack') || statStr.includes('atk')) {
-                    type = 'buff_attack'; reqTarget = true; val = finalAmount;
-                } else if (statStr.includes('stat')) {
-                    type = 'buff_stats'; reqTarget = true; val = finalAmount;
+                const isDec = /Decrease|Lose|Reduce/i.test(str);
+                if (amt !== null && statStr) {
+                    const finalAmt = isDec ? -amt : amt;
+                    if (statStr.includes('health') || statStr.includes('hp')) { t = 'heal'; rTarget = true; v = finalAmt; }
+                    else if (statStr.includes('attack') || statStr.includes('atk')) { t = 'buff_attack'; rTarget = true; v = finalAmt; }
+                    else if (statStr.includes('stat')) { t = 'buff_stats'; rTarget = true; v = finalAmt; }
+                } else if (statStr) {
+                    if (statStr.includes('health') || statStr.includes('hp')) { t = 'heal_dynamic'; rTarget = true; v = isDec ? -1 : 1; }
+                    else if (statStr.includes('attack') || statStr.includes('atk')) { t = 'buff_attack_dynamic'; rTarget = true; v = isDec ? -1 : 1; }
+                    else if (statStr.includes('stat')) { t = 'buff_stats_dynamic'; rTarget = true; v = isDec ? -1 : 1; }
                 }
             }
-        }
-        
-        // Fallbacks (Wrapped in !type so cycle doesn't accidentally overwrite a stat check)
-        if (!type) {
-            if (/\bCycle\b/i.test(text)) { type = 'cycle'; reqTarget = false; }
-            else if (/Summon Binding/i.test(text)) { type = 'summon_binding'; reqTarget = true; }
-            else if (/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i.test(text)) { 
-                type = 'spawn'; 
-                const spawnMatch = text.match(/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i);
-                if (spawnMatch) {
-                    extra = spawnMatch[1].trim();
-                    if (extra.toLowerCase().includes("copy")) type = null; 
-                }
+            
+            else if (/(?:Deal|Take) (\d+) damage/i.test(str)) {
+                t = 'lp_damage'; v = parseInt(str.match(/(\d+)/)[1]);
+                e = /both/i.test(str) ? 'both' : (/yourself|take/i.test(str) ? 'self' : 'opponent');
             }
-            else if (/Draw/i.test(text)) { type = 'draw'; }
-        }
+            else if (/(?:Gain|Restore|Recover) (\d+) LP/i.test(str)) {
+                t = 'lp_heal'; v = parseInt(str.match(/(\d+)/)[1]);
+                e = /both/i.test(str) ? 'both' : 'self';
+            }
+            else if (/\bMill\b/i.test(str)) {
+                t = 'mill_action';
+                const match = str.match(/Mill (\d+)/i);
+                v = match ? parseInt(match[1]) : 1;
+                e = /both/i.test(str) ? 'both' : 'self';
+            }
+            else if (/(?:Apply|Give Target|Give|Gain|gains).*?(Summon Binding|Sturdy|Shielded|Taunter)/i.test(str)) {
+                t = 'apply_keyword'; rTarget = true;
+                e = str.match(/(?:Apply|Give Target|Give|Gain|gains).*?(Summon Binding|Sturdy|Shielded|Taunter)/i)[1];
+            }
+            // Fallback: If it mentions Summon Binding but has MORE words than just the keyword itself
+            else if (/Summon Binding/i.test(str) && !/^\s*Summon Binding\.?\s*$/i.test(str)) {
+                t = 'apply_keyword'; rTarget = true;
+                e = 'Summon Binding';
+            }
+            else if (/Discard this card/i.test(str)) { t = 'discard_self'; }
+            else if (/Pay (\d+) LP/i.test(str)) { t = 'pay_lp'; v = parseInt(str.match(/Pay (\d+) LP/i)[1]); }
+            else if (/Remove (\d+) Counters?/i.test(str)) { t = 'remove_counter'; v = parseInt(str.match(/Remove (\d+) Counters?/i)[1]); }
+            else if (/After Life Seal a(?:nother)? card/i.test(str)) { t = 'seal_al'; rTarget = true; }
+            else if (/Stat Swap/i.test(str) || /Swap.*?Attack and Health/i.test(str)) { t = 'stat_swap'; rTarget = true; }
+            else if (/Create a.*?(\d+)[-\s]*SP.*?Copy/i.test(str)) { 
+                t = 'clone'; 
+                const match = str.match(/Create a.*?(\d+)[-\s]*SP.*?Copy/i);
+                if (match && match[1]) v = parseInt(match[1]); 
+            }
+            else if (/Create a.*?Copy/i.test(str)) { 
+                t = 'clone'; 
+            }
+            else if (/Excavate (\d+)/i.test(str)) { t = 'excavate'; v = parseInt(str.match(/Excavate (\d+)/i)[1]); }
+            else if (/(?:Both players draw|Draw .*? both players)/i.test(str)) { t = 'draw_both'; const match = str.match(/(\d+)/); v = match ? parseInt(match[1]) : 1; }
+            else if (/\bDraw\b/i.test(str) && !/Withdraw/i.test(str)) { t = 'draw'; const match = str.match(/Draw (\d+)/i); v = match ? parseInt(match[1]) : 1; }
+            else if (/\bSearch\b/i.test(str)) { t = 'search'; }
+            else if (/Flip a (?:card )?face down/i.test(str)) { t = 'flip_down'; rTarget = true; }
+            else if (/\bCycle\b/i.test(str)) { t = 'cycle'; }
+            else if (/Equip Card/i.test(str)) { t = 'equip_card'; }
+            else if (/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i.test(str)) { 
+                t = 'spawn'; 
+                const match = str.match(/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i);
+                if (match) { e = match[1].trim(); if (e.toLowerCase().includes("copy")) t = null; }
+                // Safely extract the Level or SP number to override base stats
+                const spMatch = str.match(/(\d+)[-\s]*SP|Level[-\s]*(\d+)/i);
+                if (spMatch) v = parseInt(spMatch[1] !== undefined ? spMatch[1] : spMatch[2]);
+            }
 
-        if (type) addAbility(text, type, reqTarget, val, extra);
+            return t ? { type: t, reqTarget: rTarget, value: v, extra: e } : null;
+        };
+
+        // --- BRANCHING & SEQUENCING ---
+        let preppedText = effectText.replace(/\b\s+and\s+(Gain|Lose|Draw|Deal|Destroy|Break|Discard|Banish|Mill)/gi, ' and then $1');
+		const orBranches = preppedText.split(/\b\s+or\s+\b/i);
+
+        orBranches.forEach((branchStr, branchIdx) => {
+            // FIX: Added <br> tags so multi-line bullet points perfectly separate into distinct sequence steps!
+            const sequenceSteps = branchStr.split(/\b\s+(?:and then|to)\s+\b|\.\s+|<br\s*\/?>\s*/i);
+            
+            let sequence =[];
+            let overallReqTarget = false;
+
+            sequenceSteps.forEach(stepStr => {
+                if (!stepStr.trim()) return;
+                const parsed = parseStep(stepStr);
+                if (parsed) {
+                    sequence.push(parsed);
+                    if (parsed.reqTarget) overallReqTarget = true;
+                }
+            });
+
+            if (sequence.length > 0) {
+                let btnText = orBranches.length > 1 ? `Option ${branchIdx + 1}: ${displayText}` : displayText;
+                addAbility(btnText, sequence, overallReqTarget, cost);
+            }
+        });
     });
+
+    if (parsedAbilities.length === 0) {
+        addAbility("Manual Activation (Highlight Target)",[{type: 'generic_target', reqTarget: true}], true);
+    }
 
     return parsedAbilities;
 }
@@ -1401,13 +1607,25 @@ let currentParsedAbilities =[];
 function openAbilityMenu(card) {
     if (!card) return;
     const desc = (card.description || "").toLowerCase();
-    const hasHandAbility = desc.includes('hand ability') || desc.includes('hand & field ability') || /\bcycle\b/.test(desc);
     
-    // Block if not on field, UNLESS it's in hand and has a valid hand ability
-    if (card.loc !== 'field' && !(card.loc === 'hand' && hasHandAbility)) return;
+    const inHand = card.loc === 'hand';
+    const inPile = ['afterlife', 'shadow', 'oblivion'].includes(card.loc);
+    
+    // Hand check: Allow Hand Abilities, Cycle, and Equip Card
+    if (inHand) {
+        const hasHandAbility = desc.includes('hand ability') || desc.includes('hand & field ability') || /\bcycle\b/.test(desc) || desc.includes('equip card');
+        if (!hasHandAbility) return;
+    }
+    // Pile check
+    if (inPile) {
+        const hasPileAbility = (card.loc === 'afterlife' && desc.includes('al ability')) || 
+                               (card.loc === 'shadow' && desc.includes('shadow realm ability')) || 
+                               (card.loc === 'oblivion' && desc.includes('oblivion ability'));
+        if (!hasPileAbility) return;
+    }
     
     // If activating from hand, automatically flip it face-up to reveal it to the opponent!
-    if (card.loc === 'hand' && isMultiplayer && !card.faceUp) {
+    if (inHand && isMultiplayer && !card.faceUp) {
         card.faceUp = true;
         refreshCard(card);
         sendAction('flip', { cardId: card.id, faceUp: true }); 
@@ -1423,10 +1641,10 @@ function openAbilityMenu(card) {
     abilityState = { sourceId: card.id, targetId: null, type: null, step: 'menu', activeAbility: null };
     
     // SMART BYPASS: If no automatable abilities exist, skip menu and jump straight to generic targeting
-    if (currentParsedAbilities.length === 0) {
+    if (currentParsedAbilities.length === 0 || (currentParsedAbilities.length === 1 && currentParsedAbilities[0].sequence && currentParsedAbilities[0].sequence[0].type === 'generic_target')) {
         abilityState.type = 'generic_target';
         abilityState.step = 'targeting';
-        abilityState.activeAbility = { id: 999, type: 'generic_target', reqTarget: true };
+        abilityState.activeAbility = currentParsedAbilities[0] || { id: 999, sequence:[{type: 'generic_target', reqTarget: true}], reqTarget: true };
         refreshCard(card);
         if (isMultiplayer) sendAction('ability_sync', abilityState);
         return;
@@ -1441,6 +1659,7 @@ function openAbilityMenu(card) {
     
     if (imageContainer) {
         imageContainer.innerHTML = '';
+        imageContainer.style.display = 'block'; // Ensure image shows
         const visualClone = createCardEl({...card, id: card.id + '-ui-clone', loc: 'hand'}); 
         visualClone.style.position = 'static';
         visualClone.style.width = '100%'; 
@@ -1461,6 +1680,7 @@ function openAbilityMenu(card) {
     });
     
     content.innerHTML += `<button class="custom-ui-btn custom-ui-cancel" onclick="cancelAbility()">Cancel</button>`;
+    modal.style.zIndex = '99999'; // FIX: Force it above the deck viewer
     modal.classList.remove('hidden');
 }
 
@@ -1473,17 +1693,12 @@ function selectAbility(abilityId) {
     
     abilityState.activeAbility = ability;
     abilityState.type = ability.type;
+    abilityState.currentStepIndex = 0; // NEW: Start at the first step
+    abilityState.targetId = null;
+	abilityState.apPaid = false;
 
-    if (ability.reqTarget) {
-        // Enter targeting mode!
-        abilityState.step = 'targeting';
-        const sourceCard = findCard(abilityState.sourceId);
-        if (sourceCard) refreshCard(sourceCard);
-        if (isMultiplayer) sendAction('ability_sync', abilityState);
-    } else {
-        // Doesn't need a target, execute immediately!
-        executeAbility();
-    }
+    // Start the engine! It will pause automatically if the first step needs a target.
+    executeAbility();
 }
 
 function cancelAbility() {
@@ -1501,159 +1716,284 @@ function cancelAbility() {
     if (isMultiplayer) sendAction('ability_sync', abilityState);
 }
 
-// 3. The Executor: Runs the logic based on the smart parser
+// 3. The Executor: Runs the logic sequence step-by-step
 function executeAbility() {
     const sourceCard = findCard(abilityState.sourceId);
-    const targetCard = findCard(abilityState.targetId);
     const ability = abilityState.activeAbility;
     if (!ability) return;
 
-    // Helper for pile/hand movements to keep logic clean and synced perfectly
     const performMove = (tCard, dest) => {
         const originalLoc = tCard.loc;
         moveCardTo(tCard, dest);
         if (isMultiplayer) sendAction('move', { cardId: tCard.id, fromZone: originalLoc, toZone: `${tCard.owner}-${dest}` });
     };
 
-    // --- SMART LOGIC ROUTING ---
-    if (ability.type === 'damage' && targetCard) {
-        targetCard.health -= ability.value;
-        if (targetCard.health <= 0) applyBreak(targetCard);
-        refreshCard(targetCard);
-        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
-    }
-    else if (ability.type === 'damage_dynamic' && targetCard) {
-        const dmg = prompt("Enter Damage Amount:", "500");
-        if (dmg !== null) {
-            targetCard.health -= (parseInt(dmg) || 0);
-            if (targetCard.health <= 0) applyBreak(targetCard);
+    if (!ability.sequence) { cancelAbility(); return; }
+
+    // --- 2. STATE MACHINE EXECUTION ---
+    while (abilityState.currentStepIndex < ability.sequence.length) {
+        const step = ability.sequence[abilityState.currentStepIndex];
+
+        // PAUSE RULE: If this step requires a target, and we haven't selected one yet, pause and wait!
+        if (step.reqTarget && !abilityState.targetId) {
+            abilityState.step = 'targeting';
+            refreshCard(sourceCard);
+            if (isMultiplayer) sendAction('ability_sync', abilityState);
+            return; // Exit function. Pressing 'V' again resumes from this exact spot!
+        }
+
+        // --- PROCESS AP COST (Only once, and ONLY after we confirmed the target!) ---
+        if (ability.cost && ability.cost.use_ap && !abilityState.apPaid) {
+            if (!sourceCard.ap || sourceCard.ap <= 0) {
+                alert("This card has no more AP available!");
+                cancelAbility(); return;
+            }
+            sourceCard.ap -= 1; 
+            abilityState.apPaid = true; // Mark it so we don't pay again!
+            refreshCard(sourceCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'ap', value: sourceCard.ap });
+        }
+
+        const targetCard = abilityState.targetId ? findCard(abilityState.targetId) : null;
+        if (step.type === 'sp_change') {
+            state[sourceCard.owner].sp = Math.max(0, state[sourceCard.owner].sp + step.value);
+            updateStats();
+            if (isMultiplayer) sendAction('sp', { player: sourceCard.owner, value: state[sourceCard.owner].sp });
+        }
+        else if (step.type === 'damage' && targetCard) {
+            if (targetCard.shieldActive) targetCard.shieldActive = false;
+            else { targetCard.health -= step.value; if (targetCard.health <= 0) applyBreak(targetCard); }
             refreshCard(targetCard);
             if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
         }
-    }
-    else if (ability.type === 'heal' && targetCard) {
-        targetCard.health = (targetCard.health || 0) + ability.value;
-        refreshCard(targetCard);
-        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
-    }
-    else if (ability.type === 'buff_attack' && targetCard) {
-        targetCard.attack = Math.max(0, (targetCard.attack || 0) + ability.value);
-        refreshCard(targetCard);
-        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
-    }
-    else if (ability.type === 'buff_stats' && targetCard) {
-        targetCard.attack = Math.max(0, (targetCard.attack || 0) + ability.value);
-        targetCard.health = Math.max(0, (targetCard.health || 0) + ability.value);
-        refreshCard(targetCard);
-        if (isMultiplayer) {
-            sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
-            sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
-        }
-    }
-    else if (ability.type === 'cycle') {
-        if (state[sourceCard.owner].sp < 1) {
-            alert("Not enough Summoning Points to Cycle!");
-            cancelAbility();
-            return;
-        }
-        
-        // 1. Pay Cost
-        state[sourceCard.owner].sp -= 1;
-        updateStats();
-        if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.owner, stat: 'sp', value: state[sourceCard.owner].sp });
-
-        // 2. Shuffle back
-        performMove(sourceCard, 'randomdeck');
-        
-        // 3. Draw
-        draw(1, sourceCard.owner);
-    }
-    else if (ability.type === 'break' && targetCard) {
-        applyBreak(targetCard, sourceCard);
-    }
-    else if (ability.type === 'break_facedown' && targetCard) {
-        if (!targetCard.faceUp) {
-            applyBreak(targetCard, sourceCard);
-        } else {
-            alert("The Targeted card is not Face Down!");
-        }
-    }
-    else if (ability.type === 'discard' && targetCard) {
-        performMove(targetCard, 'afterlife');
-    }
-    else if (ability.type === 'banish' && targetCard) {
-        performMove(targetCard, 'shadow');
-    }
-    else if (ability.type === 'destroy' && targetCard) {
-        performMove(targetCard, 'oblivion');
-    }
-    else if (ability.type === 'bounce' && targetCard) {
-        performMove(targetCard, 'hand');
-    }
-    else if (ability.type === 'summon_binding' && targetCard) {
-        targetCard.summonBinding = true;
-        alert(`${targetCard.name} is now Bound and cannot be Unsummoned!`);
-        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'summonBinding', value: true });
-    }
-    else if (ability.type === 'spawn') {
-        let nameToSpawn = ability.extra;
-        
-        // If the parser didn't extract a name (or failed), fallback to manual prompt
-        if (!nameToSpawn) {
-            const promptResult = prompt("Enter Card Name to Spawn:", "");
-            if (promptResult === null) return; // Cancelled
-            nameToSpawn = promptResult.trim();
-        }
-
-        if (nameToSpawn === "" || nameToSpawn.toLowerCase() === "token") {
-            spawnToken(sourceCard.owner);
-        } else {
-            const dbCard = allCards.find(c => (c.name || "").toLowerCase() === nameToSpawn.toLowerCase());
-            if (dbCard) {
-                const newCard = {
-                    ...dbCard, id: `c-${++idCounter}-${Date.now()}`,
-                    owner: sourceCard.owner, originalOwner: sourceCard.owner, originalZone: 'deck', loc: 'field',
-                    faceUp: true, rotated: false
-                };
-                
-                const pfx = sourceCard.owner;
-                let targetZone = null;
-                const priorityIds =[
-                    `${pfx}-monster-2`, `${pfx}-monster-1`, `${pfx}-monster-3`,
-                    `${pfx}-balance-1`, `${pfx}-balance-2`
-                ];
-                
-                for (let id of priorityIds) {
-                    const z = document.getElementById(id);
-                    if (z && z.children.length === 0) { targetZone = z; break; }
-                }
-
-                if (targetZone) {
-                    state[sourceCard.owner].field.push(newCard);
-                    targetZone.appendChild(createCardEl(newCard));
-                    if (isMultiplayer) sendAction('spawn_token', { tokenData: newCard, zoneId: targetZone.id });
-                } else {
-                    alert("No space on the field to spawn!");
-                }
-            } else {
-                alert(`Could not automatically find a card named "${nameToSpawn}" in the database. Try spawning manually.`);
+        else if (step.type === 'damage_dynamic' && targetCard) {
+            const dmg = prompt("Enter Damage Amount:", "500");
+            if (dmg !== null) {
+                if (targetCard.shieldActive) targetCard.shieldActive = false;
+                else { targetCard.health -= (parseInt(dmg) || 0); if (targetCard.health <= 0) applyBreak(targetCard); }
+                refreshCard(targetCard);
+                if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
             }
         }
-    }
-    else if (ability.type === 'draw') {
-        drawCard(sourceCard.owner);
-    }
-    else if (ability.type === 'generic_target' && targetCard) {
-        // Ping visual cue for complex manual resolutions
-        const tEl = document.getElementById(targetCard.id);
-        if (tEl) {
-            tEl.classList.add('golden-pulse');
-            setTimeout(() => tEl.classList.remove('golden-pulse'), 500);
+        else if (step.type === 'heal' && targetCard) {
+            targetCard.health = (targetCard.health || 0) + step.value;
+            refreshCard(targetCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
         }
+        else if (step.type === 'heal_dynamic' && targetCard) {
+            const val = prompt("Enter Health Amount:", "500");
+            if (val !== null) {
+                targetCard.health = Math.max(0, (targetCard.health || 0) + ((parseInt(val) || 0) * step.value));
+                refreshCard(targetCard);
+                if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+            }
+        }
+        else if (step.type === 'buff_attack' && targetCard) {
+            targetCard.attack = Math.max(0, (targetCard.attack || 0) + step.value);
+            refreshCard(targetCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+        }
+        else if (step.type === 'buff_attack_dynamic' && targetCard) {
+            const val = prompt("Enter Attack Amount:", "500");
+            if (val !== null) {
+                targetCard.attack = Math.max(0, (targetCard.attack || 0) + ((parseInt(val) || 0) * step.value));
+                refreshCard(targetCard);
+                if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+            }
+        }
+        else if (step.type === 'buff_stats' && targetCard) {
+            targetCard.attack = Math.max(0, (targetCard.attack || 0) + step.value);
+            targetCard.health = Math.max(0, (targetCard.health || 0) + step.value);
+            refreshCard(targetCard);
+            if (isMultiplayer) {
+                sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+                sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+            }
+        }
+        else if (step.type === 'buff_stats_dynamic' && targetCard) {
+            const val = prompt("Enter Stat Amount:", "500");
+            if (val !== null) {
+                const amt = (parseInt(val) || 0) * step.value;
+                targetCard.attack = Math.max(0, (targetCard.attack || 0) + amt);
+                targetCard.health = Math.max(0, (targetCard.health || 0) + amt);
+                refreshCard(targetCard);
+                if (isMultiplayer) {
+                    sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+                    sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+                }
+            }
+        }
+        else if (step.type === 'discard_self') {
+            performMove(sourceCard, 'afterlife');
+        }
+        else if (step.type === 'pay_lp') {
+            if (state[sourceCard.owner].lp <= step.value) { alert("Not enough LP!"); break; }
+            state[sourceCard.owner].lp -= step.value;
+            updateStats();
+            if (isMultiplayer) sendAction('lp', { player: sourceCard.owner, value: state[sourceCard.owner].lp });
+        }
+        else if (step.type === 'remove_counter') {
+            if ((sourceCard.counter || 0) < step.value) { alert(`Not enough counters!`); break; }
+            sourceCard.counter -= step.value;
+            refreshCard(sourceCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'counter', value: sourceCard.counter });
+        }
+        else if (step.type === 'seal_al' && targetCard) {
+            targetCard.description = (targetCard.description || "") + `<br><b>[Applied: After Life Sealed]</b>`;
+            refreshCard(targetCard);
+            alert(`After Life Sealed applied to ${targetCard.name}`);
+        }
+        else if (step.type === 'level_change') {
+            sourceCard.level = Math.max(0, (sourceCard.level || 0) + step.value);
+            refreshCard(sourceCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'level', value: sourceCard.level });
+        }
+        else if (step.type === 'ap_change') {
+            sourceCard.ap = (sourceCard.ap || 0) + step.value;
+            refreshCard(sourceCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'ap', value: sourceCard.ap });
+        }
+        else if (step.type === 'break' && targetCard) {
+            if (!(targetCard.description || "").includes("Immune to Targeted Break")) applyBreak(targetCard, sourceCard);
+        }
+        else if (step.type === 'break_facedown' && targetCard) {
+            if (!targetCard.faceUp) applyBreak(targetCard, sourceCard);
+        }
+        else if (step.type === 'break_backrow' && targetCard) {
+            const isSpirit = targetCard.type === 'Spirit';
+            const isCounter = targetCard.type === 'Counter';
+            const extraLower = (step.extra || "").toLowerCase();
+            let valid = false;
+            
+            if (extraLower === 'both') valid = isSpirit || isCounter;
+            else if (extraLower === 'spirit') valid = isSpirit;
+            else if (extraLower === 'counter') valid = isCounter;
+            
+            if (valid) {
+                applyBreak(targetCard, sourceCard);
+            } else {
+                alert(`Target must be a ${step.extra}!`);
+            }
+        }
+        else if (step.type === 'discard' && targetCard) performMove(targetCard, 'afterlife');
+        else if (step.type === 'banish' && targetCard) performMove(targetCard, 'shadow');
+        else if (step.type === 'destroy' && targetCard) performMove(targetCard, 'oblivion');
+        else if (step.type === 'bounce' && targetCard) performMove(targetCard, 'hand');
+        else if (step.type === 'flip_down' && targetCard) {
+            targetCard.faceUp = false; refreshCard(targetCard);
+            if (isMultiplayer) sendAction('flip', { cardId: targetCard.id, faceUp: false });
+        }
+        else if (step.type === 'equip_card') {
+            sourceCard.level = 0; sourceCard.attack = 0; sourceCard.health = 0;
+            playCardToField(sourceCard, 'Spirit', true, false);
+            refreshCard(sourceCard);
+            if (isMultiplayer) {
+                sendAction('edit_stat', { cardId: sourceCard.id, stat: 'level', value: 0 });
+                sendAction('edit_stat', { cardId: sourceCard.id, stat: 'attack', value: 0 });
+                sendAction('edit_stat', { cardId: sourceCard.id, stat: 'health', value: 0 });
+                const el = document.getElementById(sourceCard.id);
+                if (el && el.parentElement) sendAction('move', { cardId: sourceCard.id, toZone: el.parentElement.id, fromZone: 'hand', faceUp: true, rotated: false });
+            }
+        }
+        else if (step.type === 'cycle') {
+            if (state[sourceCard.owner].sp < 1) { alert("Not enough SP!"); break; }
+            state[sourceCard.owner].sp -= 1; updateStats();
+            if (isMultiplayer) sendAction('sp', { player: sourceCard.owner, value: state[sourceCard.owner].sp });
+            performMove(sourceCard, 'randomdeck');
+            draw(1, sourceCard.owner);
+        }
+        else if (step.type === 'lp_damage') {
+            const targets = step.extra === 'both' ?['player', 'opponent'] : [step.extra === 'self' ? 'player' : 'opponent'];
+            targets.forEach(t => { state[t].lp -= step.value; if (isMultiplayer) sendAction('lp', { player: t, value: state[t].lp }); });
+            updateStats();
+        }
+        else if (step.type === 'lp_heal') {
+            const targets = step.extra === 'both' ?['player', 'opponent'] : ['player'];
+            targets.forEach(t => { state[t].lp += step.value; if (isMultiplayer) sendAction('lp', { player: t, value: state[t].lp }); });
+            updateStats();
+        }
+        else if (step.type === 'mill_action') {
+            const targets = step.extra === 'both' ? ['player', 'opponent'] :['player'];
+            targets.forEach(t => {
+                for(let i=0; i<step.value; i++) {
+                    if(state[t].deck.length > 0) {
+                        const c = state[t].deck.pop(); state[t].afterlife.push(c); updateCounts(t);
+                        if (isMultiplayer) sendAction('mill', { owner: t, source: 'deck', dest: 'afterlife', cardId: c.id });
+                    }
+                }
+            });
+        }
+        else if (step.type === 'stat_swap' && targetCard) {
+            const temp = targetCard.attack || 0;
+            targetCard.attack = targetCard.health || 0; targetCard.health = temp;
+            refreshCard(targetCard);
+            if (isMultiplayer) {
+                sendAction('edit_stat', { cardId: targetCard.id, stat: 'attack', value: targetCard.attack });
+                sendAction('edit_stat', { cardId: targetCard.id, stat: 'health', value: targetCard.health });
+            }
+        }
+        else if (step.type === 'clone') cloneCard(sourceCard, step.value);
+        else if (step.type === 'excavate') startExcavate(sourceCard.owner, step.value);
+        else if (step.type === 'draw_both') {
+            const amt = step.value || 1; draw(amt, 'player');
+            if (!isMultiplayer) draw(amt, 'opponent');
+            else sendAction('draw_phase_global', { amount: amt });
+        }
+        else if (step.type === 'draw') draw(step.value || 1, sourceCard.owner);
+        else if (step.type === 'search') openViewer(sourceCard.owner, 'deck', true);
+        else if (step.type === 'spawn') {
+            let nameToSpawn = step.extra;
+            if (!nameToSpawn) {
+                const promptResult = prompt("Enter Card Name to Spawn:", "");
+                if (promptResult !== null) nameToSpawn = promptResult.trim();
+            }
+            if (nameToSpawn) {
+                if (nameToSpawn === "" || nameToSpawn.toLowerCase() === "token") spawnToken(sourceCard.owner);
+                else {
+                    const dbCard = allCards.find(c => (c.name || "").toLowerCase() === nameToSpawn.toLowerCase());
+                    if (dbCard) {
+                        const newCard = {
+                            ...dbCard, id: `c-${++idCounter}-${Date.now()}`,
+                            owner: sourceCard.owner, originalOwner: sourceCard.owner, originalZone: 'deck', loc: 'field',
+                            faceUp: true, rotated: false
+                        };
+                        const spMatch = (ability.text || "").match(/(\d+)[-\s]*SP|Level[-\s]*(\d+)/i);
+                        if (spMatch) newCard.level = parseInt(spMatch[1] !== undefined ? spMatch[1] : spMatch[2]);
+                        
+                        const statMatch = (ability.text || "").match(/(\d+)\/(\d+)/);
+                        if (statMatch) { newCard.attack = parseInt(statMatch[1]); newCard.health = parseInt(statMatch[2]); }
+
+                        const pfx = sourceCard.owner; let targetZone = null;
+                        const priorityIds =[`${pfx}-monster-2`, `${pfx}-monster-1`, `${pfx}-monster-3`, `${pfx}-balance-1`, `${pfx}-balance-2`];
+                        for (let id of priorityIds) { const z = document.getElementById(id); if (z && z.children.length === 0) { targetZone = z; break; } }
+                        
+                        if (targetZone) {
+                            state[sourceCard.owner].field.push(newCard); targetZone.appendChild(createCardEl(newCard));
+                            if (isMultiplayer) {
+                                sendAction('spawn_token', { tokenData: newCard, zoneId: targetZone.id });
+                                if (spMatch) sendAction('edit_stat', { cardId: newCard.id, stat: 'level', value: newCard.level });
+                            }
+                        } else alert("No space on the field to spawn!");
+                    } else alert(`Could not find "${nameToSpawn}".`);
+                }
+            }
+        }
+        else if (step.type === 'generic_target' && targetCard) {
+            const tEl = document.getElementById(targetCard.id);
+            if (tEl) { tEl.classList.add('golden-pulse'); setTimeout(() => tEl.classList.remove('golden-pulse'), 500); }
+        }
+
+        // --- STEP CLEANUP ---
+        // We finished the step. Clear the target so the NEXT step can ask for one if needed.
+        if (abilityState.targetId && targetCard) {
+            abilityState.targetId = null;
+            refreshCard(targetCard); // Removes the orange target glow
+        }
+        
+        abilityState.currentStepIndex++;
     }
 
-    // Cleanup and Sync
-    cancelAbility();
+    cancelAbility(); // Entire sequence is complete
 }
 
 function refreshCard(card) {
@@ -1668,11 +2008,16 @@ function refreshCard(card) {
     }
 }
 
-function cloneCard(card) {
+function cloneCard(card, overrideLevel = null) {
     idCounter++;
     const newId = `c-${idCounter}-${Date.now()}`;
     const newCard = { ...card, id: newId, originalOwner: card.originalOwner || card.owner };
     
+    // --- NEW: DYNAMIC LEVEL OVERRIDE ---
+    if (overrideLevel !== null && overrideLevel !== undefined) {
+        newCard.level = overrideLevel;
+    }
+
     let parentZoneId = null;
 
     // 1. If card is on the field, clone it to the same zone
@@ -1685,7 +2030,7 @@ function cloneCard(card) {
             parent.appendChild(createCardEl(newCard));
         }
     } 
-    // 2. FIX: If cloned from Hand, Deck, or Piles, ALWAYS add the clone to the Hand
+    // 2. If cloned from Hand, Deck, or Piles, ALWAYS add the clone to the Hand
     else {
         newCard.loc = 'hand'; // Force location to hand
         state[card.owner].hand.push(newCard);
@@ -1694,6 +2039,7 @@ function cloneCard(card) {
 
     if (isMultiplayer) {
         sendAction('clone_sync', { cardData: newCard, toZone: parentZoneId });
+        if (overrideLevel !== null) sendAction('edit_stat', { cardId: newCard.id, stat: 'level', value: newCard.level });
     }
 }
 
@@ -1779,14 +2125,19 @@ function openCardCtx(e, card) {
 		if (isMyCard) addMsg('Activate Ability (V)', 'activate-ability');
     } else if (!onField && (isMyCard || !inHand)) {
         if (card.type === 'Phantom') {
-            const playOpts = [
-                { text: 'Attack (W)', action: 'play-atk' }, { text: 'Defense', action: 'play-def' },
+            const playOpts =[
+                { text: 'Summon (Attack) (W)', action: 'play-atk' }, { text: 'Summon (Defense)', action: 'play-def' },
                 { isSeparator: true },
-                { text: 'Set Attack', action: 'set-atk' }, { text: 'Set Defense', action: 'set-def' }
+                { text: 'Set (Attack)', action: 'set-atk' }, { text: 'Set (Defense)', action: 'set-def' }
             ];
-            addNestedMenu('Play', playOpts);
+            const specialOpts =[
+                { text: 'Special Attack', action: 'special-play-atk' }, { text: 'Special Defense', action: 'special-play-def' },
+                { isSeparator: true },
+                { text: 'Sp. Set Attack', action: 'special-set-atk' }, { text: 'Sp. Set Defense', action: 'special-set-def' }
+            ];
+            addNestedMenu('Summon/Set', playOpts);
             addSep();
-            addNestedMenu('Special Summon', playOpts.map(o => ({...o, text: o.text ? o.text.split(' (')[0] : null, action: o.action ? 'special-'+o.action : null})));
+            addNestedMenu('Special Summon', specialOpts);
             addSep();
         } else {
             const isCounter = card.type === 'Counter';
@@ -1798,6 +2149,15 @@ function openCardCtx(e, card) {
 
     addMsg(inHand && isMyCard ? 'Reveal & Highlight (E)' : 'Highlight (E)', 'highlight');
     addSep();
+    
+    // Allow activating Hand Abilities directly from the context menu
+    if (inHand && isMyCard) {
+        addMsg('Activate Ability (V)', 'activate-ability');
+		const inPile =['afterlife', 'shadow', 'oblivion'].includes(card.loc);
+        addSep();
+    }
+	
+	
 
 	if (onField && card.type === 'Phantom') {
         addMsg('Unsummon (U)', 'unsummon');
@@ -1810,8 +2170,9 @@ function openCardCtx(e, card) {
     
     if (isMyCard || !inHand) { addMsg('Copy/Clone (C)', 'clone'); addSep(); }
 	
-    if (onField) {
-        addNestedMenu('Add To Card:', [
+    const inPile =['afterlife', 'shadow', 'oblivion'].includes(card.loc);
+    if (onField || inPile) {
+        addNestedMenu('Add To Card:',[
             { text: 'Add an AP', action: 'add-ap' },
             card.ap > 0 ? { text: 'Remove an AP', action: 'remove-ap' } : null,
             { isSeparator: true },
@@ -1989,10 +2350,12 @@ function cardAction(act) {
         }
     }
 	
-	// 1. Handle Unsummon (This fixes the menu button doing nothing)
+	// 1. Handle Unsummon
     if (act === 'unsummon') {
-		// Passive check for Summon Binding
-        if (card.summonBinding || (card.description && card.description.toLowerCase().includes('summon binding'))) {
+        // Passive check: Only locks if "Summon Binding" is its own isolated sentence/line, OR if manually applied
+        const isPassiveBinding = card.description && /(?:^|<br>|\.\s*)\s*Summon Binding\.?\s*(?=$|<br>|\.\s*)/i.test(card.description);
+        
+        if (card.summonBinding || isPassiveBinding) {
             alert(`${card.name} is Bound and cannot be Unsummoned!`);
             return;
         }
@@ -2128,6 +2491,15 @@ function playCardToField(card, typeName, faceUp, rotated) {
     card.loc = 'field';
     card.faceUp = faceUp;
     card.rotated = rotated;
+    card.shieldActive = (card.description || "").includes("Shielded"); 
+    
+    // --- INITIALIZE AP VISUALS ---
+    const apMatch = (card.description || "").match(/(\d+)\s*-\s*AP/i) || (card.description || "").match(/(\d+)\s*AP/i);
+    if (apMatch) {
+        card.maxAP = parseInt(apMatch[1]);
+        card.ap = card.maxAP;
+    }
+
     state[card.owner].field.push(card);
 
     const prefix = card.owner;
@@ -2654,12 +3026,14 @@ const SERVER_URL = (window.location.hostname === 'localhost' || window.location.
 
 // 1. Unified Connection Logic
 function initSocket(callback) {
-    if (socket && socket.connected) {
-        if (callback) callback();
-        return;
+    // KILL SWITCH: If a socket already exists, disconnect it to prevent "Ghost" listeners
+    if (socket) {
+        console.log("Disconnecting old socket to prevent duplicates...");
+        socket.disconnect(); 
+        socket = null;
     }
 
-    // Use the CDN version of socket.io defined in HTML
+    // Create fresh connection
     socket = io(SERVER_URL);
 
     socket.on('connect', () => {
@@ -2712,22 +3086,37 @@ function executeBattleLogic() {
     battleState = { attackerId: null, targetId: null };
 
     // Detect Keywords
-    const atkHasBreaker = atkCard.description.includes("Breaker");
-    const atkHasBouncer = atkCard.description.includes("Bouncer");
-    const atkHasDestructive = atkCard.description.includes("Destructive");
+    const atkDesc = atkCard.description || "";
+    const defDesc = defCard.description || "";
+    const atkHasBreaker = atkDesc.includes("Breaker");
+    const atkHasBouncer = atkDesc.includes("Bouncer");
+    const atkHasDestructive = atkDesc.includes("Destructive");
+    const atkHasPiercing = atkDesc.includes("Piercing");
+    const atkHasFragile = atkDesc.includes("Fragile");
+    const defHasFragile = defDesc.includes("Fragile");
 
     // 0 Health Rule: Phantoms with 0 Health deal no damage
-    const atkPower = atkCard.health > 0 ? atkCard.attack : 0;
-    const defPower = defCard.health > 0 ? defCard.attack : 0;
+    let atkPower = atkCard.health > 0 ? atkCard.attack : 0;
+    let defPower = defCard.health > 0 ? defCard.attack : 0;
+
+    // --- SHIELDED LOGIC ---
+    if (defCard.shieldActive) { defCard.shieldActive = false; atkPower = 0; }
+    if (atkCard.shieldActive) { atkCard.shieldActive = false; defPower = 0; }
 
     // Apply Health Reductions
     defCard.health -= atkPower;
     atkCard.health -= defPower;
 
-    // Battle Damage to LP (Only if target is in Attack Position)
-    if (!defCard.rotated && defCard.health < 0) {
-        const excess = Math.abs(defCard.health);
-        state[defCard.owner].lp -= excess;
+    // --- BATTLE DAMAGE TO LP ---
+    if (defCard.health < 0) {
+        // Normal: Target in Attack Position
+        if (!defCard.rotated) {
+            state[defCard.owner].lp -= Math.abs(defCard.health);
+        }
+        // Piercing: Target in Defense Position
+        else if (defCard.rotated && atkHasPiercing) {
+            state[defCard.owner].lp -= Math.abs(defCard.health);
+        }
     }
 
     // Capture IDs for sync before cards potentially move
@@ -2745,6 +3134,10 @@ function executeBattleLogic() {
     if (defCard.health <= 0 || atkHasBreaker) {
         applyBreak(defCard, atkCard);
     }
+
+    // --- FRAGILE CHECK ---
+    if (atkHasFragile && atkCard.loc === 'field') applyBreak(atkCard);
+    if (defHasFragile && defCard.loc === 'field') applyBreak(defCard);
 
     // 2. Check for Bouncer (If target is still on field after potential Break/Sturdy)
     if (atkHasBouncer && defCard.loc === 'field') {
@@ -2778,14 +3171,16 @@ function executeBattleLogic() {
 function applyBreak(targetCard, sourceCard = null) {
     if (!targetCard || targetCard.loc !== 'field') return;
 
-    const hasSturdy = targetCard.description.includes("Sturdy");
-    const sourceHasDestructive = sourceCard && sourceCard.description.includes("Destructive");
+    const hasSturdy = (targetCard.description || "").includes("Sturdy");
+    const sourceHasDestructive = sourceCard && (sourceCard.description || "").includes("Destructive");
 
-    if (hasSturdy) {
-        // Sturdy Logic: Stay on field, force 0 HP, flip to defense
+    // FIX: Check if Sturdy was already consumed!
+    if (hasSturdy && !targetCard.sturdyUsed) {
+        targetCard.sturdyUsed = true;
         targetCard.health = 0;
         targetCard.rotated = true;
         refreshCard(targetCard);
+        if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'sturdyUsed', value: true });
     } else {
         // Normal Break Logic: Determine destination
         const destination = sourceHasDestructive ? 'oblivion' : 'afterlife';
@@ -2862,6 +3257,12 @@ function applyRemoteAction(action) {
     }
     if (type === 'game_reset_global') {
         resetGame(true); 
+        return;
+    }
+	
+	if (type === 'set_first') {
+        hostGoesFirst = payload.hostGoesFirst;
+        updateTurnVisuals();
         return;
     }
     
@@ -2951,6 +3352,8 @@ function applyRemoteAction(action) {
             // It's a pile (Deck, Afterlife, etc)
             const pileType = zone.dataset.type;
             const destList = state[newOwner][pileType];
+            
+            card.loc = pileType; // FIX: Ensure opponent's memory updates the location!
 
             // FIX: Handle random insertion for the opponent
             if (payload.random) {
@@ -2964,6 +3367,12 @@ function applyRemoteAction(action) {
         } else {
             // It's a field zone
             card.loc = 'field';
+            card.shieldActive = (card.description || "").includes("Shielded");
+            const apMatch = (card.description || "").match(/(\d+)\s*-\s*AP/i) || (card.description || "").match(/(\d+)\s*AP/i);
+            if (apMatch) {
+                card.maxAP = parseInt(apMatch[1]);
+                card.ap = card.maxAP;
+            }
             state[newOwner].field.push(card);
             zone.appendChild(createCardEl(card));
         }
@@ -2981,6 +3390,20 @@ function applyRemoteAction(action) {
         if (abilityState.sourceId) refreshCard(findCard(abilityState.sourceId));
         if (abilityState.targetId) refreshCard(findCard(abilityState.targetId));
         return;
+    }
+	
+	if (type === 'end_turn_sync') {
+        currentRound = payload.round;
+        globalTurn = payload.turns;
+        updateTurnVisuals();
+        
+        // Ensure opponent's SP doesn't visually reset on our screen until they take their turn
+        // But do reset all AP usages for the new turn
+        ['player', 'opponent'].forEach(p => { 
+            state[p].field.forEach(c => {
+                if (c.maxAP !== undefined) { c.ap = c.maxAP; refreshCard(c); }
+            }); 
+        });
     }
 
     
@@ -3189,9 +3612,8 @@ function applyRemoteAction(action) {
     }
 	
     if (type === 'draw_phase_global') {
-        // Opponent triggered a global draw, so we update both sides here too
-        draw(1, 'player');
-        draw(1, 'opponent');
+        const amt = (payload && payload.amount) ? payload.amount : 1;
+        draw(amt, 'player');
     }
 	
 	if (type === 'remove_card_absolute') {
@@ -3226,9 +3648,12 @@ function applyRemoteAction(action) {
 		}
         
         if (card) {
+            card.faceUp = true;      // FIX: Ensure milled cards become visible
+            card.rotated = false;
+            card.loc = payload.dest; // FIX: Update location instantly
+            
             if (payload.dest === 'hand') {
                 // IMPORTANT: Put the card in the Hand list in memory
-                card.loc = 'hand';
                 state[targetOwner].hand.push(card);
                 renderHand(targetOwner); // Redraw the hand (as card backs)
             } else {
@@ -3266,6 +3691,8 @@ function setupSocketListeners() {
     socket.off('room_joined');
     socket.off('opponent_joined');
     socket.off('game_action');
+	socket.off('action_apply'); // <--- This was missing!
+    socket.off('receive_deck_ids'); // <--- This was missing!
     socket.off('error_msg');
 
     socket.on('room_created', (data) => {
@@ -3295,10 +3722,9 @@ function setupSocketListeners() {
                 opponent: { deck: state.opponent.deck, sideDeck: state.opponent.sideDeck, extraDeck: state.opponent.extraDeck }
             };
             socket.emit('sync_deck_ids', deckData);
-
-            // Host resets immediately (clears board), but DOES NOT DRAW yet.
-            // We removed the setTimeout. We wait for the Guest to trigger the draw via 'game_start_sync'.
-            startGame(false);
+            
+            // Just notify the Host, do NOT start the game yet!
+            alert("Opponent joined! Click 'Start Game' when you are ready.");
         }
     });
 
@@ -3320,7 +3746,6 @@ function setupSocketListeners() {
 		state.opponent.extraDeck = deckData.player.extraDeck.map(c => ({...c, owner: 'opponent', originalOwner: 'opponent'}));
 		updateCounts('player');
 		updateCounts('opponent');
-		startGame(); // NOW start
 		console.log('Deck IDs synced');
 	});
 	socket.on('action_apply', (action) => {
@@ -3614,3 +4039,82 @@ function executeAction(type, payload, isRemote = false) {
 		
     }
 }
+
+// --- EXCAVATE SYSTEM ---
+let excavatedCards = [];
+
+function startExcavate(owner, amount) {
+    const deck = state[owner].deck;
+    excavatedCards =[];
+    
+    // Physically pull them from the deck memory
+    for(let i=0; i<amount; i++) {
+        if (deck.length > 0) excavatedCards.push(deck.pop());
+    }
+    
+    if (excavatedCards.length === 0) return;
+    updateCounts(owner);
+
+    const modal = document.getElementById('custom-ui-modal');
+    const content = document.getElementById('custom-ui-content');
+    const imageContainer = document.getElementById('custom-ui-image');
+    
+    document.getElementById('custom-ui-title').innerText = `Excavate ${amount} - Choose 1 to Draw`;
+    
+    // Hide the left-side art panel to make room for the horizontal card spread
+    if (imageContainer) imageContainer.style.display = 'none'; 
+
+    let html = `<div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; padding: 10px;">`;
+    
+    excavatedCards.forEach((c, index) => {
+        // Fallback image logic
+        const typeKey = (c.type || "Phantom").toLowerCase();
+        let bg = defaultImages[typeKey] || defaultImages['phantom'];
+        if (c.image && c.image.trim() !== "") bg = c.image;
+        
+        // Inline styles create a mini-card button
+        html += `
+            <div style="cursor:pointer; width: 14vh; height: 20vh; border: 2px solid #9b59b6; border-radius: 6px; 
+                 background-size: cover; background-position: center; background-image: url('${bg}'); 
+                 position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition: transform 0.1s;" 
+                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
+                 onclick="resolveExcavate(${index}, '${owner}')">
+                <div style="position:absolute; bottom:0; background:rgba(0,0,0,0.8); width:100%; text-align:center; font-size:12px; padding:4px; font-weight:bold;">${c.name}</div>
+            </div>
+        `;
+    });
+    html += `</div><button class="custom-ui-btn custom-ui-cancel" onclick="cancelExcavate('${owner}')" style="margin-top: 10px;">Cancel (Send All to Bottom)</button>`;
+    
+    content.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+
+function resolveExcavate(selectedIndex, owner) {
+    // Take the chosen card out of the temporary array
+    const chosenCard = excavatedCards.splice(selectedIndex, 1)[0];
+    
+    // 1. Send chosen to Hand
+    chosenCard.loc = 'hand';
+    state[owner].hand.push(chosenCard);
+    renderHand(owner);
+    if (isMultiplayer) sendAction('mill', { owner, source: 'deck', dest: 'hand', cardId: chosenCard.id });
+
+    // 2. Send the rest to Bottom of Deck
+    excavatedCards.forEach(c => {
+        state[owner].deck.unshift(c); 
+        // We sync a move command so the opponent's count stays perfectly accurate
+        if (isMultiplayer) sendAction('move', { cardId: c.id, fromZone: 'field', toZone: `${owner}-deck`, toBottom: true });
+    });
+
+    cleanupExcavate();
+}
+
+function cancelExcavate(owner) {
+    excavatedCards.forEach(c => {
+        state[owner].deck.unshift(c);
+        if (isMultiplayer) sendAction('move', { cardId: c.id, fromZone: 'field', toZone: `${owner}-deck`, toBottom: true });
+    });
+    cleanupExcavate();
+}
+
+function cleanupExcavate(owner) { excavatedCards =[]; document.getElementById('custom-ui-modal').classList.add('hidden'); document.getElementById('custom-ui-image').style.display = 'block'; }

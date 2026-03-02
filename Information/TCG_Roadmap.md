@@ -2,61 +2,35 @@ My TCG Vibe Coding Road Map:
 
 
 Simulator Adjustments Wanted Easy:
-Direct Attack is not syncing for the opponent. (The Attack sees the Life Points go down. But the player being Attacked / not doing the action does not see the Life Points change).
-Also Direct Attacking does not turn off the Attack glow for the other player viewing the action.
-
-Pressing B on a Phantom that has Initiated attack, while the player is able to direct attack, should initiate the direct attack, with a second press of B confirming it.
-Pressing the B hotkey on the Phantom / Initiating a Direct Attack should Highlight the Attacking Phantom with the same highlight as a Phantom being Targeted for an Attack. To help visually denote the Direct Attack is coming.
-
-If a card Breaks in Battle, it still shows its stats and level while in the Discard Piles (in the After Life).
-
-Cards that are rotated or flipped when sent to the discard piles are not being synced properly for the opponent. The opponent sees them as still being rotated or flipped while in the Discard pile. (The player doing the action sees things correctly.)
 
 
-For some reason you cannot properly view and see the cards in the opponent’s discard piles. You should be able to open any of the opponent’s Discard Piles and see all the cards in them.
+Activate Ability Vibe Coding:
 
+Keyword Automations:
+
+Summon Binding should not show up as an Activatable Ability.
+
+Attack/Health/Stat Increase Abilities without a number are being parsed and show up as an Ability to activate. But they currently a lot of the time don’t do anything. They should just by default have a pop up to enter a prompt to increase the Attack/Health/Stat by the input amount.
+
+When a Phantom has the Equip Card keyword, it should function like this while in the hand.
+If Activated it plays to Spirt/Counter cards (like a Spirit Card would be played). It should have its level/SP set to 0. It should have its stats also set to 0.
+
+Stat Swap.
 
 
 
  
 Simulator Adjustments Wanted (Middling Difficulty):
 
-- / + hotkeys working on hover over various items to add or subtract from them. Level/AP/Tokens/Markers/Counters gain one and lose one if hotkey is pressed on them. Phantom Attack and Health gain 100 and lose 100 if hotkey is pressed on them.
-
-Make sure old decks load in updated versions of cards. 
-Currently saving a deck (in the deck builder) saves it as a .json file with all the card’s current info.
-So when they are loaded it is just loading cards based on the saved json.
-How exactly would be the best way to go about changing/fixing this? So updated cards are what is loaded in?
-(Though I do like being able to easily play with older card versions and letting people easily add custom cards to their deck. Though maybe the json file is too easy as a method for that and we just need a different way to play with customized cards).
-
-Start new game should be syncing for both players.
-
-When a card starts in a particular player’s deck, even if control shifts during the game to the other player, when that card leaves the field to basically anywhere, it should be going to the original player’s discard piles or deck.
-
-
-Deck Builder:
-Implement search working with A: Archetype Name being functional.
-Along with Set: # working to search by set.
-And Lvl: working for Level too.
-
-Update Deck Builder how to use section to include Archetype searches info.
-You can search by Archetype, Level, Attack, Health, and Set by typing any of those into the Search by with a : after.
-A: also works for Archetypes.
-Atk: – HP: – Lvl: – All also work.
-
-Have the current number of cards being displayed in the Deck Builder displayed somewhere.
-Looking like:
-Cards: (#)
-
 
 
 
  
 Simulator Adjustments Low Impact:
-
-The two Show hand buttons syncing the glow in multiplayer.
-The coin/dice/token buttons glow syncing in multiplayer.
+The two Show hand buttons syncing the visual glow in multiplayer.
+The coin/dice/token buttons having visual glow syncing in multiplayer.
 Activating your own set Counter/Spirit card should flip it up.
+
 Add custom card-back-artwork to the cards.
 
 Settings menu replaced with a Controls menu. (Which has a simple pop up that displays the hotkeys and controls).
@@ -70,18 +44,14 @@ Make the Card Info box draggable or context dependent on where it will open, suc
 
 
 Simulator Adjustments Unsure On Fixes:
-Hands are going out of sync in multiplayer still. (Needs play-testing to figure out the cause).
-Sometimes a card just doesn’t get synced quite right? (Needs play-testing to figure out the cause).
 
  
-Simulator Stage 2 Adjustments:
+Simulator Stage 3 Adjustments:
 
 
 Further Keyword Automations:
-[We will need a really well developed Design Doc for all of this. To structure how to get Keyword Abilities, Targeting, Ability Menus, and Specific Card Abilities / Code functioning in the best way possible and have the foundations built correctly from the beginning. Making it clear in the Design Doc what the whole eventual game play structure will look like and function, with specified long term goals. While explaining we are just building out the basic foundation for now.]
+[We will need a really well developed Design Doc for all of this. To structure how to get Keyword Abilities.]
 Find / put together a list of more keywords that can easily be automated.
-(Context lots of cards and their card text, alongside some keywords need to be standardized. And that during these early Alpha stages all sorts of cards or keywords are going to continue to be adjusted.)
-Figure out further logic for automating Keywords.
 
 
 In game pop up boxes / menus:
@@ -89,30 +59,18 @@ We will importantly need Diegetic pop up boxes in game, rather than a browser po
 
  
 Activating Abilities Function.
-So that certain Keywords and eventually full cards can be activated and have their Ability go off.
-Such as Stat Swap. Or Cycle. And so on.
-Have the Ability function have options to choose from when applicable.
-With a pop up similar to Master duel, where there are either tabs or a list of Abilities that can be clicked. With the list always including a Cancel option.
-Would it then be possible to set up something like targeted Damage? Using a similar system as how Attack and Battle functions?
-So it would go:
-Activate Ability. Target a Card. Initiate Ability.
-Targeted Deal ### Damage.
-The same thing could also work for Abilities that Targeted increase a Cards Attack or Health or Stats (both). Or decrease them.
-It would also be fantastic to set up Targeted Break through this as well.
-And Targeted Discard, Banish, and Destroy.
-And Targeted Break a face down card.
-And Targeted Break a Spirit/Counter.
-Abilities having a Counter cost and needing Counters to activate and automatically deducting them on resolution.
-Create and Clone automatically working on activation (either cloning the card or spawning the correct card at the correct stats).
-Ability Points / AP automatically being tracked with a visual display (that has a manual adjustment option). Visual display could be mirrored on the other side of the level when applicable.
-
-Could we also set up smart logic through this as well? Such as “Discard this card and Gain 1 SP.”
+Figuring out how to have Ability Activation which takes into account Costs.
+Such as “Discard this card and Gain 1 SP.”
 “Do this to do this” logic being dynamically achieved somehow?
 Like setting up the understanding for Discarding (or at least Discarding for cost) and the understanding for the positive (like draw a card or gain an SP) and just dynamically combine them.
 
-Activate button added to menus. E hotkey moved to Activate. Activate does the highlight.
-(Highlight stays as an option. Or maybe we change it to be Target or something instead? Nah, we still need a way to quickly communicate about cards, that aren’t related to a specific mechanic.)
-We need to work out how to most intuitively and seamlessly handle activating an ability, then targeting a card for it to be applied to.
+
+Targeted Break a Spirit/Counter.
+Abilities having a Counter cost and needing Counters to activate and automatically deducting them on resolution.
+Copy working on activation (cloning the activating card with its current stats).
+
+Ability Points / AP automatically being tracked with a visual display (that has a manual adjustment option).
+
 
 
  

@@ -200,7 +200,7 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(103, 58, 183, 0); }
 }
 
-.pulsing { animation: pulse-red 1.5s infinite; }
+.pulsing { animation: pulse-red 1s ease-out; }
 .pulsing-purple { animation: pulse-purple 1s ease-out; }
 
 /* === HANDS === */

@@ -377,6 +377,24 @@
     "health": 300
   },
   {
+    "id": "cloud_elemental",
+    "name": "Cloud Elemental",
+    "type": "Phantom",
+    "description": "",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Air",
+      "Water",
+      "Fire",
+      "Cloud"
+    ],
+    "image": "Images/Cards/Cloud Elemental.png",
+    "level": 7,
+    "attack": 500,
+    "health": 2000
+  },
+  {
     "id": "coded_injection",
     "name": "Coded Injection",
     "type": "Spirit",
@@ -413,7 +431,7 @@
     "id": "consuming_void",
     "name": "Consuming Void",
     "type": "Phantom",
-    "description": "Cards that are Attacked by this card are instead Bounced.<br><br>If a card loses Battle against this card it is Banished. <br><br>This card gains 100 Attack for every card in the Shadow Realm.",
+    "description": "Cards that are Attacked by this card are instead Bounced.<br><br>If a card loses Battle against this card it is Banished.<br><br>This card gains 100 Attack for every card in the Shadow Realm.",
     "archetype": "Shadow",
     "archetypes": [
       "Shadow",
@@ -665,7 +683,7 @@
     "id": "creation_dragon",
     "name": "Creation Dragon",
     "type": "Phantom",
-    "description": "On Summon: Create a 2-SP Copy of each of these Cards: Creation Genie, Creation Nymph, Creation Fairy, Creation Sprite.<br>And then set this Card's level to 2.<br><br>Gain the Stats of any card Unsummoned by this card's Ability.<br>Piercing. Berserker.<br><br>3-AP.<br>● AP: Unsummon one of the Phantoms listed on this card and then Search any Deck for a copy of it.<br>● AP: Unsummon one of the Phantoms listed on this card and is currently in your AL to then add it back to your hand.<br>● AP: Unsummon one of the Phantoms listed on this card and then Draw a card.",
+    "description": "Piercing. Berserker.<br><br>On Summon: Create a 1-SP 500/500 Phantom of each of these Cards:<br>Creation Genie, Creation Nymph, Creation Fairy, Creation Sprite.<br>And then set this Card's level to 6.<br><br>Gain the Stats of any card Unsummoned by this card's Ability.<br><br>3-AP.<br>● AP: Unsummon one of the Phantoms listed on this card and then Search any Deck for a copy of it.<br>● AP: Unsummon one of the Phantoms listed on this card and is currently in your AL to then add it back to your hand.<br>● AP: Unsummon one of the Phantoms listed on this card and then Draw a card.",
     "archetype": "Creation",
     "archetypes": [
       "Creation",
@@ -673,8 +691,8 @@
     ],
     "image": "Images/Cards/Creation Dragon.png",
     "level": 10,
-    "attack": 0,
-    "health": 0
+    "attack": 1000,
+    "health": 1000
   },
   {
     "id": "creation_fairy",
@@ -709,7 +727,7 @@
     "id": "creation_nymph",
     "name": "Creation Nymph",
     "type": "Phantom",
-    "description": "On Summon: Create a level 0 Creation Fairy Phantom. <br><br>1-AP per turn. <br>● AP: Negate an Attack. <br>● AP: Unsummon an Ally Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
+    "description": "On Summon: Create a level 0 Creation Fairy Phantom. <br><br>1-AP:<br>● AP: Negate an Attack. <br>● AP: Unsummon an Ally Creation Fairy and Search a copy of it. <br>● AP: Attack Directly.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -737,7 +755,7 @@
     "id": "creation_stream",
     "name": "Creation Stream",
     "type": "Counter",
-    "description": "Condition: A card is Created.<br><br>Put a Counter on this card for every card Created this Round. This card spends tokens for AP. <br>It can only activate each AP once per turn. <br><br>● 1-AP: Give a Creation Phantom 500 Attack. <br>● 2-AP: Excavate 1 card and if it is a Creation Phantom Draw it. <br>● 3-AP: Select a Creation Phantom and Search a copy of it. <br>● 4-AP: Give all face up Creation Cards Sturdy this turn.<br>● 5-AP: Select an Ally Creation Phantom and have them Activate their On Summon Creation Ability again.",
+    "description": "Condition: A card is Created.<br><br>After meeting its condition -- this card gains 1-AP for every card Created over the course of this turn.<br><br>0-AP:<br>● 1-AP: Give a Creation Phantom 500 Attack. <br>● 2-AP: Excavate 1 card and if it is a Creation Phantom Draw it. <br>● 3-AP: Select a Creation Phantom and Search a copy of it. <br>● 4-AP: Give all face up Creation Cards Sturdy this turn.<br>● 5-AP: Select an Ally Creation Phantom and have them Activate their On Summon Creation Ability again.",
     "archetype": "Creation",
     "archetypes": [
       "Creation"
@@ -1098,7 +1116,7 @@
     "id": "destruction_scavenger",
     "name": "Destruction Scavenger",
     "type": "Phantom",
-    "description": "Break Impowering: Draw.",
+    "description": "Destructive.<br>Break Impowering: Draw.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1112,7 +1130,7 @@
     "id": "destruction_stalker",
     "name": "Destruction Stalker",
     "type": "Phantom",
-    "description": "Breaker. Destructive. Break Impowering: Your opponent picks a card in their hand to Break.",
+    "description": "Breaker. Destructive.<br>Break Impowering: Your opponent picks a card in their hand to Break.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1141,7 +1159,7 @@
     "id": "destruction_viper",
     "name": "Destruction Viper",
     "type": "Phantom",
-    "description": "Breaker. Destructive. Break Impowering: Deal 200 damage to the opponent for every card in Oblivion.",
+    "description": "Breaker. Destructive.<br>Break Impowering: Deal 200 damage to the opponent for every card in Oblivion.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1155,7 +1173,7 @@
     "id": "destruction_vulture",
     "name": "Destruction Vulture",
     "type": "Phantom",
-    "description": "Break Impowering: Targeted Destroy a card in the AL. <br>AL Ability: If this card’s Break Impowering Destroyed a card, you can Destroy this card and gain 1 SP.",
+    "description": "Destructive.<br><br>Break Impowering: Targeted Destroy a card in the AL. <br><br>AL Ability: <br>If this card’s Break Impowering Destroyed a card, you can Destroy this card and gain 1 SP.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -1288,7 +1306,7 @@
     "id": "elemental_totem",
     "name": "Elemental Totem",
     "type": "Phantom",
-    "description": "Select one of the Four Elements. <br>This card gains that Archetype Branch.<br><br>Other cards with the same Architype as this Card’s Archetype-Branches gain 500 attack.<br><br>Once per turn you can change this card's Archetype Branch.",
+    "description": "Select one of the Four Elements. <br>This card gains that Archetype Branch.<br><br>Other cards with the same Architype as this Card’s Archetype-Branches gain 500 attack.<br><br>Once per your turn you can change this card's Archetype Branch.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
@@ -1388,7 +1406,7 @@
     "id": "four_elements_master",
     "name": "Four Elements Master",
     "type": "Phantom",
-    "description": "You can activate each of these Abilities Once per duel:<br>● Targeted Bounce a card.<br>● Flip a card face down for the rest of the turn.<br>● If an Ability would Break this card Negate that Ability.<br>● Targeted Deal 1000 Damage.<br><br>If this card Breaks place it onto the bottom of the deck.",
+    "description": "You can activate each of these Abilities Once per duel:<br>● Targeted Bounce a card.<br>● Flip a card face down for the rest of the turn.<br>● Quick: If an Ability would Break this card Negate that Ability.<br>● Targeted Deal 1000 Damage.<br><br>If this card Breaks place it onto the bottom of the deck.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental",
@@ -1423,6 +1441,24 @@
       "Standard"
     ],
     "image": "Images/Cards/Gracious Deal.png"
+  },
+  {
+    "id": "gravity_elemental",
+    "name": "Gravity Elemental",
+    "type": "Phantom",
+    "description": "1-AP:<br>● AP: When a card would flip up, Flip it back down for the rest of the turn.<br>● AP: When an Enemy Phantom declares an Attack, change it to defense position.<br><br><br>Field Ability:<br>When an Enemy Phantom declares an Attack, you can Attack Redirect to a Phantom you control.<br>This card can Attack Directly.<br><br><br>Balance Ability:<br>Taunter.<br>This card takes 500 less Damage from Battle declared against it.",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Air",
+      "Earth",
+      "Fire",
+      "Gravity"
+    ],
+    "image": "Images/Cards/Gravity Elemental.png",
+    "level": 8,
+    "attack": 1500,
+    "health": 2000
   },
   {
     "id": "greed_pacer",
@@ -1472,7 +1508,7 @@
     "id": "happy_to_be_alive",
     "name": "Happy To Be Alive",
     "type": "Counter",
-    "description": "Whenever a Life card is taken out of the AL, add a counter to this card. <br><br>3-AP per turn. <br>● AP: Spend 1 Counter and Add a level 3 or lower Life card from the AL to the hand. <br>● AP: Spend 2 Counters and Draw a card. <br>● AP: Spend 3 counters and Search the Side deck for a Life Phantom.",
+    "description": "Whenever a Life card is taken out of the AL, add a counter to this card. <br><br>3-AP:<br>● AP: Spend 1 Counter and Add a level 3 or lower Life card from the AL to the hand. <br>● AP: Spend 2 Counters and Draw a card. <br>● AP: Spend 3 counters and Search the Side deck for a Life Phantom.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -1595,6 +1631,17 @@
       "Life"
     ],
     "image": "Images/Cards/Imbuing Life.png"
+  },
+  {
+    "id": "implosion",
+    "name": "Implosion",
+    "type": "Counter",
+    "description": "Target a Phantom and reduce its Attack by its current Health.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Implosion.png"
   },
   {
     "id": "imposed_deduction",
@@ -1854,7 +1901,7 @@
     "id": "memories_of_four_elements",
     "name": "Memories Of Four Elements",
     "type": "Spirit",
-    "description": "Condition: Have at least one Phantom Card for each of the Four Elements in your AL. <br><br>Select 1-4 Elemental Phantom cards in your AL of 4 or less SP.<br><br>Create 4 Token Copies of the selected cards with 0-SP and 500 Stats.",
+    "description": "Condition: Have at least one Phantom Card for each of the Four Elements in your AL. <br><br>Select 1-4 Elemental Phantom cards in your AL of 4 or less SP.<br><br>Create 4 Copies of the selected cards with 0-SP and 500 Stats.",
     "archetype": "Elemental",
     "archetypes": [
       "Elemental"
@@ -2137,6 +2184,24 @@
     "image": "Images/Cards/Place Of Remembrance.png"
   },
   {
+    "id": "plasma_elemental",
+    "name": "Plasma Elemental",
+    "type": "Phantom",
+    "description": "",
+    "archetype": "Elemental",
+    "archetypes": [
+      "Elemental",
+      "Water",
+      "Earth",
+      "Fire",
+      "Plasma"
+    ],
+    "image": "Images/Cards/Plasma Elemental.png",
+    "level": 9,
+    "attack": 2000,
+    "health": 1500
+  },
+  {
     "id": "preparation_deduction",
     "name": "Preparation Deduction",
     "type": "Spirit",
@@ -2184,7 +2249,7 @@
     "id": "psychopomp_of_the_dead",
     "name": "Psychopomp Of The Dead",
     "type": "Phantom",
-    "description": "On Summon: You can select a Level 4 or lower Death card from your AL to Special Resurrect.<br>Give it Summon Binding.<br><br>Once per round: You can select a card in your opponent’s AL to Banish. <br><br>When this card Breaks a card it is sent to the bottom of the owner’s deck.<br>If this card Breaks by a Card Ability that card is Discarded and After Life Sealed.<br><br>AL Ability: 1-AP per duel. <br>● AP: After Life Seal two pairs of cards in your AL up to four sets -- and then receive SP for each pair that is After Life Sealed. <br>● AP: After Life Seal 8 Phantoms in your AL then Resurrect this card.",
+    "description": "On Summon: <br>You can select a Level 4 or lower Death card from your AL to Special Resurrect.<br>Give it Summon Binding.<br><br>Once per round: <br>You can select a card in your opponent’s AL to Banish. <br><br>When this Phantom Breaks a card it is sent to the bottom of the owner’s deck.<br>If this card Breaks by a Card's Ability -- that card is Discarded and then After Life Sealed.<br><br>AL Ability: <br>You can activate one of these Abilities per duel.<br><br>● After Life Seal two pairs of cards in your AL up to four sets -- and then receive SP for each pair that is After Life Sealed. <br>● After Life Seal 8 Phantoms in your AL then Resurrect this card.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -2255,6 +2320,17 @@
     "image": "Images/Cards/Reincarnation.png"
   },
   {
+    "id": "resurection",
+    "name": "Resurection",
+    "type": "Spirit",
+    "description": "Select a Phantom in your After Life to Resurect.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Resurection.png"
+  },
+  {
     "id": "return_from_shadow",
     "name": "Return From Shadow",
     "type": "Spirit",
@@ -2302,7 +2378,7 @@
     "id": "salient_sentry",
     "name": "Salient Sentry",
     "type": "Phantom",
-    "description": "Cycle. <br>1-AP Per Round. <br>● AP: Targeted Deal 1000 Damage.<br>● AP: Targeted Break a Facedown Card. <br>● AP: Lose 2 levels and gain 2 AP.",
+    "description": "Cycle. <br>1-AP Per Round:<br>● AP: Targeted Deal 1000 Damage.<br>● AP: Targeted Break a Facedown Card. <br>● AP: Lose 2 levels and gain 2 AP.",
     "archetype": "Light",
     "archetypes": [
       "Light"
@@ -2346,7 +2422,7 @@
     "id": "satiating_specter",
     "name": "Satiating Specter",
     "type": "Phantom",
-    "description": "Discard Impowering: Gain 1-SP<br><br>1-AP:<br>● AP: Cost: Discard a card.<br>Draw.<br><br>● AP: Cost: Mill a card<br>Give a Death Phantom 500 Health.<br><br>● AP: Cost: After Life Seal a card in your AL.<br>Give a Death Phantom 500 Attack.",
+    "description": "Discard Impowering: Gain 1-SP.<br><br>1-AP:<br>● AP: Cost: Discard a card.<br>Draw.<br><br>● AP: Cost: Mill a card.<br>Give a Death Phantom 500 Health.<br><br>● AP: Cost: After Life Seal a card in your AL.<br>Give a Death Phantom 500 Attack.",
     "archetype": "Death",
     "archetypes": [
       "Death",
@@ -2736,7 +2812,7 @@
     "id": "summoner’s_draw",
     "name": "Summoner’s Draw",
     "type": "Spirit",
-    "description": "Pay 4-SP and draw 2 cards.<br>Once per turn.",
+    "description": "Pay 2-SP and draw 2 cards.<br><br>Every additional copy of Summoner's Draw you play costs 1 more SP.<br><br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -2990,7 +3066,7 @@
     "id": "will_from_beyond",
     "name": "Will From Beyond",
     "type": "Spirit",
-    "description": "Select a Phantom from the After Life and Resurrect it for 1-turn at summoning cost. <br>At the end of the turn, if it is still on the field, After Life Seal it.",
+    "description": "Select a Phantom from the After Life and Resurrect it at half it's SP cost for 1-turn.<br>It gains Summon Binding.<br>At the end of the turn, After Life Seal it.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
