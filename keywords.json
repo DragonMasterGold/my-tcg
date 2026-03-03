@@ -60,6 +60,7 @@
   "Target": "This card Targets a Card for the ability to be applied to.",
   "Targeted": "This card Targets a Card for the ability to be applied to.",
   "Targeted Dodge Roll": "Can be activated in response to this card or it’s Card Slot being Targeted. This card must move to an available adjacent card Slot for this Ability to be activated. Dodge the Targeted Action.",
+  "Targeted Reveal": "Target a card on the field to Reveal.",
   "Taunter": "Other Phantoms on the field without Taunter cannot be Targeted for an Attack while this card is Face up on the field.",
   "Threat": "The Counter can only be turned up at the start of the turn to become active.<br>Its Condition being met has the card's Ability automatically go off.<br>If its Condition is not met by the end of the turn it was activated this card is sent to the AL.",
   "Token": "A card treated as a Phantom.<br>If details are not given for a token, it is to be treated as a Level 0 Phantom without an Ability, 0-Stats, and no Archetype.",
