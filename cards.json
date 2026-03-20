@@ -922,7 +922,7 @@
     "id": "creation_mage",
     "name": "Creation Mage",
     "type": "Phantom",
-    "description": "3-AP:<br>AP: Spend 1-SP and Draw a card.<br><br>AP: Spend 1-SP and Create a 0-SP Creation Sprite.<br><br>AP: Spend 1-SP and Targeted Deal 500 Damage.",
+    "description": "3-AP:<br>AP: Spend 1-SP and then Draw a card.<br><br>AP: Spend 1-SP and then Create a 1-SP Creation Sprite.<br><br>AP: Spend 1-SP and then Targeted Deal 500 Damage.",
     "archetype": "Creation",
     "archetypes": [
       "Creation",
@@ -1067,7 +1067,7 @@
     "id": "curious_spright",
     "name": "Curious Spright",
     "type": "Phantom",
-    "description": "Put a Counter on this card for every 1000 LP gained.<br><br>Excavate 1 card for every Counter on this card.<br>You may Draw 1 Excavated Life Card.",
+    "description": "On Summon: Put a Counter on this card.<br><br>Gain a Counter on this card for every 1000 LP gained.<br><br>Adaptation:<br>● Gain 500 LP.<br>Gain an Addition 500 LP for every Counter on this card.<br><br>● Excavate 1 card for every Counter on this card.<br>You may Draw 1 Excavated Life Card.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -1140,7 +1140,7 @@
     "id": "death_&_rebirth",
     "name": "Death & Rebirth",
     "type": "Spirit",
-    "description": "Break a selected Ally Phantom card. <br>During the start of the same phase of the next turn, Special Resurrect it from the After Life.",
+    "description": "Break a selected Ally Phantom card.<br>At the start of your next turn, Special Resurrect it from the After Life.<br>Give it Summon Binding.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -1260,7 +1260,7 @@
     "id": "defending_growth",
     "name": "Defending Growth",
     "type": "Counter",
-    "description": "When a level 1 Life Phantom is Targeted for an Attack, Negate the Attack and gain LP equal to the Attacking Phantom.",
+    "description": "When a level 1 Life Phantom is Targeted for an Attack, Negate the Attack and gain LP equal to the Attacking Phantom's Attack.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -1809,7 +1809,7 @@
     "id": "healing_tears",
     "name": "Healing Tears",
     "type": "Counter",
-    "description": "When a Life Phantom would Break, this card can be activated before the damage step. The Damage dealt for the rest of the turn is instead turned into LP that is added to the Player’s LP total.",
+    "description": "Condition: A Life Phantom would Break from Battle.<br><br>The Life Phantom is Bounced.<br>Summoner Damage taken for the rest of the turn is instead turned into LP.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -1994,7 +1994,7 @@
     "id": "land_of_radiance",
     "name": "Land Of Radiance",
     "type": "Environment",
-    "description": "Both Players in the Environment Range Play with their hands Revealed.<br>Once per turn when an Ally Light Phantom leaves the field, Reveal the top card of your Deck.",
+    "description": "Players in the Environment Range Play with their hands Revealed.<br>Once per turn when an Ally Light Phantom leaves the field, Reveal the top card of your Deck.",
     "archetype": "Light",
     "archetypes": [
       "Light"
@@ -2321,7 +2321,7 @@
     "id": "my_body_your_shield",
     "name": "My Body Your Shield",
     "type": "Counter",
-    "description": "Condition: Your Phantoms must only be Level 1 or lower Life Phantoms. <br>For this turn, the first Attack directed at each of these Ally Life Phantoms are Redirect to Direct Attacks.",
+    "description": "For the rest of this turn -- the first Attack directed at a Level 2 or lower Life Phantom is Redirected to the owning Player.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -2421,8 +2421,8 @@
   {
     "id": "oblivion_gate",
     "name": "Oblivion Gate",
-    "type": "Environment",
-    "description": "Add a counter to this card every time a card is Destroyed.<br><br>Once per Round You can Target a Phantom in the Environment range, remove two Counters from this card for every SP of the Targeted Phantom, then Targeted Break that card.<br><br>This Ability only takes one Counter when Targeting an Ally Destruction Phantom.<br>If this Ability Breaks an Ally Destruction Phantom Draw a card.",
+    "type": "Spirit",
+    "description": "Add a counter to this card every time a card is Destroyed.<br><br>Once per Round:<br>You can Target a Phantom, remove two Counters from this card for every SP of the Targeted Phantom, and then Targeted Break that card.<br><br>This Ability only takes one Counter when Targeting an Ally Destruction Phantom.<br>If this Ability Breaks an Ally Destruction Phantom Draw a card.",
     "archetype": "Destruction",
     "archetypes": [
       "Destruction"
@@ -2537,7 +2537,7 @@
     "id": "preparation_deduction",
     "name": "Preparation Deduction",
     "type": "Spirit",
-    "description": "Declare 1 card name, if that card is in your opponent's hand, they must discard that card and any other copies in their hand. <br>If not, you discard 1 card from your hand or field.",
+    "description": "Declare 1 card name, if that card is in your opponent's hand, they must discard that card and any other copies in their hand.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -2623,7 +2623,7 @@
     "id": "re_life",
     "name": "Re-Life",
     "type": "Counter",
-    "description": "If a Life Phantom would Break, instead return it to the owners hand. Half the Phantom’s SP are given to the Player on their turn.",
+    "description": "If a Life Phantom would Break, instead return it to the owners hand.<br>Special Summon a Life Phantom of equal or less SP as the returned Phantom.<br>Give it Summon Binding.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -2782,7 +2782,7 @@
     "id": "second_chance!",
     "name": "Second Chance!",
     "type": "Spirit",
-    "description": "Target all Life cards in both Players’ After Life, shuffle them all back into the owner’s decks.",
+    "description": "Shuffle all Life Phantoms in the AL into the Deck and then Draw.",
     "archetype": "Life",
     "archetypes": [
       "Life"
@@ -3132,7 +3132,7 @@
     "id": "spy_vs._spy",
     "name": "Spy Vs. Spy",
     "type": "Spirit",
-    "description": "Both Players choose 5 cards from their deck, each Player selects 1 of their opponent’s chosen cards and that card is then added to the respective Player’s hand. <br><br>The opponent shuffles their cards back. <br>The activating Player Oblivion Seals their remaining cards. <br>You cannot Attack the turn this Ability is activated. <br>Once Per Game.",
+    "description": "Both Players choose 5 cards with different names from their deck, each Player selects 1 of their opponent’s chosen cards and that card is then added to the respective Player’s hand.<br><br>The opponent shuffles their cards back.<br>The activating Player After Life Seals their cards.<br><br>Once per turn.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -3380,7 +3380,7 @@
     "id": "trolly_problem",
     "name": "Trolly Problem",
     "type": "Spirit",
-    "description": "Choose 5 cards from your deck, your opponent chooses which card is added to your hand. <br>The other 4 cards are Oblivion Sealed.<br><br>On your opponent’s next turn, this Ability activates for them, except 2 Cards must be selected to be added to their hand. <br><br>Once Per Game.",
+    "description": "Choose 5 cards with different names from your deck, your opponent chooses one of those cards which is then added to your hand. <br>The other 4 cards are After Life Sealed.<br><br>This card is then added to the Opponent's Hand.<br><br>Every time this card's Ability is successfully activated, the number of card's selected from the Deck -- and Selected by the opponent, increases by one.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -3472,7 +3472,7 @@
     "id": "will_from_beyond",
     "name": "Will From Beyond",
     "type": "Spirit",
-    "description": "Select a Phantom from the After Life and Resurrect it at half it's SP cost for 1-turn.<br>It gains Summon Binding.<br>At the end of the turn, After Life Seal it.",
+    "description": "Select a Phantom from your AL and Resurrect it at half it's SP cost for 1-turn.<br><br>Negate its Abilities.<br>It gains Summon Binding.<br><br>At the end of the turn, After Life Seal it.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
