@@ -520,9 +520,9 @@ input[type=number] {
     z-index: 12;
 }
 
-.token-counter { background: #4caf50; }
-.marker-counter { background: #2196f3; }
-.turncounter-counter { background: #9c27b0; }
+.token-counter { background: #2196f3; }
+.marker-counter { background: #9c27b0; }
+.turncounter-counter { background: #4caf50; }
 
 
 
@@ -596,15 +596,23 @@ input[type=number] {
     font-size: 1.5vh;
 }
 
-.token-counter { background: #4caf50; }
-.marker-counter { background: #2196f3; }
-.turncounter-counter { background: #9c27b0; }
+
 
 /* Counter position for rotated cards (Centered) */
-.card.rotated .counter-bubble {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
+/* FORCE UPRIGHT: When a card is rotated, counter-rotate the bubbles/text so they stay straight */
+.card.rotated .counter-base, 
+.card.rotated .counter-bubble,
+.card.rotated .ap-counter {
+    transform: translate(-50%, -50%) rotate(-90deg) !important; 
+}
+
+/* Special positioning for AP Counter when rotated (moves it to a better corner) */
+.card.rotated .ap-counter {
+    top: auto !important;
+    bottom: 85px !important;
+    left: 5px !important;
+    right: auto !important;
+    transform: rotate(-90deg) !important; /* No translate needed for AP as it's corner-positioned */
 }
 
 /* Zoomed View Scaling */

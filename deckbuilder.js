@@ -317,7 +317,7 @@ function getCardCount(cardId) {
 function addCardToDeck(card) {
     if (getCardCount(card.id) >= 3) return;
 
-    const limit = (currentDeckView === 'main') ? 50 : (currentDeckView === 'side' ? 15 : 5);
+    const limit = (currentDeckView === 'main') ? 50 : (currentDeckView === 'side' ? 20 : 10);
     
     // FIX: Removed alert. If full, we just exit silently.
     if (currentDeck[currentDeckView].length >= limit) {

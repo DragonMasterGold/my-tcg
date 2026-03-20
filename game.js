@@ -16,6 +16,17 @@ function toggleAutoDraw() {
     }
 }
 
+function checkAutoDraw() {
+    // Only the host triggers this to prevent double-firing events
+    if (isMultiplayer && myRole !== 'host') return;
+    
+    // Trigger in the middle of the round (Transitioning from Odd -> Even)
+    // globalTurn has just incremented. So if globalTurn is Even (2, 4, 6), we just finished an Odd turn.
+    if (autoDraw && globalTurn % 2 === 0) {
+        setTimeout(() => drawPhase(), 800);
+    }
+}
+
 async function loadCardDatabase() {
     try {
         // Load Cards
@@ -138,6 +149,9 @@ function setupListeners() {
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.ctx-menu')) hideCtx();
         if (e.target.classList.contains('modal')) closeAllModals();
+        
+        // FIX: Add this specific check for the Ability Menu background
+        if (e.target.id === 'custom-ui-modal') cancelAbility();
     });
 
     const zones = document.querySelectorAll('.zone, .hand-area');
@@ -341,7 +355,8 @@ function handleKeys(e) {
                 } 
                 // Step 2 Alternative: Initiate Direct Attack
                 else if (card.owner === 'player' && card.id === battleState.attackerId) {
-                    const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom');
+                    // FIX: Strict check for Face-Up phantoms that are actually on the field
+                    const oppPhantoms = state.opponent.field.filter(c => c.type === 'Phantom' && c.loc === 'field');
                     if (oppPhantoms.length > 0) {
                         alert("Cannot Direct Attack while opponent has Phantoms!");
                         return;
@@ -578,7 +593,12 @@ function startGame(isRemote = false) {
     
     // --- FIRST OR SECOND LOGIC ---
     if (!isRemote) {
-        hostGoesFirst = confirm("Do you want to go First?\n(OK = First, Cancel = Second)");
+        const userWantsFirst = confirm("Do you want to go First?\n(OK = First, Cancel = Second)");
+        
+        // If I am Host: userWantsFirst=true -> hostGoesFirst=true
+        // If I am Guest: userWantsFirst=true -> hostGoesFirst=false (Guest goes first)
+        hostGoesFirst = (myRole === 'guest') ? !userWantsFirst : userWantsFirst;
+
         if (isMultiplayer) sendAction('set_first', { hostGoesFirst });
     }
 
@@ -788,7 +808,7 @@ function createCardEl(data) {
     }
 
     // AP counter separately (Top Right)
-    if (data.ap > 0) {
+    if (data.ap > 0 && data.faceUp) {
         const apCounter = document.createElement('div');
         apCounter.className = 'counter-base ap-counter';
         apCounter.innerText = data.ap;
@@ -1259,8 +1279,23 @@ function endTurn() {
     ['player', 'opponent'].forEach(p => {
         state[p].field.forEach(c => {
             if (c.maxAP !== undefined) {
-                c.ap = c.maxAP; // Replenish the actual tracker
-                refreshCard(c); // Refresh visuals
+                const desc = (c.description || "").toLowerCase();
+                const isSpiritOrCounter = c.type === 'Spirit' || c.type === 'Counter';
+                const isPerRound = desc.includes('per round');
+                const isPerSummon = desc.includes('per summon');
+
+                let shouldReset = true;
+                if (isSpiritOrCounter) shouldReset = false;
+                
+                // If globalTurn is Even right now, it means Player 1 just finished Turn 1. The Round is NOT over!
+                if (isPerRound && (globalTurn % 2 === 0)) shouldReset = false; 
+                
+                if (isPerSummon) shouldReset = false;
+
+                if (shouldReset) {
+                    c.ap = c.maxAP; 
+                    refreshCard(c);
+                }
             }
         });
     });
@@ -1271,13 +1306,7 @@ function endTurn() {
     }
 
     // --- AUTO DRAW LOGIC ---
-    // The middle of the round is always when Turn 1 ends and Turn 2 begins (Even number)
-    if (autoDraw && globalTurn % 2 === 0) {
-        // Only the host forces the global draw to prevent duplicate sync loops!
-        if (!isMultiplayer || myRole === 'host') {
-            setTimeout(() => drawPhase(), 50);
-        }
-    }
+    checkAutoDraw();
 }
 
 function triggerPulse(selector) {
@@ -1453,25 +1482,38 @@ function analyzeCardAbilities(card) {
         // 4. Immunity Blocker (If it's just describing an immunity, stop parsing it!)
         if (/Immune/i.test(displayText)) return;
 
-        // 5. EXTRACT AP COST (Only AP remains a hardcoded 'cost', everything else becomes a sequence step)
+        // 5. EXTRACT AP COST & SP COST
         let cost = null;
-        if (/●\s*AP/i.test(chunk)) cost = { use_ap: true };
+        const apCostMatch = chunk.match(/●\s*(\d+)[-\s]*AP/i);
+        if (/●\s*AP/i.test(chunk)) {
+            cost = { use_ap: true, val: apCostMatch ? parseInt(apCostMatch[1]) : 1 };
+        }
 
-        // Instead of stripping costs into alerts, we just strip the word "Cost:" so the sequence engine reads the action!
-        let effectText = displayText.replace(/Cost:\s*/gi, '').replace(/●\s*AP:?/i, '').trim();
+        let effectText = displayText;
+        if (/Cost:\s*Pay (\d+)[-\s]*SP/i.test(effectText)) { 
+            cost = { ...cost, type: 'pay_sp', val: parseInt(effectText.match(/Pay (\d+)[-\s]*SP/i)[1]) }; 
+            effectText = effectText.replace(/Cost:\s*Pay \d+[-\s]*SP(?: and|,| to)?\.?/i, ''); 
+        }
+
+        effectText = effectText.replace(/Cost:\s*/gi, '').replace(/●\s*(\d+[-\s]*)?AP:?/i, '').trim();
 
         if (!effectText) return;
 
         // --- HELPER TO PARSE INDIVIDUAL STEPS ---
         const parseStep = (str) => {
-            let t = null; let rTarget = false; let v = null; let e = null;
+            let t = null; let rTarget = false; let v = null; let e = null; let kw = null;
+            str = str.replace(/<br\s*\/?>/gi, ' ').trim();
 
-            // SP / AP / Level Modifiers
-            if (/(?:Gain|Add|Get)\s*(\d+)[-\s]*SP/i.test(str)) { t = 'sp_change'; v = parseInt(str.match(/(?:Gain|Add|Get)\s*(\d+)[-\s]*SP/i)[1]); }
-            else if (/(?:Lose|Subtract)\s*(\d+)[-\s]*SP/i.test(str)) { t = 'sp_change'; v = -parseInt(str.match(/(?:Lose|Subtract)\s*(\d+)[-\s]*SP/i)[1]); }
-            else if (/(?:Gain|Add|Get)\s*(\d+)\s*AP/i.test(str)) { t = 'ap_change'; v = parseInt(str.match(/(?:Gain|Add|Get)\s*(\d+)\s*AP/i)[1]); }
-            else if (/(?:Lose|Decrease|Reduce|Subtract)\s*(\d+)\s*Levels?/i.test(str)) { t = 'level_change'; v = -parseInt(str.match(/(?:Lose|Decrease|Reduce|Subtract)\s*(\d+)\s*Levels?/i)[1]); }
-            else if (/(?:Gain|Add|Increase)\s*(\d+)\s*Levels?/i.test(str)) { t = 'level_change'; v = parseInt(str.match(/(?:Gain|Add|Increase)\s*(\d+)\s*Levels?/i)[1]); }
+            // Player SP vs Card Level (Genie & Shifter fix)
+            if (/(?:Gain|Add|Get)\s*(\d+)[-\s]*SP(?!\s*Copy)/i.test(str)) { t = 'sp_change'; v = parseInt(str.match(/(?:Gain|Add|Get)\s*(\d+)[-\s]*SP/i)[1]); }
+            else if (/(?:Lose|Subtract|Pay)\s*(\d+)[-\s]*SP(?!\s*Copy)/i.test(str) && !/this card/i.test(str)) { t = 'sp_change'; v = -parseInt(str.match(/(?:Lose|Subtract|Pay)\s*(\d+)[-\s]*SP/i)[1]); }
+            
+            else if (/(?:Lose|Decrease|Reduce|Subtract)\s*(?:this card's\s*)?(?:SP(?: value)?|Levels?)(?:\s*by)?\s*(\d+)/i.test(str)) { t = 'level_change'; v = -parseInt(str.match(/(?:Lose|Decrease|Reduce|Subtract)\s*(?:this card's\s*)?(?:SP(?: value)?|Levels?)(?:\s*by)?\s*(\d+)/i)[1]); }
+            else if (/(?:Gain|Add|Increase)\s*(?:this card's\s*)?(?:SP(?: value)?|Levels?)(?:\s*by)?\s*(\d+)/i.test(str)) { t = 'level_change'; v = parseInt(str.match(/(?:Gain|Add|Increase)\s*(?:this card's\s*)?(?:SP(?: value)?|Levels?)(?:\s*by)?\s*(\d+)/i)[1]); }
+            else if (/Set this(?: card's)?(?: SP| Level) to (\d+)/i.test(str)) { t = 'set_self_level'; v = parseInt(str.match(/to\s*(\d+)/i)[1]); }
+
+            // Unsummon (Forgiving Regex)
+            else if (/\bUnsummon\b/i.test(str)) { t = 'unsummon_target'; rTarget = true; }
 
             // Standard Actions
             else if (/Targeted Break a (?:face down|facedown)/i.test(str)) { t = 'break_facedown'; rTarget = true; }
@@ -1555,20 +1597,39 @@ function analyzeCardAbilities(card) {
             else if (/Flip a (?:card )?face down/i.test(str)) { t = 'flip_down'; rTarget = true; }
             else if (/\bCycle\b/i.test(str)) { t = 'cycle'; }
             else if (/Equip Card/i.test(str)) { t = 'equip_card'; }
-            else if (/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i.test(str)) { 
+            else if (/Create\s+(?:a|two|three|four|\d+)/i.test(str)) { 
                 t = 'spawn'; 
-                const match = str.match(/Create (?:a|\d+)(?: level[- ]?\d+)?\s+([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s*$|\.)/i);
-                if (match) { e = match[1].trim(); if (e.toLowerCase().includes("copy")) t = null; }
-                // Safely extract the Level or SP number to override base stats
+                let keywordToApply = null;
+                
+                // Clip off "with Rush" or "with Summon Binding"
+                const kwMatch = str.match(/with\s+([\w\s]+?)(?:\s*$|\.|\,)/i);
+                if (kwMatch) keywordToApply = kwMatch[1].trim();
+
+                const match = str.match(/Create\s+(?:a|two|three|four|\d+)\s+(?:level[-\s]*\d+\s+|\d+[-\s]*SP\s+)?(?:[\d]+\/[\d]+\s+)?([\w\s'-]+?)(?:\s+Phantoms?|\s+Tokens?|\s+with\s+[\w\s]+|\s*$|\.|\,)/i);
+                
+                if (match) { 
+                    e = match[1].trim(); 
+                    // Clean the "0-SP" or "Level 1" out of the card name so the database finds it!
+                    e = e.replace(/^(?:\d+[-\s]*SP|Level[-\s]*\d+)\s+/i, '');
+                    if (e.toLowerCase().includes("copy")) t = null; 
+                }
+                
+                if (/two/i.test(str)) t = 'spawn_2';
+                else if (/three/i.test(str)) t = 'spawn_3';
+                else if (/four/i.test(str)) t = 'spawn_4';
+                
                 const spMatch = str.match(/(\d+)[-\s]*SP|Level[-\s]*(\d+)/i);
                 if (spMatch) v = parseInt(spMatch[1] !== undefined ? spMatch[1] : spMatch[2]);
+                
+                // Return the extra 'keyword' property so the executor can apply it!
+                return t ? { type: t, reqTarget: rTarget, value: v, extra: e, keyword: keywordToApply } : null;
             }
 
             return t ? { type: t, reqTarget: rTarget, value: v, extra: e } : null;
         };
 
         // --- BRANCHING & SEQUENCING ---
-        let preppedText = effectText.replace(/\b\s+and\s+(Gain|Lose|Draw|Deal|Destroy|Break|Discard|Banish|Mill)/gi, ' and then $1');
+        let preppedText = effectText.replace(/\b\s+and\s+(Gain|Lose|Draw|Deal|Destroy|Break|Discard|Banish|Mill|Search|Unsummon|Create|Set|Reduce|Decrease|Increase)\b/gi, ' and then $1');
 		const orBranches = preppedText.split(/\b\s+or\s+\b/i);
 
         orBranches.forEach((branchStr, branchIdx) => {
@@ -1730,28 +1791,52 @@ function executeAbility() {
 
     if (!ability.sequence) { cancelAbility(); return; }
 
-    // --- 2. STATE MACHINE EXECUTION ---
+    // --- STATE MACHINE EXECUTION ---
     while (abilityState.currentStepIndex < ability.sequence.length) {
         const step = ability.sequence[abilityState.currentStepIndex];
 
-        // PAUSE RULE: If this step requires a target, and we haven't selected one yet, pause and wait!
+        // 1. PAUSE FOR TARGET
         if (step.reqTarget && !abilityState.targetId) {
             abilityState.step = 'targeting';
             refreshCard(sourceCard);
             if (isMultiplayer) sendAction('ability_sync', abilityState);
-            return; // Exit function. Pressing 'V' again resumes from this exact spot!
+            return; 
         }
 
-        // --- PROCESS AP COST (Only once, and ONLY after we confirmed the target!) ---
-        if (ability.cost && ability.cost.use_ap && !abilityState.apPaid) {
-            if (!sourceCard.ap || sourceCard.ap <= 0) {
-                alert("This card has no more AP available!");
-                cancelAbility(); return;
+        // 2. PROCESS AP & SP COST (Only runs once per sequence, right after targeting is resolved!)
+        if (abilityState.currentStepIndex === 0 && !abilityState.apPaid) {
+            if (ability.cost && ability.cost.use_ap) {
+                const costVal = ability.cost.val || 1;
+                if (!sourceCard.ap || sourceCard.ap < costVal) {
+                    alert(`Need ${costVal} AP!`);
+                    cancelAbility(); return;
+                }
+                sourceCard.ap -= costVal; 
+                refreshCard(sourceCard);
+                if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'ap', value: sourceCard.ap });
             }
-            sourceCard.ap -= 1; 
-            abilityState.apPaid = true; // Mark it so we don't pay again!
-            refreshCard(sourceCard);
-            if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'ap', value: sourceCard.ap });
+            
+            // --- NEW: PAY SP COST ---
+            if (ability.cost && ability.cost.type === 'pay_sp') {
+                if (state[sourceCard.owner].sp < ability.cost.val) {
+                    alert("Not enough SP to pay the cost!");
+                    cancelAbility(); return;
+                }
+                state[sourceCard.owner].sp -= ability.cost.val;
+                updateStats();
+                if (isMultiplayer) sendAction('sp', { player: sourceCard.owner, value: state[sourceCard.owner].sp });
+            }
+            
+            abilityState.apPaid = true;
+        }
+
+        
+        
+
+        if (step.type === 'sp_change') {
+            state[sourceCard.owner].sp = Math.max(0, state[sourceCard.owner].sp + step.value);
+            updateStats();
+            if (isMultiplayer) sendAction('sp', { player: sourceCard.owner, value: state[sourceCard.owner].sp });
         }
 
         const targetCard = abilityState.targetId ? findCard(abilityState.targetId) : null;
@@ -1826,6 +1911,37 @@ function executeAbility() {
         else if (step.type === 'discard_self') {
             performMove(sourceCard, 'afterlife');
         }
+		
+		else if (step.type === 'unsummon_target' && targetCard) {
+            const refund = parseInt(targetCard.level) || 0;
+            state[sourceCard.owner].sp += refund;
+            updateStats();
+            if (isMultiplayer) sendAction('sp', { player: sourceCard.owner, value: state[sourceCard.owner].sp });
+            performMove(targetCard, 'afterlife');
+        }
+        else if (step.type === 'seal_al' && targetCard) {
+            const txt = `<br><b>[Applied: After Life Sealed]</b>`;
+            targetCard.description = (targetCard.description || "") + txt;
+            refreshCard(targetCard);
+            alert(`After Life Sealed applied to ${targetCard.name}`);
+            // SYNC THE DESCRIPTION UPDATE
+            if (isMultiplayer) sendAction('edit_stat', { cardId: targetCard.id, stat: 'description', value: targetCard.description });
+        }
+        else if (step.type === 'apply_keyword' && targetCard) {
+            targetCard.description = (targetCard.description || "") + `<br><b>[Applied: ${step.extra}]</b>`;
+            if (step.extra.toLowerCase() === 'summon binding') targetCard.summonBinding = true;
+            if (step.extra.toLowerCase() === 'shielded') targetCard.shieldActive = true;
+            alert(`${step.extra} applied to ${targetCard.name}!`);
+            refreshCard(targetCard);
+            
+            // SYNC KEYWORDS
+            if (isMultiplayer) {
+                sendAction('edit_stat', { cardId: targetCard.id, stat: 'description', value: targetCard.description });
+                if (targetCard.summonBinding) sendAction('edit_stat', { cardId: targetCard.id, stat: 'summonBinding', value: true });
+                if (targetCard.shieldActive) sendAction('edit_stat', { cardId: targetCard.id, stat: 'shieldActive', value: true });
+            }
+        }
+		
         else if (step.type === 'pay_lp') {
             if (state[sourceCard.owner].lp <= step.value) { alert("Not enough LP!"); break; }
             state[sourceCard.owner].lp -= step.value;
@@ -1845,6 +1961,11 @@ function executeAbility() {
         }
         else if (step.type === 'level_change') {
             sourceCard.level = Math.max(0, (sourceCard.level || 0) + step.value);
+            refreshCard(sourceCard);
+            if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'level', value: sourceCard.level });
+        }
+        else if (step.type === 'set_self_level') {
+            sourceCard.level = step.value;
             refreshCard(sourceCard);
             if (isMultiplayer) sendAction('edit_stat', { cardId: sourceCard.id, stat: 'level', value: sourceCard.level });
         }
@@ -1941,41 +2062,78 @@ function executeAbility() {
         }
         else if (step.type === 'draw') draw(step.value || 1, sourceCard.owner);
         else if (step.type === 'search') openViewer(sourceCard.owner, 'deck', true);
-        else if (step.type === 'spawn') {
+        else if (step.type === 'spawn' || step.type === 'spawn_2' || step.type === 'spawn_3') {
+            let count = 1;
+            if (step.type === 'spawn_2') count = 2;
+            if (step.type === 'spawn_3') count = 3;
+
             let nameToSpawn = step.extra;
             if (!nameToSpawn) {
                 const promptResult = prompt("Enter Card Name to Spawn:", "");
                 if (promptResult !== null) nameToSpawn = promptResult.trim();
             }
-            if (nameToSpawn) {
-                if (nameToSpawn === "" || nameToSpawn.toLowerCase() === "token") spawnToken(sourceCard.owner);
-                else {
-                    const dbCard = allCards.find(c => (c.name || "").toLowerCase() === nameToSpawn.toLowerCase());
-                    if (dbCard) {
-                        const newCard = {
-                            ...dbCard, id: `c-${++idCounter}-${Date.now()}`,
-                            owner: sourceCard.owner, originalOwner: sourceCard.owner, originalZone: 'deck', loc: 'field',
-                            faceUp: true, rotated: false
-                        };
-                        const spMatch = (ability.text || "").match(/(\d+)[-\s]*SP|Level[-\s]*(\d+)/i);
-                        if (spMatch) newCard.level = parseInt(spMatch[1] !== undefined ? spMatch[1] : spMatch[2]);
-                        
-                        const statMatch = (ability.text || "").match(/(\d+)\/(\d+)/);
-                        if (statMatch) { newCard.attack = parseInt(statMatch[1]); newCard.health = parseInt(statMatch[2]); }
 
-                        const pfx = sourceCard.owner; let targetZone = null;
-                        const priorityIds =[`${pfx}-monster-2`, `${pfx}-monster-1`, `${pfx}-monster-3`, `${pfx}-balance-1`, `${pfx}-balance-2`];
-                        for (let id of priorityIds) { const z = document.getElementById(id); if (z && z.children.length === 0) { targetZone = z; break; } }
-                        
-                        if (targetZone) {
-                            state[sourceCard.owner].field.push(newCard); targetZone.appendChild(createCardEl(newCard));
-                            if (isMultiplayer) {
-                                sendAction('spawn_token', { tokenData: newCard, zoneId: targetZone.id });
-                                if (spMatch) sendAction('edit_stat', { cardId: newCard.id, stat: 'level', value: newCard.level });
+            if (nameToSpawn) {
+                for (let k = 0; k < count; k++) {
+                    if (nameToSpawn === "" || nameToSpawn.toLowerCase() === "token") {
+                        spawnToken(sourceCard.owner);
+                    } else {
+                        const dbCard = allCards.find(c => (c.name || "").toLowerCase() === nameToSpawn.toLowerCase());
+                        if (dbCard) {
+                            const newCard = {
+                                ...dbCard, 
+                                id: `c-${++idCounter}-${Date.now()}-${k}`, 
+                                owner: sourceCard.owner, originalOwner: sourceCard.owner, 
+                                originalZone: 'deck', loc: 'field', faceUp: true, rotated: false
+                            };
+
+                            // --- APPLY OVERRIDES ---
+                            if (step.value !== null && step.value !== undefined) {
+                                newCard.level = step.value;
+                            } else if (nameToSpawn.toLowerCase() === "token") {
+                                newCard.level = 0;
                             }
-                        } else alert("No space on the field to spawn!");
-                    } else alert(`Could not find "${nameToSpawn}".`);
-                }
+
+                            const statMatch = (ability.text || "").match(/(\d+)\/(\d+)/);
+                            if (statMatch) { 
+                                newCard.attack = parseInt(statMatch[1]); 
+                                newCard.health = parseInt(statMatch[2]); 
+                            } else if (nameToSpawn.toLowerCase() === "token") {
+                                newCard.attack = 0; newCard.health = 0;
+                            }
+
+                            if (step.keyword) {
+                                newCard.description = (newCard.description || "") + `<br><b>[Applied: ${step.keyword}]</b>`;
+                                if (step.keyword.toLowerCase().includes('summon binding')) newCard.summonBinding = true;
+                                if (step.keyword.toLowerCase().includes('shielded')) newCard.shieldActive = true;
+                            }
+
+                            const pfx = sourceCard.owner; 
+                            let targetZone = null;
+                            const priorityIds =[`${pfx}-monster-2`, `${pfx}-monster-1`, `${pfx}-monster-3`, `${pfx}-balance-1`, `${pfx}-balance-2`];
+                            for (let id of priorityIds) { 
+                                const z = document.getElementById(id); 
+                                if (z && z.children.length === 0) { targetZone = z; break; } 
+                            }
+                            
+                            if (targetZone) {
+                                state[sourceCard.owner].field.push(newCard); 
+                                targetZone.appendChild(createCardEl(newCard));
+                                if (isMultiplayer) {
+                                    sendAction('spawn_token', { tokenData: newCard, zoneId: targetZone.id });
+                                    if (newCard.level !== dbCard.level) sendAction('edit_stat', { cardId: newCard.id, stat: 'level', value: newCard.level });
+                                    if (newCard.attack !== dbCard.attack) sendAction('edit_stat', { cardId: newCard.id, stat: 'attack', value: newCard.attack });
+                                    if (newCard.health !== dbCard.health) sendAction('edit_stat', { cardId: newCard.id, stat: 'health', value: newCard.health });
+                                    if (step.keyword) sendAction('edit_stat', { cardId: newCard.id, stat: 'description', value: newCard.description });
+                                }
+                            } else {
+                                alert("No space on the field to spawn!"); break;
+                            }
+                        } else {
+                            alert(`Could not find "${nameToSpawn}" in database.`); break;
+                        }
+                    }
+                } 
             }
         }
         else if (step.type === 'generic_target' && targetCard) {
@@ -2176,8 +2334,8 @@ function openCardCtx(e, card) {
             { text: 'Add an AP', action: 'add-ap' },
             card.ap > 0 ? { text: 'Remove an AP', action: 'remove-ap' } : null,
             { isSeparator: true },
-            { text: 'Add a Token', action: 'add-token' },
-            card.token > 0 ? { text: 'Remove a Token', action: 'remove-token' } : null,
+            { text: 'Add a Counter', action: 'add-token' },
+            card.token > 0 ? { text: 'Remove a Counter', action: 'remove-token' } : null,
             { isSeparator: true },
             { text: 'Add a Marker', action: 'add-marker' },
             card.marker > 0 ? { text: 'Remove a Marker', action: 'remove-marker' } : null,
@@ -3397,13 +3555,14 @@ function applyRemoteAction(action) {
         globalTurn = payload.turns;
         updateTurnVisuals();
         
-        // Ensure opponent's SP doesn't visually reset on our screen until they take their turn
-        // But do reset all AP usages for the new turn
         ['player', 'opponent'].forEach(p => { 
             state[p].field.forEach(c => {
                 if (c.maxAP !== undefined) { c.ap = c.maxAP; refreshCard(c); }
             }); 
         });
+        
+        // Host checks for auto-draw here, since they just received the Guest's end turn
+        checkAutoDraw();
     }
 
     
@@ -3825,25 +3984,26 @@ function executeAction(type, payload, isRemote = false) {
             const isPileTarget = ['deck', 'sideDeck', 'extraDeck', 'afterlife', 'shadow', 'oblivion'].some(t => targetId.includes(t));
 			const isHandTarget = targetId.includes('hand');
 
-            if (isPileTarget || isHandTarget) {
-                // Safety: If originalOwner is missing, set to current
+            // 1. PILES: Always force card back to Original Owner (You can't put your card in opponent's deck/grave)
+            if (isPileTarget) {
                 if (!mCard.originalOwner) mCard.originalOwner = mCard.owner;
-                
-                // Restore original ownership
                 mCard.owner = mCard.originalOwner;
                 
-                // Force targetId to match the correct original owner's zone
                 const pileName = targetId.includes('-') ? targetId.split('-')[1] : targetId;
                 targetId = `${mCard.owner}-${pileName}`;
 
-                // Reset state when going into Decks or Discard Piles
                 mCard.rotated = false;
                 mCard.faceUp = true; 
                 mCard.ap = 0; mCard.token = 0; mCard.marker = 0; mCard.turncounter = 0; mCard.counter = 0;
-            } else {
-                // Moving between Hand and Field: 
-                // Use payload values if they exist (from right-click menu), 
-                // otherwise keep whatever the card currently has.
+            } 
+            // 2. HANDS: Reset stats, but respect the drop target (Allows stealing cards)
+            else if (isHandTarget) {
+                mCard.rotated = false;
+                mCard.faceUp = true; 
+                mCard.ap = 0; mCard.token = 0; mCard.marker = 0; mCard.turncounter = 0; mCard.counter = 0;
+            } 
+            // 3. FIELD: Keep current stats unless overwritten
+            else {
                 if (payload.faceUp !== undefined) mCard.faceUp = payload.faceUp;
                 if (payload.rotated !== undefined) mCard.rotated = payload.rotated;
             }
@@ -3855,7 +4015,12 @@ function executeAction(type, payload, isRemote = false) {
                 mCard.loc = 'hand';
                 state[newOwner].hand.push(mCard);
                 renderHand(newOwner);
-            } 
+                // FIX: If we moved it OUT of a hand, re-render the source hand too!
+                if (payload.fromZone && payload.fromZone.includes('hand')) {
+                    const sourceOwner = payload.fromZone.includes('opponent') ? 'opponent' : 'player';
+                    renderHand(sourceOwner);
+                }
+            }
             else if (isPileTarget) {
                 // Determine specific pile type
                 let pileType = 'deck';
@@ -3877,8 +4042,19 @@ function executeAction(type, payload, isRemote = false) {
                 updateCounts(newOwner);
             } else {
                 // Field Move
-                if (mCard.loc !== 'field') mCard.summonedThisTurn = true;
+                if (mCard.loc !== 'field') {
+                    mCard.summonedThisTurn = true;
+                    // FIX: Initialize AP if this is a fresh summon/drag
+                    const apMatch = (mCard.description || "").match(/(\d+)\s*-\s*AP/i) || (mCard.description || "").match(/(\d+)\s*AP/i);
+                    if (apMatch) {
+                        mCard.maxAP = parseInt(apMatch[1]);
+                        mCard.ap = mCard.maxAP;
+                    }
+                }
+                
                 mCard.loc = 'field';
+                mCard.shieldActive = (mCard.description || "").includes("Shielded");
+                
                 state[newOwner].field.push(mCard);
                 const zone = document.getElementById(targetId);
                 if (zone) zone.appendChild(createCardEl(mCard));
