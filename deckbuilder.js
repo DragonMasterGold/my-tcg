@@ -317,7 +317,7 @@ function getCardCount(cardId) {
 function addCardToDeck(card) {
     if (getCardCount(card.id) >= 3) return;
 
-    const limit = (currentDeckView === 'main') ? 50 : (currentDeckView === 'side' ? 20 : 10);
+    const limit = (currentDeckView === 'main') ? 60 : (currentDeckView === 'side' ? 20 : 10);
     
     // FIX: Removed alert. If full, we just exit silently.
     if (currentDeck[currentDeckView].length >= limit) {
@@ -363,7 +363,7 @@ function updateDeckStats() {
     document.getElementById('side-deck-count').textContent = sideNum;
     document.getElementById('extra-deck-count').textContent = extraNum;
     
-    document.getElementById('main-deck-count').className = 'stat-value ' + (mainNum >= 30 && mainNum <= 50 ? 'valid' : 'invalid');
+    document.getElementById('main-deck-count').className = 'stat-value ' + (mainNum >= 40 && mainNum <= 60 ? 'valid' : 'invalid');
 }
 
 function switchDeckView(deckType) {
