@@ -205,13 +205,14 @@
     "id": "arboreal_librarian",
     "name": "Arboreal Librarian",
     "type": "Phantom",
-    "description": "● Searcher: Level 2 Nature Phantom.<br><br>● Self Sacrifice: Special Summon a Level 2 ≥ Nature Phantom.",
+    "description": "● Searcher: Level 2 Nature Phantom.<br><br>● Self Sacrifice; Special Summon a Level 2≥ Nature Phantom.",
     "archetype": "Nature",
     "archetypes": [
       "Nature",
       "White",
       "Life",
-      "Librarian"
+      "Librarian",
+      "Druid"
     ],
     "image": "Images/Cards/Arboreal Librarian.png",
     "level": 2,
@@ -361,10 +362,13 @@
     "id": "battle_counter",
     "name": "Battle Counter",
     "type": "Counter",
-    "description": "Condition: An Enemy Card initiates Battle. <br>Targeted Break.",
-    "archetype": "Standard",
+    "description": "Condition: An Enemy Card initiates Battle. <br>Targeted Break it.",
+    "archetype": "Action",
     "archetypes": [
-      "Standard"
+      "Action",
+      "White",
+      "Creation",
+      "null"
     ],
     "image": "Images/Cards/Battle Counter.png"
   },
@@ -1177,9 +1181,24 @@
     "image": "Images/Cards/Connecting Branch.png"
   },
   {
+    "id": "consuming_shadows",
+    "name": "Consuming Shadows",
+    "type": "Phantom",
+    "description": "Attack Bounce.<br>Banisher.<br><br>Self Aura: Gain +100 Attack per SR Card.",
+    "archetype": "Shadow",
+    "archetypes": [
+      "Shadow",
+      "Consumer"
+    ],
+    "image": "Images/Cards/Consuming Shadows.png",
+    "level": 6,
+    "attack": 0,
+    "health": 1500
+  },
+  {
     "id": "consuming_void",
     "name": "Consuming Void",
-    "type": "Spirit",
+    "type": "Counter",
     "description": "Slow: Deal 200 Damage to all Phantoms.<br>Empty Hand Boon: Deal +100 More.",
     "archetype": "Dark",
     "archetypes": [
@@ -1188,21 +1207,6 @@
       "Void"
     ],
     "image": "Images/Cards/Consuming Void.png"
-  },
-  {
-    "id": "consuming_void",
-    "name": "Consuming Void",
-    "type": "Phantom",
-    "description": "Attack Bounce.<br>Banisher.<br><br>Self Aura: Gain +100 Attack per SR Card.",
-    "archetype": "Shadow",
-    "archetypes": [
-      "Shadow",
-      "Consumer"
-    ],
-    "image": "Images/Cards/Consuming Void.png",
-    "level": 6,
-    "attack": 0,
-    "health": 1500
   },
   {
     "id": "copy_cat",
@@ -3125,6 +3129,17 @@
     "image": "Images/Cards/Frost Lance.png"
   },
   {
+    "id": "fully_fortified",
+    "name": "Fully Fortified",
+    "type": "Spirit",
+    "description": "Targeted Give a Phantom +500 Armor and Full Binding.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Fully Fortified.png"
+  },
+  {
     "id": "fusion_break_up",
     "name": "Fusion Break Up",
     "type": "Counter",
@@ -3139,12 +3154,34 @@
     "id": "fusion_kit",
     "name": "Fusion Kit",
     "type": "Spirit",
-    "description": "Initialize a Fusion Summon with Owned Phantoms.",
+    "description": "Initialize a Fusion Summon using Owned Phantoms as Materials.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
     ],
     "image": "Images/Cards/Fusion Kit.png"
+  },
+  {
+    "id": "fusion_manuel",
+    "name": "Fusion Manuel",
+    "type": "Spirit",
+    "description": "Initialize a Fusion Summon using Ally Phantoms as Materials.<br>AL: Self Search.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Fusion Manuel.png"
+  },
+  {
+    "id": "fusion_planet",
+    "name": "Fusion Planet",
+    "type": "Environment",
+    "description": "Environment Range: Initialize a Fusion Summon using Ally Phantoms as Materials.",
+    "archetype": "Standard",
+    "archetypes": [
+      "Standard"
+    ],
+    "image": "Images/Cards/Fusion Planet.png"
   },
   {
     "id": "gale_hurricane",
@@ -3519,7 +3556,7 @@
     "id": "imbuing_life",
     "name": "Imbuing Life",
     "type": "Spirit",
-    "description": "Give every Ally White Phantom 200 Health.",
+    "description": "Give every Ally White or Life Phantom 200 Health.",
     "archetype": "White",
     "archetypes": [
       "White",
@@ -3774,7 +3811,7 @@
     "id": "level_down",
     "name": "Level Down",
     "type": "Spirit",
-    "description": "Sacrifice a Phantom.<br>Special Summon a 1-SP lower Value Phantom.",
+    "description": "Sacrifice a Phantom; Special Summon a 1-SP lower Value Phantom.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -3796,7 +3833,7 @@
     "id": "level_up",
     "name": "Level Up",
     "type": "Spirit",
-    "description": "Sacrifice a Phantom.<br>Special Summon a 1-SP higher Value Phantom.",
+    "description": "Sacrifice a Phantom; Special Summon a 1-SP higher Value Phantom.",
     "archetype": "Standard",
     "archetypes": [
       "Standard"
@@ -4114,7 +4151,7 @@
     "id": "mr._equalizer",
     "name": "Mr. Equalizer",
     "type": "Phantom",
-    "description": "Cost: Sacrifice a Phantom.<br>Targeted Break a ≤ X-SP Card.",
+    "description": "Sacrifice a Phantom; Targeted Break a ≤ X-SP Card.",
     "archetype": "Grey",
     "archetypes": [
       "Grey",
@@ -6565,7 +6602,7 @@
     "id": "white_paladin",
     "name": "White Paladin",
     "type": "Phantom",
-    "description": "Blocker.<br>Regeneration: 300.<br><br>Binding.",
+    "description": "Blocker. Binding.<br>Regeneration: 300.",
     "archetype": "White",
     "archetypes": [
       "White",
