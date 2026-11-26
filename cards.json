@@ -3468,7 +3468,7 @@
     "id": "hilarious_hyenas",
     "name": "Hilarious Hyenas",
     "type": "Phantom",
-    "description": "Coordinating Attacker.<br>Recruiter: Two Level-2 500≥ Attack Creature Phantoms.",
+    "description": "Coordinating Attacker.<br>Recruiter: Two Level 2 500≥ Attack Creature Phantoms.",
     "archetype": "Creature",
     "archetypes": [
       "Creature",
